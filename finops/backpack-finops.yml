@@ -1,0 +1,106 @@
+specification: API Commons FinOps
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/FinOps
+provider: Backpack
+providerId: backpack
+created: '2026-05-24'
+modified: '2026-05-24'
+tags:
+  - Crypto
+  - Trading
+  - FinOps
+  - Cost
+  - Usage
+description: >-
+  Backpack Exchange does not charge a metered API subscription — the cost surface is the trading
+  spread (maker/taker fee on each fill), withdrawal network fees, wire-transfer fees, and borrow/lend
+  interest. This FinOps mapping aligns those cost categories to the FinOps Framework / FOCUS data spec
+  so that desks treating the exchange as a venue can map exchange fees into their cloud-cost / vendor-cost
+  reporting alongside infrastructure spend.
+sources:
+  - https://docs.backpack.exchange/
+  - https://support.backpack.exchange/exchange/trading/trading-fees
+  - https://support.backpack.exchange/llms-full.txt
+
+billing:
+  model: per-transaction
+  currency: USD-equivalent (settled in trade quote currency)
+  invoicing: none
+  postingFrequency: real-time
+  selfService: true
+
+usageEndpoints:
+  - method: GET
+    path: /api/v1/account
+    description: Returns current account, including effective fee tier.
+    instruction: accountQuery
+  - method: GET
+    path: /wapi/v1/history/fills
+    description: Per-fill record including fee charged on each trade. Use as the primary cost-line source for trading FinOps reporting.
+    instruction: fillHistoryQueryAll
+  - method: GET
+    path: /wapi/v1/history/funding
+    description: Funding payments paid and received on perpetual positions.
+  - method: GET
+    path: /wapi/v1/history/interest
+    description: Interest accrued on borrow positions.
+  - method: GET
+    path: /wapi/v1/history/borrowLend
+    description: Full borrow/lend activity history.
+  - method: GET
+    path: /wapi/v1/history/settlements
+    description: Settlement records, including realized PnL events.
+  - method: GET
+    path: /wapi/v1/capital/deposits
+    description: Deposit history (cost of funding).
+  - method: GET
+    path: /wapi/v1/capital/withdrawals
+    description: Withdrawal history with per-token network fee.
+
+focusMapping:
+  ServiceName: Backpack Exchange
+  ServiceCategory: Financial Services
+  ProviderName: Backpack
+  PublisherName: Backpack
+  InvoiceIssuerName: Backpack
+  costCategories:
+    - focusKey: SkuId
+      backpackSource: fill.symbol + fill.makerOrTaker
+      description: Map each fill into a SKU keyed by market symbol and maker/taker role.
+    - focusKey: BilledCost
+      backpackSource: fill.fee
+      description: Fee charged on the fill in fill.feeSymbol.
+    - focusKey: ConsumedUnit
+      backpackSource: fill.quantity
+      description: Filled base quantity.
+    - focusKey: ConsumedQuantity
+      backpackSource: fill.quoteQuantity
+      description: Filled notional in the quote currency.
+    - focusKey: ChargePeriodStart
+      backpackSource: fill.timestamp
+      description: ISO-8601 fill timestamp.
+    - focusKey: SubAccountName
+      backpackSource: fill.subaccountId
+      description: Sub-account isolation key.
+    - focusKey: Tag
+      backpackSource: fill.orderId or fill.clientId
+      description: Trader-supplied client ID for cost attribution.
+
+reportingPatterns:
+  - name: Daily Fee Report
+    description: Pull /wapi/v1/history/fills daily, group by symbol and maker/taker, sum fee.
+    cadence: daily
+  - name: Funding P&L Reconciliation
+    description: Pull /wapi/v1/history/funding daily; net into perp P&L.
+    cadence: daily
+  - name: Borrow Cost Attribution
+    description: Pull /wapi/v1/history/interest to attribute borrow cost to the spot-margin position that incurred it.
+    cadence: daily
+  - name: Sub-Account Roll-up
+    description: Aggregate fill fees across sub-accounts to compute desk-level vendor spend.
+    cadence: weekly
+
+notes:
+  - Effective fee tier is the max of (30-day volume tier, BP stake tier, Mad Lad NFT tier) — recalculated hourly.
+  - USDT/USDC trades at 0% fee and does not contribute to volume tier — exclude from cost-per-volume KPIs.
+  - Internal address transfers are detected automatically and incur 0 withdrawal fees even when a fee preview is shown.

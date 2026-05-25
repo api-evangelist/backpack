@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/backpack/main/json-schema/backpack-futurepositionwithmargin-schema.json",
+  "title": "Backpack Position",
+  "description": "JSON Schema for the Backpack Exchange FuturePositionWithMargin resource, extracted from the Backpack Exchange OpenAPI 3.0 specification.",
+  "type": "object",
+  "required": [
+    "breakEvenPrice",
+    "entryPrice",
+    "estLiquidationPrice",
+    "imf",
+    "imfFunction",
+    "markPrice",
+    "mmf",
+    "mmfFunction",
+    "netCost",
+    "netQuantity",
+    "netExposureQuantity",
+    "netExposureNotional",
+    "pnlRealized",
+    "pnlUnrealized",
+    "cumulativeFundingPayment",
+    "symbol",
+    "userId",
+    "positionId",
+    "cumulativeInterest"
+  ],
+  "properties": {
+    "breakEvenPrice": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Break-even price for this position."
+    },
+    "entryPrice": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Entry price for this position."
+    },
+    "estLiquidationPrice": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Estimated liquidation price for this position."
+    },
+    "imf": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Initial margin fraction for this position."
+    },
+    "imfFunction": {
+      "description": "IMF function.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/PositionImfFunction"
+        },
+        {
+          "description": "IMF function."
+        }
+      ]
+    },
+    "markPrice": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Mark price for this position's market."
+    },
+    "mmf": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Maintenance margin fraction for this position."
+    },
+    "mmfFunction": {
+      "description": "MMF function.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/PositionImfFunction"
+        },
+        {
+          "description": "MMF function."
+        }
+      ]
+    },
+    "netCost": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Positive if long. Negative if short.\n\nThe net cost to enter into the position,i.e., price*quantity for\nall positions adjusting this position."
+    },
+    "netQuantity": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Positive if long. Negative if short."
+    },
+    "netExposureQuantity": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Quantity of this futures position including worst case open positions."
+    },
+    "netExposureNotional": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Notional value of the futures position including worst case open\npositions."
+    },
+    "pnlRealized": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Aggregates the amount of pnl realized on this position since opening."
+    },
+    "pnlUnrealized": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Unrealized profit and loss for this position."
+    },
+    "cumulativeFundingPayment": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Cumulative funding payment for this position."
+    },
+    "subaccountId": {
+      "type": "integer",
+      "format": "uint16",
+      "description": "ID of the user subaccount that the position is for."
+    },
+    "symbol": {
+      "type": "string",
+      "description": "Future to which this position belongs."
+    },
+    "userId": {
+      "type": "integer",
+      "format": "int32",
+      "description": "Id of the user."
+    },
+    "positionId": {
+      "type": "string",
+      "description": "Id of the position."
+    },
+    "cumulativeInterest": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Cumulative interest paid for this position's unrealized pnl."
+    }
+  },
+  "$defs": {
+    "PositionImfFunction": {
+      "type": "object",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PositionImfFunction_SqrtFunction"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "type",
+        "mapping": {
+          "sqrt": "#/components/schemas/PositionImfFunction_SqrtFunction"
+        }
+      }
+    },
+    "PositionImfFunction_SqrtFunction": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "sqrt"
+              ],
+              "example": "sqrt"
+            }
+          }
+        },
+        {
+          "$ref": "#/$defs/SqrtFunction"
+        }
+      ]
+    },
+    "SqrtFunction": {
+      "type": "object",
+      "title": "SqrtFunction",
+      "required": [
+        "base",
+        "factor"
+      ],
+      "properties": {
+        "base": {
+          "type": "string",
+          "format": "decimal"
+        },
+        "factor": {
+          "type": "string",
+          "format": "decimal"
+        }
+      }
+    }
+  }
+}

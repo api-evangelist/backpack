@@ -1,0 +1,220 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: "Backpack Exchange \u2014 Strategy"
+  description: "Backpack Exchange API \u2014 Strategy. 6 operations. Self-contained Naftiko capability covering one Backpack business surface."
+  tags:
+  - Backpack
+  - Exchange
+  - Strategy
+  created: '2026-05-24'
+  modified: '2026-05-24'
+binds:
+- namespace: env
+  keys:
+    BACKPACK_API_KEY: BACKPACK_API_KEY
+    BACKPACK_API_SECRET: BACKPACK_API_SECRET
+capability:
+  consumes:
+  - type: http
+    namespace: backpack-strategy
+    baseUri: https://api.backpack.exchange
+    description: Backpack Exchange Strategy business capability. ED25519 signed requests.
+    resources:
+    - name: api-v1-strategy
+      path: /api/v1/strategy
+      operations:
+      - name: get-strategy
+        method: GET
+        description: Get open strategy.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: strategy-create
+        method: POST
+        description: Create strategy.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: cancel-strategy
+        method: DELETE
+        description: Cancel open strategy.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: api-v1-strategies
+      path: /api/v1/strategies
+      operations:
+      - name: get-open-strategies
+        method: GET
+        description: Get open strategies.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: cancel-open-strategies
+        method: DELETE
+        description: Cancel open strategies.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: wapi-v1-history-strategies
+      path: /wapi/v1/history/strategies
+      operations:
+      - name: get-strategies-history
+        method: GET
+        description: Get strategy history.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: apikey
+      key: X-API-Key
+      value: '{{env.BACKPACK_API_KEY}}'
+      placement: header
+  exposes:
+  - type: rest
+    namespace: backpack-strategy-rest
+    port: 8080
+    description: "REST adapter for Backpack Exchange \u2014 Strategy."
+    resources:
+    - path: /api/v1/strategy
+      name: api-v1-strategy
+      description: REST surface for api-v1-strategy.
+      operations:
+      - method: GET
+        name: get-strategy
+        description: Get open strategy.
+        call: backpack-strategy.get-strategy
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: strategy-create
+        description: Create strategy.
+        call: backpack-strategy.strategy-create
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: cancel-strategy
+        description: Cancel open strategy.
+        call: backpack-strategy.cancel-strategy
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /api/v1/strategies
+      name: api-v1-strategies
+      description: REST surface for api-v1-strategies.
+      operations:
+      - method: GET
+        name: get-open-strategies
+        description: Get open strategies.
+        call: backpack-strategy.get-open-strategies
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: cancel-open-strategies
+        description: Cancel open strategies.
+        call: backpack-strategy.cancel-open-strategies
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /wapi/v1/history/strategies
+      name: wapi-v1-history-strategies
+      description: REST surface for wapi-v1-history-strategies.
+      operations:
+      - method: GET
+        name: get-strategies-history
+        description: Get strategy history.
+        call: backpack-strategy.get-strategies-history
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: backpack-strategy-mcp
+    port: 9090
+    transport: http
+    description: "MCP adapter for Backpack Exchange \u2014 Strategy."
+    tools:
+    - name: backpack-get-strategy
+      description: Get open strategy.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-strategy.get-strategy
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-strategy-create
+      description: Create strategy.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: backpack-strategy.strategy-create
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-cancel-strategy
+      description: Cancel open strategy.
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: backpack-strategy.cancel-strategy
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-open-strategies
+      description: Get open strategies.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-strategy.get-open-strategies
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-cancel-open-strategies
+      description: Cancel open strategies.
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: backpack-strategy.cancel-open-strategies
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-strategies-history
+      description: Get strategy history.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-strategy.get-strategies-history
+      outputParameters:
+      - type: object
+        mapping: $.

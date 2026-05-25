@@ -1,0 +1,71 @@
+extends:
+  - spectral:oas
+
+rules:
+  # Backpack uses lowerCamelCase parameter names (e.g. symbol, orderType, marketType, postOnly)
+  backpack-parameter-camelcase:
+    description: Backpack request and response field names use lowerCamelCase.
+    message: '"{{property}}" should be lowerCamelCase to match Backpack convention.'
+    severity: warn
+    given: $.paths..parameters[?(@.in == 'query')].name
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[a-z][a-zA-Z0-9]*$"
+
+  # All trader-facing paths live under /api/v1/ or /wapi/v1/
+  backpack-path-prefix:
+    description: Backpack exposes the trading API under /api/v1/ and the wallet/history API under /wapi/v1/.
+    message: Path "{{path}}" should start with /api/v1/ or /wapi/v1/.
+    severity: warn
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^/(api|wapi)/v1/"
+
+  # All authenticated operations should document the four signing headers.
+  backpack-signed-request-headers:
+    description: Authenticated operations require X-API-Key, X-Signature, X-Timestamp, and X-Window headers.
+    message: Authenticated operation is missing the documented signing headers.
+    severity: warn
+    given: $.paths.*[?( @.security && @.security.length > 0 )]
+    then:
+      field: parameters
+      function: truthy
+
+  # Operations should bind to a named instruction (orderExecute, balanceQuery, etc.)
+  backpack-instruction-binding:
+    description: Authenticated operations should document the Backpack signing instruction.
+    message: Operation is missing the `x-backpack-instruction` extension naming the signing instruction.
+    severity: info
+    given: $.paths.*[?( @.security && @.security.length > 0 )]
+    then:
+      field: x-backpack-instruction
+      function: truthy
+
+  # Title Case operation summaries
+  backpack-summary-titlecase:
+    description: Operation summaries should be Title Case sentences ending in a period.
+    severity: info
+    given: $.paths.*.*.summary
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[A-Z][^.]*\\.?$"
+
+  # Pagination uses limit + offset
+  backpack-pagination-limit-offset:
+    description: List endpoints should expose `limit` (max 1000) and `offset` query parameters for pagination.
+    severity: info
+    given: $.paths[?(@property =~ /s$/)].get.parameters
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: array
+          contains:
+            type: object
+            properties:
+              name: {const: limit}

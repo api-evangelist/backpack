@@ -1,0 +1,75 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "fibo": "https://spec.edmcouncil.org/fibo/ontology/",
+    "backpack": "https://docs.backpack.exchange/#",
+    "bp": "https://api.backpack.exchange/api/v1/",
+
+    "Exchange": "schema:Organization",
+    "Market": "fibo:FBC/FunctionalEntities/FinancialServicesEntities/FinancialMarket",
+    "Order": "fibo:FBC/ProductsAndServices/FinancialProductsAndServices/Order",
+    "Trade": "fibo:FBC/FunctionalEntities/MarketsAndExchanges/Trade",
+    "Position": "fibo:DER/DerivativesPosition",
+    "Asset": "fibo:FBC/ProductsAndServices/FinancialProductsAndServices/FinancialAsset",
+    "Wallet": "schema:Thing",
+
+    "symbol": "schema:identifier",
+    "baseSymbol": {"@id": "backpack:base-symbol"},
+    "quoteSymbol": {"@id": "backpack:quote-symbol"},
+    "marketType": {"@id": "backpack:market-type"},
+    "side": {"@id": "backpack:side"},
+    "orderType": {"@id": "backpack:order-type"},
+    "timeInForce": {"@id": "backpack:time-in-force"},
+    "price": {"@id": "schema:price", "@type": "xsd:decimal"},
+    "quantity": {"@id": "backpack:quantity", "@type": "xsd:decimal"},
+    "executedQuantity": {"@id": "backpack:executed-quantity", "@type": "xsd:decimal"},
+    "executedQuoteQuantity": {"@id": "backpack:executed-quote-quantity", "@type": "xsd:decimal"},
+    "status": {"@id": "backpack:status"},
+    "createdAt": {"@id": "schema:dateCreated", "@type": "xsd:dateTime"},
+    "selfTradePrevention": {"@id": "backpack:self-trade-prevention"},
+    "clientId": {"@id": "schema:identifier"},
+
+    "fundingRate": {"@id": "backpack:funding-rate", "@type": "xsd:decimal"},
+    "markPrice": {"@id": "backpack:mark-price", "@type": "xsd:decimal"},
+    "indexPrice": {"@id": "backpack:index-price", "@type": "xsd:decimal"},
+    "openInterest": {"@id": "backpack:open-interest", "@type": "xsd:decimal"},
+
+    "instruction": {"@id": "backpack:instruction"},
+    "signature": {"@id": "backpack:signature"},
+    "timestamp": {"@id": "backpack:timestamp", "@type": "xsd:long"},
+    "window": {"@id": "backpack:window", "@type": "xsd:integer"},
+
+    "MarketType": {
+      "@id": "backpack:market-type-enum",
+      "@type": "@vocab",
+      "@context": {
+        "@vocab": "https://docs.backpack.exchange/#tag/Markets/MarketType/",
+        "SPOT": "https://docs.backpack.exchange/#SPOT",
+        "PERP": "https://docs.backpack.exchange/#PERP",
+        "IPERP": "https://docs.backpack.exchange/#IPERP",
+        "DATED": "https://docs.backpack.exchange/#DATED",
+        "PREDICTION": "https://docs.backpack.exchange/#PREDICTION",
+        "RFQ": "https://docs.backpack.exchange/#RFQ"
+      }
+    },
+
+    "OrderSide": {
+      "@id": "backpack:order-side-enum",
+      "@type": "@vocab",
+      "@context": {
+        "Bid": "https://docs.backpack.exchange/#Bid",
+        "Ask": "https://docs.backpack.exchange/#Ask"
+      }
+    },
+
+    "OrderType": {
+      "@id": "backpack:order-type-enum",
+      "@type": "@vocab",
+      "@context": {
+        "Limit": "https://docs.backpack.exchange/#Limit",
+        "Market": "https://docs.backpack.exchange/#Market"
+      }
+    }
+  }
+}

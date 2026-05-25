@@ -1,0 +1,130 @@
+name: Backpack Exchange Vocabulary
+description: Normative vocabulary for the Backpack Exchange API surface — market types, order primitives, instructions, and infrastructure terms.
+url: https://docs.backpack.exchange/
+modified: '2026-05-24'
+
+terms:
+  - name: Market
+    description: A tradable pair on Backpack Exchange, identified by `symbol` (e.g. SOL_USDC, SOL_USDC_PERP).
+    type: Resource
+
+  - name: MarketType
+    description: The classification of a market.
+    type: Enum
+    values:
+      - SPOT
+      - PERP
+      - IPERP
+      - DATED
+      - PREDICTION
+      - RFQ
+
+  - name: OrderBookState
+    description: Lifecycle state of a market's order book.
+    type: Enum
+    values:
+      - Open
+      - Closed
+      - CancelOnly
+      - LimitOnly
+      - PostOnly
+
+  - name: Side
+    description: Direction of an order or trade.
+    type: Enum
+    values:
+      - Bid
+      - Ask
+
+  - name: OrderType
+    description: Execution semantics of an order.
+    type: Enum
+    values:
+      - Limit
+      - Market
+
+  - name: TimeInForce
+    description: How long an order remains active.
+    type: Enum
+    values:
+      - GTC
+      - IOC
+      - FOK
+
+  - name: SelfTradePrevention
+    description: How the matching engine handles a self-cross.
+    type: Enum
+    values:
+      - RejectTaker
+      - RejectMaker
+      - RejectBoth
+      - Allow
+
+  - name: Instruction
+    description: Named operation bound into every signed request. Used in the signing prefix.
+    type: Concept
+    examples:
+      - accountQuery
+      - accountUpdate
+      - orderExecute
+      - orderCancel
+      - orderCancelAll
+      - orderQuery
+      - orderQueryAll
+      - balanceQuery
+      - borrowLendExecute
+      - positionQuery
+      - withdraw
+      - depositAddressQuery
+      - rfqSubmit
+      - quoteSubmit
+      - strategyCreate
+      - subscribe
+
+  - name: ED25519 Signed Request
+    description: Authentication scheme. Sign string = alphabetically ordered query/body params + `&timestamp=<ms>&window=<ms>`, prefixed by `instruction=<name>`, signed with the ED25519 private key, base64-encoded as `X-Signature`.
+    type: Authentication
+
+  - name: X-Window
+    description: Replay-protection window in milliseconds. Default 5000, max 60000.
+    type: Header
+
+  - name: Funding
+    description: Periodic perpetual-futures payment between longs and shorts to anchor mark price to index price.
+    type: Concept
+
+  - name: BorrowLend
+    description: Backpack's unified lending pool that backs spot margin and perp collateral.
+    type: Concept
+
+  - name: RFQ
+    description: Request-for-Quote workflow — submit RFQ, market makers quote within ~ms, taker has 2 minutes to accept.
+    type: Concept
+
+  - name: Strategy
+    description: Server-side managed order strategies (grid bots, etc.) created via the Strategy API.
+    type: Concept
+
+  - name: Vault
+    description: Tokenized portfolio that users can mint into and request to redeem from.
+    type: Concept
+
+  - name: WithdrawalDelay
+    description: User-configurable account-level delay that pauses outbound withdrawals before broadcast for security.
+    type: Concept
+
+  - name: xNFT
+    description: Executable NFT — an on-chain artifact that points at a JavaScript application loaded inside the Backpack wallet runtime.
+    type: Concept
+
+tags:
+  - Crypto
+  - Exchange
+  - Trading
+  - Spot
+  - Perpetuals
+  - DeFi
+  - Solana
+  - Web3
+  - Order Book
+  - Market Data

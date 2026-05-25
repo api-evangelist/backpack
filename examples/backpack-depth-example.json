@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "https://api.backpack.exchange/api/v1/depth?symbol=SOL_USDC",
+    "auth": "public"
+  },
+  "response": {
+    "asks": [
+      ["180.51", "12.34"],
+      ["180.52", "8.10"],
+      ["180.55", "25.00"]
+    ],
+    "bids": [
+      ["180.50", "15.20"],
+      ["180.49", "20.00"],
+      ["180.48", "5.55"]
+    ],
+    "lastUpdateId": "1234567890",
+    "timestamp": 1735689600000
+  }
+}

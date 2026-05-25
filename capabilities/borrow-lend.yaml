@@ -1,0 +1,241 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: "Backpack Exchange \u2014 Borrow Lend"
+  description: "Backpack Exchange API \u2014 Borrow Lend. 6 operations. Self-contained Naftiko capability covering one Backpack business surface."
+  tags:
+  - Backpack
+  - Exchange
+  - Borrow Lend
+  created: '2026-05-24'
+  modified: '2026-05-24'
+binds:
+- namespace: env
+  keys:
+    BACKPACK_API_KEY: BACKPACK_API_KEY
+    BACKPACK_API_SECRET: BACKPACK_API_SECRET
+capability:
+  consumes:
+  - type: http
+    namespace: backpack-borrow-lend
+    baseUri: https://api.backpack.exchange
+    description: Backpack Exchange Borrow Lend business capability. ED25519 signed requests.
+    resources:
+    - name: api-v1-borrowlend-positions
+      path: /api/v1/borrowLend/positions
+      operations:
+      - name: get-borrow-lend-positions
+        method: GET
+        description: Get borrow lend positions.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: api-v1-borrowlend-position-liquidationprice
+      path: /api/v1/borrowLend/position/liquidationPrice
+      operations:
+      - name: get-borrow-lend-estimated-liquidation-price
+        method: GET
+        description: Get estimated liquidation price.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: api-v1-borrowlend
+      path: /api/v1/borrowLend
+      operations:
+      - name: execute-borrow-lend
+        method: POST
+        description: Execute borrow lend.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: wapi-v1-history-borrowlend
+      path: /wapi/v1/history/borrowLend
+      operations:
+      - name: get-borrow-lend-history
+        method: GET
+        description: Get borrow history.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: wapi-v1-history-interest
+      path: /wapi/v1/history/interest
+      operations:
+      - name: get-interest-history
+        method: GET
+        description: Get interest history.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: wapi-v1-history-borrowlend-positions
+      path: /wapi/v1/history/borrowLend/positions
+      operations:
+      - name: get-borrow-lend-position-history
+        method: GET
+        description: Get borrow position history.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: apikey
+      key: X-API-Key
+      value: '{{env.BACKPACK_API_KEY}}'
+      placement: header
+  exposes:
+  - type: rest
+    namespace: backpack-borrow-lend-rest
+    port: 8080
+    description: "REST adapter for Backpack Exchange \u2014 Borrow Lend."
+    resources:
+    - path: /api/v1/borrowLend/positions
+      name: api-v1-borrowlend-positions
+      description: REST surface for api-v1-borrowlend-positions.
+      operations:
+      - method: GET
+        name: get-borrow-lend-positions
+        description: Get borrow lend positions.
+        call: backpack-borrow-lend.get-borrow-lend-positions
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /api/v1/borrowLend/position/liquidationPrice
+      name: api-v1-borrowlend-position-liquidationprice
+      description: REST surface for api-v1-borrowlend-position-liquidationprice.
+      operations:
+      - method: GET
+        name: get-borrow-lend-estimated-liquidation-price
+        description: Get estimated liquidation price.
+        call: backpack-borrow-lend.get-borrow-lend-estimated-liquidation-price
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /api/v1/borrowLend
+      name: api-v1-borrowlend
+      description: REST surface for api-v1-borrowlend.
+      operations:
+      - method: POST
+        name: execute-borrow-lend
+        description: Execute borrow lend.
+        call: backpack-borrow-lend.execute-borrow-lend
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /wapi/v1/history/borrowLend
+      name: wapi-v1-history-borrowlend
+      description: REST surface for wapi-v1-history-borrowlend.
+      operations:
+      - method: GET
+        name: get-borrow-lend-history
+        description: Get borrow history.
+        call: backpack-borrow-lend.get-borrow-lend-history
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /wapi/v1/history/interest
+      name: wapi-v1-history-interest
+      description: REST surface for wapi-v1-history-interest.
+      operations:
+      - method: GET
+        name: get-interest-history
+        description: Get interest history.
+        call: backpack-borrow-lend.get-interest-history
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /wapi/v1/history/borrowLend/positions
+      name: wapi-v1-history-borrowlend-positions
+      description: REST surface for wapi-v1-history-borrowlend-positions.
+      operations:
+      - method: GET
+        name: get-borrow-lend-position-history
+        description: Get borrow position history.
+        call: backpack-borrow-lend.get-borrow-lend-position-history
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: backpack-borrow-lend-mcp
+    port: 9090
+    transport: http
+    description: "MCP adapter for Backpack Exchange \u2014 Borrow Lend."
+    tools:
+    - name: backpack-get-borrow-lend-positions
+      description: Get borrow lend positions.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-borrow-lend.get-borrow-lend-positions
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-borrow-lend-estimated-liquidation-price
+      description: Get estimated liquidation price.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-borrow-lend.get-borrow-lend-estimated-liquidation-price
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-execute-borrow-lend
+      description: Execute borrow lend.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: backpack-borrow-lend.execute-borrow-lend
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-borrow-lend-history
+      description: Get borrow history.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-borrow-lend.get-borrow-lend-history
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-interest-history
+      description: Get interest history.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-borrow-lend.get-interest-history
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-borrow-lend-position-history
+      description: Get borrow position history.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-borrow-lend.get-borrow-lend-position-history
+      outputParameters:
+      - type: object
+        mapping: $.

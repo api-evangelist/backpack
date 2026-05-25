@@ -1,0 +1,63 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
+provider: Backpack
+providerId: backpack
+created: '2026-05-24'
+modified: '2026-05-24'
+reconciled: false
+tags:
+  - Crypto
+  - Trading
+  - Rate Limiting
+  - Web3
+description: >-
+  Backpack Exchange enforces per-API-key request limits and a request validity window via X-Window
+  (default 5000ms, max 60000ms). Specific RPM tiers are not publicly published in the OpenAPI; expect
+  conservative defaults and adjust based on observed 429 responses. WebSocket connections are
+  long-lived but subject to subscription-count limits.
+sources:
+  - https://docs.backpack.exchange/
+  - https://docs.backpack.exchange/#section/Authentication
+algorithm: token-bucket
+window:
+  header: X-Window
+  defaultMs: 5000
+  maxMs: 60000
+  description: Client-supplied request validity window in milliseconds. Server rejects requests outside the window.
+responseCodes:
+  throttled: 429
+  signatureExpired: 401
+  signatureInvalid: 401
+limits:
+  - scope: REST API
+    perKey:
+      rpm: undocumented
+      note: Backpack does not publish a per-key RPM in the OpenAPI. Treat 50-100 RPS as a soft ceiling and back off on 429.
+    perIp:
+      rpm: undocumented
+      note: A per-IP ceiling is enforced for unauthenticated endpoints.
+  - scope: WebSocket
+    perConnection:
+      maxSubscriptions: undocumented
+      note: A single connection can subscribe to multiple streams; expect a soft cap in the low hundreds.
+  - scope: Order placement
+    perAccount:
+      orderRateLimit: undocumented
+      note: Matching engine enforces an undocumented max-orders-per-second to protect the book.
+authentication:
+  type: ed25519-signed-request
+  signingHeaders:
+    - X-API-Key
+    - X-Signature
+    - X-Timestamp
+    - X-Window
+  instructionBinding: true
+  description: >-
+    Every signed request is prefixed with instruction=<name> before signing. The instruction binds the signature
+    to a specific operation (orderExecute, balanceQuery, withdraw, etc.) so a captured signature cannot be replayed
+    against a different operation.
+notes:
+  - Backpack does not publish standardized rate-limit response headers in the same way as e.g. Anthropic or Binance.
+  - Clients should implement exponential backoff on 429 and re-sync server time via GET /api/v1/time on persistent 401 from clock drift.
+  - The USDT/USDC pair has 0% fees and trades on it do not count toward your 30-day volume-tier requirements.

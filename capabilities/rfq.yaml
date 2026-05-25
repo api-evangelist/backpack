@@ -1,0 +1,409 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: "Backpack Exchange \u2014 RFQ"
+  description: "Backpack Exchange API \u2014 RFQ. 10 operations. Self-contained Naftiko capability covering one Backpack business surface."
+  tags:
+  - Backpack
+  - Exchange
+  - RFQ
+  created: '2026-05-24'
+  modified: '2026-05-24'
+binds:
+- namespace: env
+  keys:
+    BACKPACK_API_KEY: BACKPACK_API_KEY
+    BACKPACK_API_SECRET: BACKPACK_API_SECRET
+capability:
+  consumes:
+  - type: http
+    namespace: backpack-rfq
+    baseUri: https://api.backpack.exchange
+    description: Backpack Exchange RFQ business capability. ED25519 signed requests.
+    resources:
+    - name: api-v1-rfq-quote
+      path: /api/v1/rfq/quote
+      operations:
+      - name: submit-quote
+        method: POST
+        description: Submit quote.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: api-v1-rfqs
+      path: /api/v1/rfqs
+      operations:
+      - name: get-open-rfqs
+        method: GET
+        description: Get open RFQs.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: api-v1-rfq
+      path: /api/v1/rfq
+      operations:
+      - name: submit-rfq
+        method: POST
+        description: Submit RFQ.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: api-v1-rfq-accept
+      path: /api/v1/rfq/accept
+      operations:
+      - name: accept-quote
+        method: POST
+        description: Accept quote.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: api-v1-rfq-refresh
+      path: /api/v1/rfq/refresh
+      operations:
+      - name: refresh-rfq
+        method: POST
+        description: Refresh RFQ.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: api-v1-rfq-cancel
+      path: /api/v1/rfq/cancel
+      operations:
+      - name: cancel-rfq
+        method: POST
+        description: Cancel RFQ.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: wapi-v1-history-rfq
+      path: /wapi/v1/history/rfq
+      operations:
+      - name: get-rfq-history
+        method: GET
+        description: Get RFQ history.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: wapi-v1-history-quote
+      path: /wapi/v1/history/quote
+      operations:
+      - name: get-quote-history
+        method: GET
+        description: Get quote history.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: wapi-v1-history-rfq-fill
+      path: /wapi/v1/history/rfq/fill
+      operations:
+      - name: get-rfq-fill-history
+        method: GET
+        description: Get RFQ fill history.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: wapi-v1-history-quote-fill
+      path: /wapi/v1/history/quote/fill
+      operations:
+      - name: get-quote-fill-history
+        method: GET
+        description: Get quote fill history.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: apikey
+      key: X-API-Key
+      value: '{{env.BACKPACK_API_KEY}}'
+      placement: header
+  exposes:
+  - type: rest
+    namespace: backpack-rfq-rest
+    port: 8080
+    description: "REST adapter for Backpack Exchange \u2014 RFQ."
+    resources:
+    - path: /api/v1/rfq/quote
+      name: api-v1-rfq-quote
+      description: REST surface for api-v1-rfq-quote.
+      operations:
+      - method: POST
+        name: submit-quote
+        description: Submit quote.
+        call: backpack-rfq.submit-quote
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /api/v1/rfqs
+      name: api-v1-rfqs
+      description: REST surface for api-v1-rfqs.
+      operations:
+      - method: GET
+        name: get-open-rfqs
+        description: Get open RFQs.
+        call: backpack-rfq.get-open-rfqs
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /api/v1/rfq
+      name: api-v1-rfq
+      description: REST surface for api-v1-rfq.
+      operations:
+      - method: POST
+        name: submit-rfq
+        description: Submit RFQ.
+        call: backpack-rfq.submit-rfq
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /api/v1/rfq/accept
+      name: api-v1-rfq-accept
+      description: REST surface for api-v1-rfq-accept.
+      operations:
+      - method: POST
+        name: accept-quote
+        description: Accept quote.
+        call: backpack-rfq.accept-quote
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /api/v1/rfq/refresh
+      name: api-v1-rfq-refresh
+      description: REST surface for api-v1-rfq-refresh.
+      operations:
+      - method: POST
+        name: refresh-rfq
+        description: Refresh RFQ.
+        call: backpack-rfq.refresh-rfq
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /api/v1/rfq/cancel
+      name: api-v1-rfq-cancel
+      description: REST surface for api-v1-rfq-cancel.
+      operations:
+      - method: POST
+        name: cancel-rfq
+        description: Cancel RFQ.
+        call: backpack-rfq.cancel-rfq
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /wapi/v1/history/rfq
+      name: wapi-v1-history-rfq
+      description: REST surface for wapi-v1-history-rfq.
+      operations:
+      - method: GET
+        name: get-rfq-history
+        description: Get RFQ history.
+        call: backpack-rfq.get-rfq-history
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /wapi/v1/history/quote
+      name: wapi-v1-history-quote
+      description: REST surface for wapi-v1-history-quote.
+      operations:
+      - method: GET
+        name: get-quote-history
+        description: Get quote history.
+        call: backpack-rfq.get-quote-history
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /wapi/v1/history/rfq/fill
+      name: wapi-v1-history-rfq-fill
+      description: REST surface for wapi-v1-history-rfq-fill.
+      operations:
+      - method: GET
+        name: get-rfq-fill-history
+        description: Get RFQ fill history.
+        call: backpack-rfq.get-rfq-fill-history
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /wapi/v1/history/quote/fill
+      name: wapi-v1-history-quote-fill
+      description: REST surface for wapi-v1-history-quote-fill.
+      operations:
+      - method: GET
+        name: get-quote-fill-history
+        description: Get quote fill history.
+        call: backpack-rfq.get-quote-fill-history
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: backpack-rfq-mcp
+    port: 9090
+    transport: http
+    description: "MCP adapter for Backpack Exchange \u2014 RFQ."
+    tools:
+    - name: backpack-submit-quote
+      description: Submit quote.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: backpack-rfq.submit-quote
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-open-rfqs
+      description: Get open RFQs.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-rfq.get-open-rfqs
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-submit-rfq
+      description: Submit RFQ.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: backpack-rfq.submit-rfq
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-accept-quote
+      description: Accept quote.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: backpack-rfq.accept-quote
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-refresh-rfq
+      description: Refresh RFQ.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: backpack-rfq.refresh-rfq
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-cancel-rfq
+      description: Cancel RFQ.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: backpack-rfq.cancel-rfq
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-rfq-history
+      description: Get RFQ history.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-rfq.get-rfq-history
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-quote-history
+      description: Get quote history.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-rfq.get-quote-history
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-rfq-fill-history
+      description: Get RFQ fill history.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-rfq.get-rfq-fill-history
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-quote-fill-history
+      description: Get quote fill history.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-rfq.get-quote-fill-history
+      outputParameters:
+      - type: object
+        mapping: $.

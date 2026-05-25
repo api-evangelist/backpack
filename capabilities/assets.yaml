@@ -1,0 +1,103 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: "Backpack Exchange \u2014 Assets"
+  description: "Backpack Exchange API \u2014 Assets. 2 operations. Self-contained Naftiko capability covering one Backpack business surface."
+  tags:
+  - Backpack
+  - Exchange
+  - Assets
+  created: '2026-05-24'
+  modified: '2026-05-24'
+binds:
+- namespace: env
+  keys:
+    BACKPACK_API_KEY: BACKPACK_API_KEY
+    BACKPACK_API_SECRET: BACKPACK_API_SECRET
+capability:
+  consumes:
+  - type: http
+    namespace: backpack-assets
+    baseUri: https://api.backpack.exchange
+    description: Backpack Exchange Assets business capability. ED25519 signed requests.
+    resources:
+    - name: api-v1-assets
+      path: /api/v1/assets
+      operations:
+      - name: get-assets
+        method: GET
+        description: Get assets.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: api-v1-collateral
+      path: /api/v1/collateral
+      operations:
+      - name: get-collateral-parameters
+        method: GET
+        description: Get collateral.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: apikey
+      key: X-API-Key
+      value: '{{env.BACKPACK_API_KEY}}'
+      placement: header
+  exposes:
+  - type: rest
+    namespace: backpack-assets-rest
+    port: 8080
+    description: "REST adapter for Backpack Exchange \u2014 Assets."
+    resources:
+    - path: /api/v1/assets
+      name: api-v1-assets
+      description: REST surface for api-v1-assets.
+      operations:
+      - method: GET
+        name: get-assets
+        description: Get assets.
+        call: backpack-assets.get-assets
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /api/v1/collateral
+      name: api-v1-collateral
+      description: REST surface for api-v1-collateral.
+      operations:
+      - method: GET
+        name: get-collateral-parameters
+        description: Get collateral.
+        call: backpack-assets.get-collateral-parameters
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: backpack-assets-mcp
+    port: 9090
+    transport: http
+    description: "MCP adapter for Backpack Exchange \u2014 Assets."
+    tools:
+    - name: backpack-get-assets
+      description: Get assets.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-assets.get-assets
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: backpack-get-collateral-parameters
+      description: Get collateral.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: backpack-assets.get-collateral-parameters
+      outputParameters:
+      - type: object
+        mapping: $.

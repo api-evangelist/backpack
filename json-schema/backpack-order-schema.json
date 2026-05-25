@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/backpack/main/json-schema/backpack-order-schema.json",
+  "title": "Backpack Order",
+  "description": "JSON Schema for the Backpack Exchange Order resource, extracted from the Backpack Exchange OpenAPI 3.0 specification.",
+  "type": "object",
+  "required": [
+    "id",
+    "createdAt",
+    "orderType",
+    "selfTradePrevention",
+    "status",
+    "side",
+    "symbol",
+    "timeInForce"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique ID of the order."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "naive-date-time",
+      "description": "Time the order was created."
+    },
+    "executedQuantity": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Quantity of the order that has been filled."
+    },
+    "executedQuoteQuantity": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Quantity of the order that has been filled in the quote asset."
+    },
+    "expiryReason": {
+      "description": "Order expiry reason.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/OrderExpiryReason"
+        },
+        {
+          "description": "Order expiry reason."
+        }
+      ]
+    },
+    "orderType": {
+      "description": "Type of order.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/OrderTypeEnum"
+        },
+        {
+          "description": "Type of order."
+        }
+      ]
+    },
+    "postOnly": {
+      "type": "boolean",
+      "description": "Whether the order is post only or not."
+    },
+    "price": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Price that the order was submitted at (if `orderType` is `Limit`)"
+    },
+    "quantity": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Quantity of the order."
+    },
+    "quoteQuantity": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Quantity of the order in quote the quote asset."
+    },
+    "selfTradePrevention": {
+      "description": "Self trade prevention setting of the order. Default is `RejectTaker`.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/SelfTradePrevention"
+        },
+        {
+          "description": "Self trade prevention setting of the order. Default is `RejectTaker`."
+        }
+      ]
+    },
+    "status": {
+      "description": "Status of the order.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/OrderStatus"
+        },
+        {
+          "description": "Status of the order."
+        }
+      ]
+    },
+    "side": {
+      "description": "Side of the order.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Side"
+        },
+        {
+          "description": "Side of the order."
+        }
+      ]
+    },
+    "stopLossTriggerPrice": {
+      "type": "string",
+      "description": "Stop loss price (price the stop loss order will be triggered at)."
+    },
+    "stopLossLimitPrice": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Stop loss limit price. If set the stop loss will be a limit order,\notherwise it will be a market order."
+    },
+    "stopLossTriggerBy": {
+      "type": "string",
+      "description": "Reference price that should trigger the stop loss order.",
+      "enum": [
+        "MarkPrice",
+        "LastPrice",
+        "IndexPrice"
+      ]
+    },
+    "symbol": {
+      "type": "string",
+      "description": "Market symbol of the order."
+    },
+    "takeProfitTriggerPrice": {
+      "type": "string",
+      "description": "Take profit price (price the take profit order will be triggered at)."
+    },
+    "takeProfitLimitPrice": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Take profit limit price. If set the take profit will be a limit order,\notherwise it will be a market order."
+    },
+    "takeProfitTriggerBy": {
+      "type": "string",
+      "description": "Reference price that should trigger the take profit order.",
+      "enum": [
+        "MarkPrice",
+        "LastPrice",
+        "IndexPrice"
+      ]
+    },
+    "timeInForce": {
+      "description": "Time in force of the order.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TimeInForce"
+        },
+        {
+          "description": "Time in force of the order."
+        }
+      ]
+    },
+    "triggerBy": {
+      "type": "string",
+      "description": "Reference price that should trigger the order.",
+      "enum": [
+        "MarkPrice",
+        "LastPrice",
+        "IndexPrice"
+      ]
+    },
+    "triggerPrice": {
+      "type": "string",
+      "description": "Price the order was set to trigger at."
+    },
+    "triggerQuantity": {
+      "type": "string",
+      "description": "Trigger quantity."
+    },
+    "clientId": {
+      "type": "integer",
+      "format": "uint32",
+      "description": "Custom order ID."
+    },
+    "systemOrderType": {
+      "description": "The type of system order, if applicable.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/SystemOrderType"
+        },
+        {
+          "description": "The type of system order, if applicable."
+        }
+      ]
+    },
+    "strategyId": {
+      "type": "string",
+      "description": "Strategy ID of the order, if any."
+    },
+    "slippageTolerance": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Slippage tolerance allowed for the order."
+    },
+    "slippageToleranceType": {
+      "description": "Slippage tolerance type",
+      "allOf": [
+        {
+          "$ref": "#/$defs/SlippageToleranceType"
+        },
+        {
+          "description": "Slippage tolerance type"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "OrderExpiryReason": {
+      "type": "string",
+      "enum": [
+        "AccountTradingSuspended",
+        "BorrowRequiresLendRedeem",
+        "FillOrKill",
+        "InsufficientBorrowableQuantity",
+        "InsufficientFunds",
+        "InsufficientLiquidity",
+        "InvalidPrice",
+        "InvalidQuantity",
+        "ImmediateOrCancel",
+        "InsufficientMargin",
+        "Liquidation",
+        "NegativeEquity",
+        "PostOnlyMode",
+        "PostOnlyTaker",
+        "PriceOutOfBounds",
+        "ReduceOnlyNotReduced",
+        "SelfTradePrevention",
+        "StopWithoutPosition",
+        "PriceImpact",
+        "Unknown",
+        "UserPermissions",
+        "MaxStopOrdersPerPosition",
+        "PositionLimit",
+        "SlippageToleranceExceeded"
+      ]
+    },
+    "OrderTypeEnum": {
+      "type": "string",
+      "enum": [
+        "Market",
+        "Limit"
+      ]
+    },
+    "SelfTradePrevention": {
+      "type": "string",
+      "enum": [
+        "RejectTaker",
+        "RejectMaker",
+        "RejectBoth"
+      ]
+    },
+    "OrderStatus": {
+      "type": "string",
+      "enum": [
+        "Cancelled",
+        "Expired",
+        "Filled",
+        "New",
+        "PartiallyFilled",
+        "TriggerPending",
+        "TriggerFailed"
+      ]
+    },
+    "Side": {
+      "type": "string",
+      "enum": [
+        "Bid",
+        "Ask"
+      ]
+    },
+    "TimeInForce": {
+      "type": "string",
+      "enum": [
+        "GTC",
+        "IOC",
+        "FOK"
+      ]
+    },
+    "SystemOrderType": {
+      "type": "string",
+      "enum": [
+        "CollateralConversion",
+        "FutureExpiry",
+        "LiquidatePositionOnAdl",
+        "LiquidatePositionOnBook",
+        "LiquidatePositionOnBackstop",
+        "OrderBookClosed"
+      ]
+    },
+    "SlippageToleranceType": {
+      "type": "string",
+      "enum": [
+        "TickSize",
+        "Percent"
+      ]
+    }
+  }
+}

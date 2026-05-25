@@ -1,0 +1,128 @@
+specification: API Commons Plans
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
+provider: Backpack
+providerId: backpack
+created: '2026-05-24'
+modified: '2026-05-24'
+tags:
+  - Crypto
+  - Trading
+  - Pricing
+description: >-
+  Backpack Exchange uses a volume-based maker/taker fee schedule with tier upgrades determined by the
+  higher of (a) 30-day trailing trading volume, (b) BP Stake amount, or (c) pre-TGE Mad Lad NFT holdings.
+  Tiers are recalculated hourly. There is no monthly subscription fee for API access — fees are paid per
+  filled trade. Sub-account trading volume rolls up to the main account for VIP tier purposes.
+sources:
+  - https://support.backpack.exchange/exchange/trading/trading-fees
+  - https://support.backpack.exchange/llms-full.txt
+
+structure:
+  model: volume-tiered-maker-taker
+  recalculationFrequency: hourly
+  effectiveTierRule: max(volumeTier, stakeTier, madLadTier)
+  freeProductPair: USDT/USDC
+  freeProductNote: USDT/USDC trades 0% fee and does not count toward volume requirements.
+
+plans:
+  - id: api-access
+    name: API Access
+    description: Programmatic access to the Backpack Exchange API is free. Trading fees apply per execution.
+    entries:
+      - geo: Global
+        label: API Key
+        price: 0
+        metric: account
+        timeFrame: monthly
+        description: No subscription fee for ED25519 API keys. Rate limits apply.
+    elements:
+      - name: Unlimited number of ED25519 API key pairs (subject to undocumented account cap)
+      - name: REST API access (https://api.backpack.exchange/)
+      - name: WebSocket streams (wss://ws.backpack.exchange/)
+      - name: Sub-accounts for strategy isolation
+      - name: Configurable withdrawal delay
+      - name: Per-operation instruction binding for replay protection
+
+  - id: spot-fees
+    name: Spot Trading Fees
+    description: Volume-tier-based maker/taker spot trading fee schedule. Specific basis-point figures are published as a figure on the trading-fees page rather than as machine-readable text.
+    entries:
+      - geo: Global
+        label: VIP 0 - Default tier
+        price: variable
+        metric: trade
+        timeFrame: per-fill
+        description: Default maker/taker bps applied when no volume/stake/NFT tier is achieved.
+      - geo: Global
+        label: VIP 1-7 - Volume tiers
+        price: variable
+        metric: trade
+        timeFrame: per-fill
+        description: Maker and taker fees decrease as 30-day trailing volume increases.
+      - geo: Global
+        label: USDT/USDC pair
+        price: 0
+        metric: trade
+        timeFrame: per-fill
+        description: Zero-fee trading on the stablecoin pair. Volume on this pair does not count toward tier upgrades.
+    elements:
+      - name: Maker fee on Limit/PostOnly orders
+      - name: Taker fee on Market orders and crossed Limit orders
+      - name: BP Stake counts toward tier
+      - name: Pre-TGE Mad Lad NFT holding counts toward tier
+      - name: Sub-account volume aggregates into main account tier
+
+  - id: perp-fees
+    name: Perpetual Futures Fees
+    description: Volume-tier-based maker/taker schedule for PERP and IPERP markets.
+    entries:
+      - geo: Global
+        label: VIP 0 - Default tier
+        price: variable
+        metric: trade
+        timeFrame: per-fill
+      - geo: Global
+        label: VIP 1-7 - Volume tiers
+        price: variable
+        metric: trade
+        timeFrame: per-fill
+    elements:
+      - name: Funding settled on perp funding interval
+      - name: Liquidation fee 1% on system-triggered perp liquidations
+      - name: Cross-margin shares collateral with spot and lending balances
+
+  - id: withdrawal-fees
+    name: Withdrawal Fees
+    description: Per-token, per-network withdrawal fees published on the asset info page.
+    entries:
+      - geo: Global
+        label: On-chain withdrawals
+        price: variable
+        metric: withdrawal
+        timeFrame: per-transaction
+        description: Network fee (gas) varies by token and chain.
+      - geo: Global
+        label: Internal transfer
+        price: 0
+        metric: withdrawal
+        timeFrame: per-transaction
+        description: Transfers between Backpack exchange accounts are auto-detected and free.
+      - geo: Global
+        label: Sub-account transfer
+        price: 0
+        metric: transfer
+        timeFrame: per-transaction
+        description: No fees on transfers between sub-accounts.
+    elements:
+      - name: Configurable withdrawal delay (POST /wapi/v1/capital/withdrawals/delay)
+
+  - id: wire-fees
+    name: Fiat Wire Fees
+    description: Tier-based fiat wire fees with included free wires per 30 days. Higher VIP tiers earn more free wires and reduced fees.
+    entries:
+      - geo: Global
+        label: Wire transfer
+        price: variable
+        metric: transfer
+        timeFrame: per-transaction

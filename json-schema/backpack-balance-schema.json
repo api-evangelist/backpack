@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/backpack/main/json-schema/backpack-balance-schema.json",
+  "title": "Backpack Balance",
+  "description": "JSON Schema for the Backpack Exchange Balance resource, extracted from the Backpack Exchange OpenAPI 3.0 specification.",
+  "type": "object",
+  "required": [
+    "available",
+    "locked",
+    "staked"
+  ],
+  "properties": {
+    "available": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Funds available for use."
+    },
+    "locked": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Funds that are locked because they are in an order that has not been\nexecuted."
+    },
+    "staked": {
+      "type": "string",
+      "format": "decimal",
+      "description": "Funds that are staked."
+    }
+  }
+}

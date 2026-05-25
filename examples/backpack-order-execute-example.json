@@ -1,0 +1,41 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "https://api.backpack.exchange/api/v1/order",
+    "headers": {
+      "X-API-Key": "<base64-ed25519-public-key>",
+      "X-Signature": "<base64-ed25519-signature>",
+      "X-Timestamp": "1735689600000",
+      "X-Window": "5000",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "symbol": "SOL_USDC",
+      "side": "Bid",
+      "orderType": "Limit",
+      "timeInForce": "GTC",
+      "price": "180.50",
+      "quantity": "1.5",
+      "clientId": 1001,
+      "postOnly": true,
+      "selfTradePrevention": "RejectTaker"
+    },
+    "signingNote": "Sign string is alphabetically ordered key=value pairs of the body, prefixed with instruction=orderExecute and suffixed with &timestamp=<X-Timestamp>&window=<X-Window>, signed with the ED25519 private key, base64-encoded into X-Signature."
+  },
+  "response": {
+    "id": "111051090663277568",
+    "clientId": 1001,
+    "symbol": "SOL_USDC",
+    "side": "Bid",
+    "orderType": "Limit",
+    "timeInForce": "GTC",
+    "price": "180.50",
+    "quantity": "1.5",
+    "executedQuantity": "0",
+    "executedQuoteQuantity": "0",
+    "status": "New",
+    "selfTradePrevention": "RejectTaker",
+    "postOnly": true,
+    "createdAt": 1735689600123
+  }
+}
