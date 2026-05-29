@@ -97,6 +97,8 @@ apis:
     type: Documentation
   - url: openapi/backpack-exchange-openapi.yml
     type: OpenAPI
+  - url: asyncapi/backpack-asyncapi.yml
+    type: AsyncAPI
   description: >-
     Real-time market and account event streams over WebSocket. Public streams cover ticker, depth, trades,
     klines, mark price, open interest, and liquidation events keyed by symbol. Private (signed) streams cover

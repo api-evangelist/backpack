@@ -1,0 +1,1063 @@
+asyncapi: '2.6.0'
+id: 'urn:com:backpack:exchange:streams'
+info:
+  title: Backpack Exchange WebSocket Streams API
+  version: '2024-01-16'
+  description: |
+    Real-time market data and account event streams for Backpack Exchange.
+
+    Clients connect to a single WebSocket endpoint and manage many streams over
+    that connection by sending `SUBSCRIBE` / `UNSUBSCRIBE` JSON frames. Each
+    inbound data message is wrapped in an envelope of the form
+    `{ "stream": "<name>", "data": <payload> }`.
+
+    Public streams (ticker, depth, kline, trade, bookTicker, markPrice,
+    openInterest, liquidation) require no authentication. Private streams are
+    prefixed with `account.` and require an ED25519 signature in the subscribe
+    parameters using the `subscribe` instruction.
+
+    All timestamps are in microseconds, except for the K-Line `t`/`T` start and
+    close times (ISO 8601) and the RFQ `w`/`W` submission and expiry times
+    (milliseconds).
+
+    Keep-alive: the server sends a WebSocket `Ping` every 60 seconds; the
+    client must reply with a `Pong` within 120 seconds or the connection is
+    closed. On server shutdown a `Close` frame is sent with a 30 second grace
+    period and the client should reconnect.
+  contact:
+    name: Backpack Exchange Support
+    url: https://support.backpack.exchange/
+  license:
+    name: Proprietary
+  termsOfService: https://backpack.exchange/refer/terms
+  x-apis-json:
+    aid: backpack:backpack-exchange-streams-api
+    humanURL: https://docs.backpack.exchange/#tag/Streams
+externalDocs:
+  description: Backpack Exchange Streams documentation
+  url: https://docs.backpack.exchange/#tag/Streams
+
+defaultContentType: application/json
+
+servers:
+  production:
+    url: ws.backpack.exchange
+    protocol: wss
+    description: Backpack Exchange production WebSocket endpoint.
+
+channels:
+  'bookTicker.{symbol}':
+    description: Best bid/ask updates pushed in real time as the top of book changes.
+    parameters:
+      symbol:
+        $ref: '#/components/parameters/symbol'
+    subscribe:
+      operationId: subscribeBookTicker
+      summary: Receive best bid/ask updates for a symbol.
+      message:
+        $ref: '#/components/messages/BookTickerEnvelope'
+    bindings:
+      ws:
+        bindingVersion: '0.1.0'
+
+  'depth.{symbol}':
+    description: |
+      Incremental order book depth updates. Each event contains absolute
+      values at the listed levels; a level with quantity `0` is removed.
+      A REST snapshot from `/api/v1/depth` is required to seed local state.
+      Updates are sequential — `U` must equal previous `u + 1`.
+    parameters:
+      symbol:
+        $ref: '#/components/parameters/symbol'
+    subscribe:
+      operationId: subscribeDepth
+      summary: Receive realtime incremental depth updates.
+      message:
+        $ref: '#/components/messages/DepthEnvelope'
+    bindings:
+      ws:
+        bindingVersion: '0.1.0'
+
+  'depth.{aggregation}.{symbol}':
+    description: |
+      Aggregated depth stream variant. Updates are buffered and emitted on a
+      fixed interval (200ms, 600ms, or 1000ms) instead of in real time.
+    parameters:
+      aggregation:
+        description: Aggregation window for the depth stream.
+        schema:
+          type: string
+          enum: ['200ms', '600ms', '1000ms']
+      symbol:
+        $ref: '#/components/parameters/symbol'
+    subscribe:
+      operationId: subscribeDepthAggregated
+      summary: Receive depth updates aggregated over a fixed window.
+      message:
+        $ref: '#/components/messages/DepthEnvelope'
+    bindings:
+      ws:
+        bindingVersion: '0.1.0'
+
+  'kline.{interval}.{symbol}':
+    description: |
+      Candlestick (K-Line) updates. Pushed up to once per second while the
+      candle is open; a final message with `X: true` is sent when the candle
+      closes.
+    parameters:
+      interval:
+        description: K-line interval.
+        schema:
+          type: string
+          enum:
+            - 1s
+            - 1m
+            - 3m
+            - 5m
+            - 15m
+            - 30m
+            - 1h
+            - 2h
+            - 4h
+            - 6h
+            - 8h
+            - 12h
+            - 1d
+            - 3d
+            - 1w
+            - 1month
+      symbol:
+        $ref: '#/components/parameters/symbol'
+    subscribe:
+      operationId: subscribeKline
+      summary: Receive candlestick OHLCV updates for a symbol.
+      message:
+        $ref: '#/components/messages/KlineEnvelope'
+    bindings:
+      ws:
+        bindingVersion: '0.1.0'
+
+  liquidation:
+    description: Public liquidation events across all markets and liquidation types.
+    subscribe:
+      operationId: subscribeLiquidation
+      summary: Receive liquidation events.
+      message:
+        $ref: '#/components/messages/LiquidationEnvelope'
+    bindings:
+      ws:
+        bindingVersion: '0.1.0'
+
+  'markPrice.{symbol}':
+    description: |
+      Mark price stream for futures markets. Includes estimated funding rate,
+      index price, and next funding timestamp (omitted on prediction markets).
+    parameters:
+      symbol:
+        $ref: '#/components/parameters/symbol'
+    subscribe:
+      operationId: subscribeMarkPrice
+      summary: Receive mark price updates for a symbol.
+      message:
+        $ref: '#/components/messages/MarkPriceEnvelope'
+    bindings:
+      ws:
+        bindingVersion: '0.1.0'
+
+  'openInterest.{symbol}':
+    description: Open interest updates pushed every 60 seconds.
+    parameters:
+      symbol:
+        $ref: '#/components/parameters/symbol'
+    subscribe:
+      operationId: subscribeOpenInterest
+      summary: Receive open interest updates for a symbol.
+      message:
+        $ref: '#/components/messages/OpenInterestEnvelope'
+    bindings:
+      ws:
+        bindingVersion: '0.1.0'
+
+  'ticker.{symbol}':
+    description: 24 hour rolling statistics pushed once per second for a single symbol.
+    parameters:
+      symbol:
+        $ref: '#/components/parameters/symbol'
+    subscribe:
+      operationId: subscribeTicker
+      summary: Receive 24h rolling ticker statistics.
+      message:
+        $ref: '#/components/messages/TickerEnvelope'
+    bindings:
+      ws:
+        bindingVersion: '0.1.0'
+
+  'trade.{symbol}':
+    description: |
+      Public trade prints for a single symbol. The trade ID is a sequential
+      number scoped to the symbol. Trades produced by liquidations are
+      included.
+    parameters:
+      symbol:
+        $ref: '#/components/parameters/symbol'
+    subscribe:
+      operationId: subscribeTrade
+      summary: Receive public trade prints for a symbol.
+      message:
+        $ref: '#/components/messages/TradeEnvelope'
+    bindings:
+      ws:
+        bindingVersion: '0.1.0'
+
+  account.orderUpdate:
+    description: |
+      Authenticated stream of order lifecycle updates across all symbols on
+      the signing account. Event types include `orderAccepted`,
+      `orderCancelled`, `orderExpired`, `orderFill`, `orderModified`,
+      `triggerPlaced`, and `triggerFailed`.
+    subscribe:
+      operationId: subscribeOrderUpdateAll
+      summary: Receive order updates for all symbols on the account.
+      bindings:
+        ws:
+          bindingVersion: '0.1.0'
+      message:
+        $ref: '#/components/messages/OrderUpdateEnvelope'
+
+  'account.orderUpdate.{symbol}':
+    description: Authenticated stream of order lifecycle updates filtered to a single symbol.
+    parameters:
+      symbol:
+        $ref: '#/components/parameters/symbol'
+    subscribe:
+      operationId: subscribeOrderUpdateSymbol
+      summary: Receive order updates for a single symbol on the account.
+      bindings:
+        ws:
+          bindingVersion: '0.1.0'
+      message:
+        $ref: '#/components/messages/OrderUpdateEnvelope'
+
+  account.positionUpdate:
+    description: |
+      Authenticated stream of position lifecycle updates across all markets.
+      On subscribe, the server sends current open positions with the `e`
+      field omitted. Subsequent events use one of `positionAdjusted`,
+      `positionOpened`, or `positionClosed`.
+    subscribe:
+      operationId: subscribePositionUpdateAll
+      summary: Receive position updates for all markets on the account.
+      bindings:
+        ws:
+          bindingVersion: '0.1.0'
+      message:
+        $ref: '#/components/messages/PositionUpdateEnvelope'
+
+  'account.positionUpdate.{symbol}':
+    description: Authenticated position update stream filtered to a single market.
+    parameters:
+      symbol:
+        $ref: '#/components/parameters/symbol'
+    subscribe:
+      operationId: subscribePositionUpdateSymbol
+      summary: Receive position updates for a single market.
+      bindings:
+        ws:
+          bindingVersion: '0.1.0'
+      message:
+        $ref: '#/components/messages/PositionUpdateEnvelope'
+
+  account.rfqUpdate:
+    description: |
+      Authenticated stream of RFQ (Request for Quote) and Quote lifecycle
+      events relevant to the signing account, both as taker and maker.
+      Event types include `rfqActive`, `rfqAccepted`, `rfqRefreshed`,
+      `rfqCancelled`, `rfqCandidate`, `rfqFilled`, `quoteAccepted`, and
+      `quoteCancelled`.
+    subscribe:
+      operationId: subscribeRfqUpdateAll
+      summary: Receive RFQ and quote lifecycle events for the account.
+      bindings:
+        ws:
+          bindingVersion: '0.1.0'
+      message:
+        $ref: '#/components/messages/RfqUpdateEnvelope'
+
+  'account.rfqUpdate.{symbol}':
+    description: Authenticated RFQ update stream filtered to a single symbol.
+    parameters:
+      symbol:
+        $ref: '#/components/parameters/symbol'
+    subscribe:
+      operationId: subscribeRfqUpdateSymbol
+      summary: Receive RFQ and quote lifecycle events for a single symbol.
+      bindings:
+        ws:
+          bindingVersion: '0.1.0'
+      message:
+        $ref: '#/components/messages/RfqUpdateEnvelope'
+
+  subscriptionControl:
+    description: |
+      Control channel for client-initiated `SUBSCRIBE` and `UNSUBSCRIBE`
+      frames sent over the same WebSocket connection. Private streams must
+      include a `signature` array of
+      `[verifyingKey, signature, timestamp, window]` base64-encoded values
+      using the `subscribe` instruction.
+    publish:
+      operationId: sendSubscriptionControl
+      summary: Send a SUBSCRIBE or UNSUBSCRIBE request.
+      message:
+        oneOf:
+          - $ref: '#/components/messages/SubscribeRequest'
+          - $ref: '#/components/messages/UnsubscribeRequest'
+      bindings:
+        ws:
+          bindingVersion: '0.1.0'
+
+components:
+  parameters:
+    symbol:
+      description: Market symbol, e.g. `SOL_USDC`, `SOL_USDC_PERP`, `SOL_USDC_RFQ`.
+      schema:
+        type: string
+        pattern: '^[A-Z0-9_]+$'
+
+  messages:
+    SubscribeRequest:
+      name: SubscribeRequest
+      title: Subscribe request
+      summary: Subscribe to one or more streams.
+      contentType: application/json
+      payload:
+        type: object
+        required: [method, params]
+        properties:
+          method:
+            type: string
+            enum: [SUBSCRIBE]
+          params:
+            type: array
+            description: Stream names to subscribe to.
+            items:
+              type: string
+          signature:
+            type: array
+            minItems: 4
+            maxItems: 4
+            description: |
+              Required for private streams. Tuple of
+              `[verifyingKey, signature, timestamp, window]` where the
+              first two are base64 encoded and timestamp/window are
+              milliseconds. The signing string is
+              `instruction=subscribe&timestamp=<ts>&window=<window>`.
+            items:
+              type: string
+
+    UnsubscribeRequest:
+      name: UnsubscribeRequest
+      title: Unsubscribe request
+      summary: Unsubscribe from one or more streams.
+      contentType: application/json
+      payload:
+        type: object
+        required: [method, params]
+        properties:
+          method:
+            type: string
+            enum: [UNSUBSCRIBE]
+          params:
+            type: array
+            items:
+              type: string
+
+    BookTickerEnvelope:
+      name: BookTickerEnvelope
+      title: Book ticker envelope
+      contentType: application/json
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/StreamEnvelope'
+          - type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/BookTickerEvent'
+
+    DepthEnvelope:
+      name: DepthEnvelope
+      title: Depth envelope
+      contentType: application/json
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/StreamEnvelope'
+          - type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/DepthEvent'
+
+    KlineEnvelope:
+      name: KlineEnvelope
+      title: K-Line envelope
+      contentType: application/json
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/StreamEnvelope'
+          - type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/KlineEvent'
+
+    LiquidationEnvelope:
+      name: LiquidationEnvelope
+      title: Liquidation envelope
+      contentType: application/json
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/StreamEnvelope'
+          - type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/LiquidationEvent'
+
+    MarkPriceEnvelope:
+      name: MarkPriceEnvelope
+      title: Mark price envelope
+      contentType: application/json
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/StreamEnvelope'
+          - type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/MarkPriceEvent'
+
+    OpenInterestEnvelope:
+      name: OpenInterestEnvelope
+      title: Open interest envelope
+      contentType: application/json
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/StreamEnvelope'
+          - type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/OpenInterestEvent'
+
+    TickerEnvelope:
+      name: TickerEnvelope
+      title: Ticker envelope
+      contentType: application/json
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/StreamEnvelope'
+          - type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/TickerEvent'
+
+    TradeEnvelope:
+      name: TradeEnvelope
+      title: Trade envelope
+      contentType: application/json
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/StreamEnvelope'
+          - type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/TradeEvent'
+
+    OrderUpdateEnvelope:
+      name: OrderUpdateEnvelope
+      title: Order update envelope
+      contentType: application/json
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/StreamEnvelope'
+          - type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/OrderUpdateEvent'
+
+    PositionUpdateEnvelope:
+      name: PositionUpdateEnvelope
+      title: Position update envelope
+      contentType: application/json
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/StreamEnvelope'
+          - type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/PositionUpdateEvent'
+
+    RfqUpdateEnvelope:
+      name: RfqUpdateEnvelope
+      title: RFQ update envelope
+      contentType: application/json
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/StreamEnvelope'
+          - type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/RfqUpdateEvent'
+
+  schemas:
+    StreamEnvelope:
+      type: object
+      required: [stream, data]
+      properties:
+        stream:
+          type: string
+          description: Stream name the payload was emitted on.
+        data:
+          type: object
+          description: Stream-specific event payload.
+
+    BookTickerEvent:
+      type: object
+      properties:
+        e:
+          type: string
+          const: bookTicker
+          description: Event type.
+        E:
+          type: integer
+          format: int64
+          description: Event time in microseconds.
+        s:
+          type: string
+          description: Symbol.
+        a:
+          type: string
+          description: Inside ask price.
+        A:
+          type: string
+          description: Inside ask quantity.
+        b:
+          type: string
+          description: Inside bid price.
+        B:
+          type: string
+          description: Inside bid quantity.
+        u:
+          type: string
+          description: Update ID of the event.
+        T:
+          type: integer
+          format: int64
+          description: Engine timestamp in microseconds.
+
+    DepthEvent:
+      type: object
+      properties:
+        e:
+          type: string
+          const: depth
+          description: Event type.
+        E:
+          type: integer
+          format: int64
+          description: Event time in microseconds.
+        s:
+          type: string
+          description: Symbol.
+        a:
+          type: array
+          description: Ask updates. Each entry is `[price, quantity]`.
+          items:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              type: string
+        b:
+          type: array
+          description: Bid updates. Each entry is `[price, quantity]`.
+          items:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              type: string
+        U:
+          type: integer
+          format: int64
+          description: First update ID in the event.
+        u:
+          type: integer
+          format: int64
+          description: Last update ID in the event.
+        T:
+          type: integer
+          format: int64
+          description: Engine timestamp in microseconds.
+
+    KlineEvent:
+      type: object
+      properties:
+        e:
+          type: string
+          const: kline
+          description: Event type.
+        E:
+          type: integer
+          format: int64
+          description: Event time in microseconds.
+        s:
+          type: string
+          description: Symbol.
+        t:
+          type: string
+          description: K-Line start time (ISO 8601).
+        T:
+          type: string
+          description: K-Line close time (ISO 8601).
+        o:
+          type: string
+          description: Open price.
+        c:
+          type: string
+          description: Close price.
+        h:
+          type: string
+          description: High price.
+        l:
+          type: string
+          description: Low price.
+        v:
+          type: string
+          description: Base asset volume.
+        n:
+          type: integer
+          description: Number of trades.
+        X:
+          type: boolean
+          description: True when this candle is closed.
+
+    LiquidationEvent:
+      type: object
+      properties:
+        e:
+          type: string
+          const: liquidation
+          description: Event type.
+        E:
+          type: integer
+          format: int64
+          description: Event time in microseconds.
+        q:
+          type: string
+          description: Quantity.
+        p:
+          type: string
+          description: Price.
+        S:
+          type: string
+          enum: [Bid, Ask]
+          description: Side.
+        s:
+          type: string
+          description: Symbol.
+        T:
+          type: integer
+          format: int64
+          description: Engine timestamp in microseconds.
+
+    MarkPriceEvent:
+      type: object
+      properties:
+        e:
+          type: string
+          const: markPrice
+          description: Event type.
+        E:
+          type: integer
+          format: int64
+          description: Event time in microseconds.
+        s:
+          type: string
+          description: Symbol.
+        p:
+          type: string
+          description: Mark price.
+        f:
+          type: string
+          description: Estimated funding rate. Not present for prediction markets.
+        i:
+          type: string
+          description: Index price. Not present for prediction markets.
+        n:
+          type: integer
+          format: int64
+          description: Next funding timestamp in milliseconds. Not present for prediction markets.
+        T:
+          type: integer
+          format: int64
+          description: Engine timestamp in microseconds.
+
+    OpenInterestEvent:
+      type: object
+      properties:
+        e:
+          type: string
+          const: openInterest
+          description: Event type.
+        E:
+          type: integer
+          format: int64
+          description: Event time in microseconds.
+        s:
+          type: string
+          description: Symbol.
+        o:
+          type: string
+          description: Open interest in contracts.
+
+    TickerEvent:
+      type: object
+      properties:
+        e:
+          type: string
+          const: ticker
+          description: Event type.
+        E:
+          type: integer
+          format: int64
+          description: Event time in microseconds.
+        s:
+          type: string
+          description: Symbol.
+        o:
+          type: string
+          description: First price (24h open).
+        c:
+          type: string
+          description: Last price.
+        h:
+          type: string
+          description: High price.
+        l:
+          type: string
+          description: Low price.
+        v:
+          type: string
+          description: Base asset volume.
+        V:
+          type: string
+          description: Quote asset volume.
+        n:
+          type: integer
+          description: Number of trades.
+
+    TradeEvent:
+      type: object
+      properties:
+        e:
+          type: string
+          const: trade
+          description: Event type.
+        E:
+          type: integer
+          format: int64
+          description: Event time in microseconds.
+        s:
+          type: string
+          description: Symbol.
+        p:
+          type: string
+          description: Price.
+        q:
+          type: string
+          description: Quantity.
+        b:
+          type: string
+          description: Buyer order ID.
+        a:
+          type: string
+          description: Seller order ID.
+        t:
+          type: integer
+          format: int64
+          description: Sequential trade ID for the symbol.
+        T:
+          type: integer
+          format: int64
+          description: Engine timestamp in microseconds.
+        m:
+          type: boolean
+          description: True if the buyer is the maker.
+
+    OrderUpdateEvent:
+      type: object
+      description: |
+        Order lifecycle event. Many fields are conditional on order type or
+        event type — see Backpack docs for full conditional rules.
+      properties:
+        e:
+          type: string
+          description: Event type.
+          enum:
+            - orderAccepted
+            - orderCancelled
+            - orderExpired
+            - orderFill
+            - orderModified
+            - triggerPlaced
+            - triggerFailed
+        E:
+          type: integer
+          format: int64
+          description: Event time in microseconds.
+        s:
+          type: string
+          description: Symbol.
+        c:
+          type: integer
+          format: int64
+          description: Client order ID. Only present if set on the order.
+        S:
+          type: string
+          enum: [Bid, Ask]
+          description: Side.
+        o:
+          type: string
+          description: Order type (e.g. LIMIT, MARKET).
+        f:
+          type: string
+          description: Time in force (e.g. GTC, IOC, FOK).
+        q:
+          type: string
+          description: Quantity. Only present if the order has a quantity set.
+        Q:
+          type: string
+          description: Quantity in quote. Only present on reverse market orders.
+        p:
+          type: string
+          description: Price. Only present on limit orders.
+        P:
+          type: string
+          description: Trigger price. Only present on trigger orders.
+        B:
+          type: string
+          description: Trigger by reference. Only present on trigger orders.
+        a:
+          type: string
+          description: Take profit trigger price. Only present if set.
+        b:
+          type: string
+          description: Stop loss trigger price. Only present if set.
+        j:
+          type: string
+          description: Take profit limit price.
+        k:
+          type: string
+          description: Stop loss limit price.
+        d:
+          type: string
+          description: Take profit trigger by reference.
+        g:
+          type: string
+          description: Stop loss trigger by reference.
+        Y:
+          type: string
+          description: Trigger quantity. Only present on trigger orders.
+        X:
+          type: string
+          description: Order state.
+        R:
+          type: string
+          description: Order expiry reason. Only present on orderExpired events.
+        i:
+          type: string
+          description: Order ID.
+        t:
+          type: integer
+          format: int64
+          description: Trade ID. Only present on orderFill events.
+        l:
+          type: string
+          description: Fill quantity. Only present on orderFill events.
+        z:
+          type: string
+          description: Cumulative executed quantity.
+        Z:
+          type: string
+          description: Cumulative executed quantity in quote.
+        L:
+          type: string
+          description: Fill price. Only present on orderFill events.
+        m:
+          type: boolean
+          description: Whether the order was the maker side. Only on orderFill.
+        n:
+          type: string
+          description: Fee. Only present on orderFill events.
+        N:
+          type: string
+          description: Fee asset symbol. Only present on orderFill events.
+        V:
+          type: string
+          description: Self trade prevention mode.
+        T:
+          type: integer
+          format: int64
+          description: Engine timestamp in microseconds.
+        O:
+          type: string
+          description: Origin of the update.
+          enum:
+            - USER
+            - LIQUIDATION_AUTOCLOSE
+            - ADL_AUTOCLOSE
+            - COLLATERAL_CONVERSION
+            - SETTLEMENT_AUTOCLOSE
+            - BACKSTOP_LIQUIDITY_PROVIDER
+        I:
+          type: string
+          description: Related order ID.
+        H:
+          type: integer
+          format: int64
+          description: Strategy ID.
+        y:
+          type: boolean
+          description: Post only flag.
+
+    PositionUpdateEvent:
+      type: object
+      properties:
+        e:
+          type: string
+          description: |
+            Event type. Omitted in the initial snapshot of current open
+            positions sent on subscribe.
+          enum:
+            - positionAdjusted
+            - positionOpened
+            - positionClosed
+        E:
+          type: integer
+          format: int64
+          description: Event time in microseconds.
+        s:
+          type: string
+          description: Symbol.
+        b:
+          type: number
+          description: Break even price.
+        B:
+          type: number
+          description: Entry price.
+        f:
+          type: number
+          description: Initial margin fraction.
+        M:
+          type: number
+          description: Mark price.
+        m:
+          type: number
+          description: Maintenance margin fraction.
+        q:
+          type: number
+          description: Net quantity. Positive for long, negative for short.
+        Q:
+          type: number
+          description: Net exposure quantity, including open orders.
+        n:
+          type: number
+          description: Net exposure notional.
+        i:
+          type: string
+          description: Position ID.
+        p:
+          type: string
+          description: Realized PnL.
+        P:
+          type: string
+          description: Unrealized PnL.
+        T:
+          type: integer
+          format: int64
+          description: Engine timestamp in microseconds.
+
+    RfqUpdateEvent:
+      type: object
+      description: |
+        RFQ / Quote lifecycle event. Field presence varies per event type —
+        either `q` (base) or `Q` (quote quantity) is present, never both.
+      properties:
+        e:
+          type: string
+          description: Event type.
+          enum:
+            - rfqActive
+            - rfqAccepted
+            - rfqRefreshed
+            - rfqCancelled
+            - rfqCandidate
+            - rfqFilled
+            - quoteAccepted
+            - quoteCancelled
+        E:
+          type: integer
+          format: int64
+          description: Event time in microseconds.
+        R:
+          type: integer
+          format: int64
+          description: RFQ ID.
+        u:
+          type: integer
+          format: int64
+          description: Quote ID.
+        C:
+          type: string
+          description: Client ID (Client RFQ ID or Client Quote ID depending on context).
+        s:
+          type: string
+          description: Symbol.
+        S:
+          type: string
+          enum: [Bid, Ask]
+          description: RFQ side.
+        q:
+          type: string
+          description: Quantity in base asset. Present when RFQ is in base.
+        Q:
+          type: string
+          description: Quantity in quote asset. Present when RFQ is in quote.
+        p:
+          type: string
+          description: Price associated with the quote or fill event.
+        w:
+          type: integer
+          format: int64
+          description: Submission time in milliseconds.
+        W:
+          type: integer
+          format: int64
+          description: Expiry time in milliseconds.
+        X:
+          type: string
+          description: RFQ or quote status.
+          enum: [New, Cancelled, Filled]
+        o:
+          type: string
+          description: System order type (e.g. CollateralConversion). Only on system-initiated RFQs.
+        T:
+          type: integer
+          format: int64
+          description: Engine timestamp in microseconds.
+
+  securitySchemes:
+    ed25519SubscribeSignature:
+      type: apiKey
+      in: user
+      description: |
+        ED25519 signature passed in the `signature` field of the SUBSCRIBE
+        frame as `[verifyingKey, signature, timestamp, window]`. The signing
+        string is
+        `instruction=subscribe&timestamp=<timestamp>&window=<window>`.
+        Required for any stream prefixed with `account.`.
