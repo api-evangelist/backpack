@@ -1,0 +1,135 @@
+arazzo: 1.0.1
+info:
+  title: Backpack Add a Take-Profit to a Position
+  summary: Read an open futures position and the mark price, then place a reduce-only take-profit order.
+  description: >-
+    A position-management flow for the Backpack Exchange futures markets. It
+    reads the account's open positions and the current mark price for the target
+    symbol, then submits a reduce-only limit order on the opposite side at a
+    take-profit price so the position is closed if price reaches the target.
+    Every step inlines its request — including the ED25519 signing headers
+    required on authenticated calls — so the flow can be read and executed
+    without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: backpackApi
+  url: ../openapi/backpack-exchange-openapi.yml
+  type: openapi
+workflows:
+- workflowId: position-take-profit
+  summary: Place a reduce-only take-profit order against an open futures position.
+  description: >-
+    Reads open positions and the mark price for the symbol, then submits a
+    reduce-only limit order on the supplied side at the take-profit price and
+    quantity.
+  inputs:
+    type: object
+    required:
+    - symbol
+    - closeSide
+    - takeProfitPrice
+    - quantity
+    - apiKey
+    - signature
+    - timestamp
+    properties:
+      symbol:
+        type: string
+        description: The futures market symbol (e.g. SOL_USDC_PERP).
+      closeSide:
+        type: string
+        enum:
+        - Bid
+        - Ask
+        description: The side that reduces the position (Ask to close a long, Bid to close a short).
+      takeProfitPrice:
+        type: string
+        description: The limit price at which to take profit, as a decimal string.
+      quantity:
+        type: string
+        description: The quantity of the position to close, as a decimal string.
+      apiKey:
+        type: string
+        description: Base64 encoded ED25519 verifying key for the X-API-KEY header.
+      signature:
+        type: string
+        description: Base64 encoded ED25519 signature for the X-SIGNATURE header.
+      timestamp:
+        type: integer
+        description: Unix time in milliseconds for the X-TIMESTAMP header.
+      window:
+        type: integer
+        description: Request validity window in milliseconds for the X-WINDOW header (default 5000).
+  steps:
+  - stepId: getPositions
+    description: >-
+      Read the account's open positions to confirm there is a position on the
+      target symbol to protect.
+    operationId: get_positions
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      positions: $response.body
+  - stepId: getMarkPrice
+    description: >-
+      Read the current mark price for the symbol so the take-profit target can
+      be sanity-checked against the mark.
+    operationId: get_mark_prices
+    parameters:
+    - name: symbol
+      in: query
+      value: $inputs.symbol
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      markPrices: $response.body
+  - stepId: placeTakeProfit
+    description: >-
+      Submit a reduce-only limit order on the closing side at the take-profit
+      price so the position closes when price reaches the target.
+    operationId: execute_order
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    requestBody:
+      contentType: application/json; charset=utf-8
+      payload:
+        symbol: $inputs.symbol
+        side: $inputs.closeSide
+        orderType: Limit
+        price: $inputs.takeProfitPrice
+        quantity: $inputs.quantity
+        reduceOnly: true
+        timeInForce: GTC
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      orderId: $response.body#/id
+      status: $response.body#/status
+  outputs:
+    orderId: $steps.placeTakeProfit.outputs.orderId
+    status: $steps.placeTakeProfit.outputs.status
+    positions: $steps.getPositions.outputs.positions

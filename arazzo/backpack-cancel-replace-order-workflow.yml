@@ -1,0 +1,157 @@
+arazzo: 1.0.1
+info:
+  title: Backpack Cancel and Replace an Order
+  summary: Look up a resting order, cancel it, and place a replacement at a new price.
+  description: >-
+    A common market-making maintenance flow on the Backpack Exchange. The
+    workflow reads a resting order by id to capture its symbol and side, cancels
+    it from the order book, and then submits a fresh limit order on the same side
+    at a new price and quantity. Every step inlines its request — including the
+    ED25519 signing headers required on authenticated calls — so the flow can be
+    read and executed without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: backpackApi
+  url: ../openapi/backpack-exchange-openapi.yml
+  type: openapi
+workflows:
+- workflowId: cancel-replace-order
+  summary: Cancel a resting order and replace it with a new limit order on the same side.
+  description: >-
+    Reads the existing order, cancels it, and submits a replacement limit order
+    on the same symbol and side at the supplied new price and quantity.
+  inputs:
+    type: object
+    required:
+    - symbol
+    - orderId
+    - side
+    - newPrice
+    - newQuantity
+    - apiKey
+    - signature
+    - timestamp
+    properties:
+      symbol:
+        type: string
+        description: The market symbol the order exists on (e.g. SOL_USDC).
+      orderId:
+        type: string
+        description: The id of the resting order to cancel and replace.
+      side:
+        type: string
+        enum:
+        - Bid
+        - Ask
+        description: Side for the replacement order; Bid to buy, Ask to sell.
+      newPrice:
+        type: string
+        description: The new limit price as a decimal string.
+      newQuantity:
+        type: string
+        description: The new order quantity in the base asset as a decimal string.
+      apiKey:
+        type: string
+        description: Base64 encoded ED25519 verifying key for the X-API-KEY header.
+      signature:
+        type: string
+        description: Base64 encoded ED25519 signature for the X-SIGNATURE header.
+      timestamp:
+        type: integer
+        description: Unix time in milliseconds for the X-TIMESTAMP header.
+      window:
+        type: integer
+        description: Request validity window in milliseconds for the X-WINDOW header (default 5000).
+  steps:
+  - stepId: getOrder
+    description: >-
+      Read the resting order by id to confirm it is still on the book before
+      attempting to cancel it.
+    operationId: get_order
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    - name: orderId
+      in: query
+      value: $inputs.orderId
+    - name: symbol
+      in: query
+      value: $inputs.symbol
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      existingStatus: $response.body#/status
+      existingSymbol: $response.body#/symbol
+  - stepId: cancelOrder
+    description: >-
+      Cancel the resting order from the order book by its id.
+    operationId: cancel_order
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    requestBody:
+      contentType: application/json; charset=utf-8
+      payload:
+        symbol: $inputs.symbol
+        orderId: $inputs.orderId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      cancelledStatus: $response.body#/status
+      cancelledId: $response.body#/id
+  - stepId: placeReplacement
+    description: >-
+      Submit the replacement limit order on the same symbol and side at the new
+      price and quantity.
+    operationId: execute_order
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    requestBody:
+      contentType: application/json; charset=utf-8
+      payload:
+        symbol: $inputs.symbol
+        side: $inputs.side
+        orderType: Limit
+        price: $inputs.newPrice
+        quantity: $inputs.newQuantity
+        timeInForce: GTC
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      newOrderId: $response.body#/id
+      newStatus: $response.body#/status
+  outputs:
+    cancelledOrderId: $steps.cancelOrder.outputs.cancelledId
+    newOrderId: $steps.placeReplacement.outputs.newOrderId
+    newStatus: $steps.placeReplacement.outputs.newStatus

@@ -1,0 +1,145 @@
+arazzo: 1.0.1
+info:
+  title: Backpack Balance-Checked Withdrawal
+  summary: Confirm available balance, request a withdrawal, then reconcile it against withdrawal history.
+  description: >-
+    A guarded withdrawal flow for the Backpack Exchange. It reads account
+    balances to confirm there is available asset, submits a withdrawal request to
+    the configured address on the chosen blockchain, and then reads withdrawal
+    history to reconcile the newly requested withdrawal by its id. Every step
+    inlines its request — including the ED25519 signing headers required on
+    authenticated calls — so the flow can be read and executed without opening
+    the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: backpackApi
+  url: ../openapi/backpack-exchange-openapi.yml
+  type: openapi
+workflows:
+- workflowId: balance-checked-withdrawal
+  summary: Check balances, request a withdrawal, and reconcile it against withdrawal history.
+  description: >-
+    Reads account balances, submits a withdrawal request for the supplied asset,
+    quantity, blockchain, and address, then reads withdrawal history filtered to
+    the new withdrawal id to confirm it was recorded.
+  inputs:
+    type: object
+    required:
+    - symbol
+    - blockchain
+    - address
+    - quantity
+    - apiKey
+    - signature
+    - timestamp
+    properties:
+      symbol:
+        type: string
+        description: Symbol of the asset to withdraw (e.g. USDC).
+      blockchain:
+        type: string
+        description: Blockchain to withdraw on (e.g. Solana, Ethereum).
+      address:
+        type: string
+        description: Destination address to withdraw to.
+      quantity:
+        type: string
+        description: Quantity to withdraw, as a decimal string.
+      twoFactorToken:
+        type: string
+        description: Issued two factor token, required if the address is not 2FA-exempt.
+      apiKey:
+        type: string
+        description: Base64 encoded ED25519 verifying key for the X-API-KEY header.
+      signature:
+        type: string
+        description: Base64 encoded ED25519 signature for the X-SIGNATURE header.
+      timestamp:
+        type: integer
+        description: Unix time in milliseconds for the X-TIMESTAMP header.
+      window:
+        type: integer
+        description: Request validity window in milliseconds for the X-WINDOW header (default 5000).
+  steps:
+  - stepId: getBalances
+    description: >-
+      Read account balances to confirm there is available asset before
+      requesting the withdrawal.
+    operationId: get_balances
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      balances: $response.body
+  - stepId: requestWithdrawal
+    description: >-
+      Submit a withdrawal request for the supplied asset, quantity, blockchain,
+      and destination address.
+    operationId: request_withdrawal
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    requestBody:
+      contentType: application/json; charset=utf-8
+      payload:
+        symbol: $inputs.symbol
+        blockchain: $inputs.blockchain
+        address: $inputs.address
+        quantity: $inputs.quantity
+        twoFactorToken: $inputs.twoFactorToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      withdrawalId: $response.body#/id
+      status: $response.body#/status
+  - stepId: reconcileWithdrawal
+    description: >-
+      Read withdrawal history filtered to the new withdrawal id to confirm it
+      was recorded by the exchange.
+    operationId: get_withdrawals
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    - name: id
+      in: query
+      value: $steps.requestWithdrawal.outputs.withdrawalId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      reconciledStatus: $response.body#/0/status
+      reconciledId: $response.body#/0/id
+  outputs:
+    withdrawalId: $steps.requestWithdrawal.outputs.withdrawalId
+    status: $steps.reconcileWithdrawal.outputs.reconciledStatus

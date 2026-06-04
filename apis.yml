@@ -155,6 +155,33 @@ kind: contract
 image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
 access: 3rd-Party
 common:
+- type: ArazzoWorkflows
+  url: arazzo/
+  workflows:
+  - url: arazzo/backpack-balance-checked-market-buy-workflow.yml
+    name: Backpack Balance-Checked Market Buy
+    summary: Confirm available balance, read the ticker, then place a market buy and verify the fill.
+  - url: arazzo/backpack-balance-checked-withdrawal-workflow.yml
+    name: Backpack Balance-Checked Withdrawal
+    summary: Confirm available balance, request a withdrawal, then reconcile it against withdrawal history.
+  - url: arazzo/backpack-cancel-replace-order-workflow.yml
+    name: Backpack Cancel and Replace an Order
+    summary: Look up a resting order, cancel it, and place a replacement at a new price.
+  - url: arazzo/backpack-deposit-address-and-history-workflow.yml
+    name: Backpack Get Deposit Address and Reconcile History
+    summary: Fetch a blockchain deposit address, then read deposit history to reconcile incoming funds.
+  - url: arazzo/backpack-flatten-market-orders-workflow.yml
+    name: Backpack Flatten Open Orders on a Market
+    summary: List open orders on a market, cancel them all, and confirm none remain.
+  - url: arazzo/backpack-market-trade-analytics-workflow.yml
+    name: Backpack Market and Trade Analytics
+    summary: Discover markets, pull all tickers, and read recent trades for a chosen symbol.
+  - url: arazzo/backpack-place-limit-order-workflow.yml
+    name: Backpack Place a Limit Order
+    summary: Price a market from the ticker and order book, then place and confirm a limit order.
+  - url: arazzo/backpack-position-take-profit-workflow.yml
+    name: Backpack Add a Take-Profit to a Position
+    summary: Read an open futures position and the mark price, then place a reduce-only take-profit order.
 - type: Portal
   url: https://backpack.app/
 - type: Portal

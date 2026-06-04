@@ -1,0 +1,102 @@
+arazzo: 1.0.1
+info:
+  title: Backpack Get Deposit Address and Reconcile History
+  summary: Fetch a blockchain deposit address, then read deposit history to reconcile incoming funds.
+  description: >-
+    A funding flow for the Backpack Exchange. It retrieves the account-specific
+    deposit address for a given blockchain and then reads recent deposit history
+    so the caller can reconcile an expected incoming deposit against what the
+    exchange has recorded. Both steps inline their request — including the
+    ED25519 signing headers required on authenticated calls — so the flow can be
+    read and executed without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: backpackApi
+  url: ../openapi/backpack-exchange-openapi.yml
+  type: openapi
+workflows:
+- workflowId: deposit-address-and-history
+  summary: Retrieve a deposit address for a blockchain and reconcile against deposit history.
+  description: >-
+    Fetches the deposit address for the requested blockchain and then reads
+    recent deposit history to reconcile incoming funds.
+  inputs:
+    type: object
+    required:
+    - blockchain
+    - apiKey
+    - signature
+    - timestamp
+    properties:
+      blockchain:
+        type: string
+        description: Blockchain to get a deposit address for (e.g. Solana, Ethereum).
+      limit:
+        type: integer
+        description: Maximum number of deposit history rows to return (default 100, max 1000).
+      apiKey:
+        type: string
+        description: Base64 encoded ED25519 verifying key for the X-API-KEY header.
+      signature:
+        type: string
+        description: Base64 encoded ED25519 signature for the X-SIGNATURE header.
+      timestamp:
+        type: integer
+        description: Unix time in milliseconds for the X-TIMESTAMP header.
+      window:
+        type: integer
+        description: Request validity window in milliseconds for the X-WINDOW header (default 5000).
+  steps:
+  - stepId: getDepositAddress
+    description: >-
+      Retrieve the account-specific deposit address for the requested
+      blockchain.
+    operationId: get_deposit_address
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    - name: blockchain
+      in: query
+      value: $inputs.blockchain
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      address: $response.body#/address
+  - stepId: getDeposits
+    description: >-
+      Read recent deposit history so the caller can reconcile an expected
+      incoming deposit against the exchange record.
+    operationId: get_deposits
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    - name: limit
+      in: query
+      value: $inputs.limit
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      deposits: $response.body
+  outputs:
+    depositAddress: $steps.getDepositAddress.outputs.address
+    deposits: $steps.getDeposits.outputs.deposits

@@ -1,0 +1,158 @@
+arazzo: 1.0.1
+info:
+  title: Backpack Place a Limit Order
+  summary: Price a market from the ticker and order book, then place and confirm a limit order.
+  description: >-
+    A grounded order-entry flow for the Backpack Exchange. It reads the 24h
+    ticker and the live order book depth for a market so the caller can anchor a
+    limit price, submits a limit order to the matching engine, and then queries
+    the resting order to confirm it landed on the book. Every step spells out its
+    request inline — including the ED25519 signing headers the exchange requires
+    on authenticated calls — so the flow can be read and executed without opening
+    the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: backpackApi
+  url: ../openapi/backpack-exchange-openapi.yml
+  type: openapi
+workflows:
+- workflowId: place-limit-order
+  summary: Quote a market, place a limit order, and confirm it is resting on the book.
+  description: >-
+    Reads the ticker and order book depth for the target symbol, submits a limit
+    order on the requested side at the supplied price and quantity, then reads
+    the order back to confirm its status.
+  inputs:
+    type: object
+    required:
+    - symbol
+    - side
+    - price
+    - quantity
+    - apiKey
+    - signature
+    - timestamp
+    properties:
+      symbol:
+        type: string
+        description: The market symbol to trade (e.g. SOL_USDC).
+      side:
+        type: string
+        enum:
+        - Bid
+        - Ask
+        description: Order side; Bid to buy, Ask to sell.
+      price:
+        type: string
+        description: The limit price as a decimal string.
+      quantity:
+        type: string
+        description: The order quantity in the base asset as a decimal string.
+      apiKey:
+        type: string
+        description: Base64 encoded ED25519 verifying key for the X-API-KEY header.
+      signature:
+        type: string
+        description: Base64 encoded ED25519 signature for the X-SIGNATURE header.
+      timestamp:
+        type: integer
+        description: Unix time in milliseconds for the X-TIMESTAMP header.
+      window:
+        type: integer
+        description: Request validity window in milliseconds for the X-WINDOW header (default 5000).
+  steps:
+  - stepId: getTicker
+    description: >-
+      Read the 24h ticker for the market to anchor the order price against the
+      last traded price.
+    operationId: get_ticker
+    parameters:
+    - name: symbol
+      in: query
+      value: $inputs.symbol
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lastPrice: $response.body#/lastPrice
+      high: $response.body#/high
+      low: $response.body#/low
+  - stepId: getDepth
+    description: >-
+      Read the order book depth so the caller can see the best bid/ask before
+      committing the order.
+    operationId: get_depth
+    parameters:
+    - name: symbol
+      in: query
+      value: $inputs.symbol
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      bids: $response.body#/bids
+      asks: $response.body#/asks
+  - stepId: placeOrder
+    description: >-
+      Submit a limit order to the matching engine on the requested side at the
+      supplied price and quantity.
+    operationId: execute_order
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    requestBody:
+      contentType: application/json; charset=utf-8
+      payload:
+        symbol: $inputs.symbol
+        side: $inputs.side
+        orderType: Limit
+        price: $inputs.price
+        quantity: $inputs.quantity
+        timeInForce: GTC
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      orderId: $response.body#/id
+      status: $response.body#/status
+      executedQuantity: $response.body#/executedQuantity
+  - stepId: confirmOrder
+    description: >-
+      Read the order back from the book to confirm it is resting and report its
+      current status.
+    operationId: get_order
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    - name: orderId
+      in: query
+      value: $steps.placeOrder.outputs.orderId
+    - name: symbol
+      in: query
+      value: $inputs.symbol
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      confirmedStatus: $response.body#/status
+      confirmedId: $response.body#/id
+  outputs:
+    orderId: $steps.placeOrder.outputs.orderId
+    status: $steps.confirmOrder.outputs.confirmedStatus
+    lastPrice: $steps.getTicker.outputs.lastPrice

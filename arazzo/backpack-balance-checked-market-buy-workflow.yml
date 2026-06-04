@@ -1,0 +1,149 @@
+arazzo: 1.0.1
+info:
+  title: Backpack Balance-Checked Market Buy
+  summary: Confirm available balance, read the ticker, then place a market buy and verify the fill.
+  description: >-
+    A guarded market-entry flow for the Backpack Exchange. It reads account
+    balances to confirm funds are available, anchors against the current ticker
+    price, submits a market buy that spends a quote-asset amount, and then reads
+    the account fills to confirm the order was executed. Every step inlines its
+    request — including the ED25519 signing headers required on authenticated
+    calls — so the flow can be read and executed without opening the underlying
+    OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: backpackApi
+  url: ../openapi/backpack-exchange-openapi.yml
+  type: openapi
+workflows:
+- workflowId: balance-checked-market-buy
+  summary: Check balances, quote a market, place a market buy, and confirm the fill.
+  description: >-
+    Reads account balances and the market ticker, submits a market buy spending
+    the supplied quote quantity, and reads recent fills to confirm execution.
+  inputs:
+    type: object
+    required:
+    - symbol
+    - quoteQuantity
+    - apiKey
+    - signature
+    - timestamp
+    properties:
+      symbol:
+        type: string
+        description: The market symbol to buy (e.g. SOL_USDC).
+      quoteQuantity:
+        type: string
+        description: The amount of the quote asset to spend on the market buy, as a decimal string.
+      apiKey:
+        type: string
+        description: Base64 encoded ED25519 verifying key for the X-API-KEY header.
+      signature:
+        type: string
+        description: Base64 encoded ED25519 signature for the X-SIGNATURE header.
+      timestamp:
+        type: integer
+        description: Unix time in milliseconds for the X-TIMESTAMP header.
+      window:
+        type: integer
+        description: Request validity window in milliseconds for the X-WINDOW header (default 5000).
+  steps:
+  - stepId: getBalances
+    description: >-
+      Read account balances so the caller can confirm there is available quote
+      asset before placing the buy.
+    operationId: get_balances
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      balances: $response.body
+  - stepId: getTicker
+    description: >-
+      Read the ticker to anchor the buy against the current last traded price.
+    operationId: get_ticker
+    parameters:
+    - name: symbol
+      in: query
+      value: $inputs.symbol
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lastPrice: $response.body#/lastPrice
+  - stepId: placeMarketBuy
+    description: >-
+      Submit a market buy that spends the supplied quote-asset amount on the
+      requested symbol.
+    operationId: execute_order
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    requestBody:
+      contentType: application/json; charset=utf-8
+      payload:
+        symbol: $inputs.symbol
+        side: Bid
+        orderType: Market
+        quoteQuantity: $inputs.quoteQuantity
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      orderId: $response.body#/id
+      status: $response.body#/status
+      executedQuantity: $response.body#/executedQuantity
+  - stepId: confirmFill
+    description: >-
+      Read recent account fills for the symbol to confirm the market buy was
+      executed.
+    operationId: get_fills
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    - name: symbol
+      in: query
+      value: $inputs.symbol
+    - name: limit
+      in: query
+      value: 10
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      mostRecentFillOrderId: $response.body#/0/orderId
+      mostRecentFillPrice: $response.body#/0/price
+  outputs:
+    orderId: $steps.placeMarketBuy.outputs.orderId
+    status: $steps.placeMarketBuy.outputs.status
+    fillPrice: $steps.confirmFill.outputs.mostRecentFillPrice

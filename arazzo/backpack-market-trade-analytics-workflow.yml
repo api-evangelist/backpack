@@ -1,0 +1,73 @@
+arazzo: 1.0.1
+info:
+  title: Backpack Market and Trade Analytics
+  summary: Discover markets, pull all tickers, and read recent trades for a chosen symbol.
+  description: >-
+    A public read-only analytics flow for the Backpack Exchange that needs no
+    authentication. It lists every supported market, pulls the 24h ticker for
+    every market in one call, and then reads the most recent public trades for a
+    chosen symbol so a caller can build a quick snapshot of activity and
+    momentum. Every step inlines its request so the flow can be read and executed
+    without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: backpackApi
+  url: ../openapi/backpack-exchange-openapi.yml
+  type: openapi
+workflows:
+- workflowId: market-trade-analytics
+  summary: List markets, pull all tickers, and read recent trades for a symbol.
+  description: >-
+    Retrieves the list of supported markets, pulls tickers for every market, and
+    reads recent public trades for the supplied symbol.
+  inputs:
+    type: object
+    required:
+    - symbol
+    properties:
+      symbol:
+        type: string
+        description: The market symbol to read recent trades for (e.g. SOL_USDC).
+      tradeLimit:
+        type: integer
+        description: Number of recent trades to return (default 100, max 1000).
+  steps:
+  - stepId: listMarkets
+    description: >-
+      Retrieve all supported markets so the caller can confirm the symbol is
+      tradable.
+    operationId: get_markets
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      markets: $response.body
+  - stepId: getTickers
+    description: >-
+      Pull the 24h ticker for every market in a single call for a cross-market
+      activity snapshot.
+    operationId: get_tickers
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      tickers: $response.body
+  - stepId: getRecentTrades
+    description: >-
+      Read the most recent public trades for the chosen symbol to gauge
+      short-term momentum.
+    operationId: get_recent_trades
+    parameters:
+    - name: symbol
+      in: query
+      value: $inputs.symbol
+    - name: limit
+      in: query
+      value: $inputs.tradeLimit
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      trades: $response.body
+      mostRecentPrice: $response.body#/0/price
+  outputs:
+    markets: $steps.listMarkets.outputs.markets
+    tickers: $steps.getTickers.outputs.tickers
+    trades: $steps.getRecentTrades.outputs.trades

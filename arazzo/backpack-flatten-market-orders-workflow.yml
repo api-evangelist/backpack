@@ -1,0 +1,127 @@
+arazzo: 1.0.1
+info:
+  title: Backpack Flatten Open Orders on a Market
+  summary: List open orders on a market, cancel them all, and confirm none remain.
+  description: >-
+    A risk-control flow for the Backpack Exchange. It lists the open orders for a
+    single market, cancels every open order on that market, and then re-lists the
+    open orders to confirm the book is clear for the account. Every step inlines
+    its request — including the ED25519 signing headers required on authenticated
+    calls — so the flow can be read and executed without opening the underlying
+    OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: backpackApi
+  url: ../openapi/backpack-exchange-openapi.yml
+  type: openapi
+workflows:
+- workflowId: flatten-market-orders
+  summary: Cancel all open orders on a single market and confirm none remain.
+  description: >-
+    Lists the open orders for the market, cancels all of them, and re-lists to
+    confirm there are no remaining open orders.
+  inputs:
+    type: object
+    required:
+    - symbol
+    - apiKey
+    - signature
+    - timestamp
+    properties:
+      symbol:
+        type: string
+        description: The market symbol to flatten (e.g. SOL_USDC).
+      apiKey:
+        type: string
+        description: Base64 encoded ED25519 verifying key for the X-API-KEY header.
+      signature:
+        type: string
+        description: Base64 encoded ED25519 signature for the X-SIGNATURE header.
+      timestamp:
+        type: integer
+        description: Unix time in milliseconds for the X-TIMESTAMP header.
+      window:
+        type: integer
+        description: Request validity window in milliseconds for the X-WINDOW header (default 5000).
+  steps:
+  - stepId: listOpenOrders
+    description: >-
+      List the open orders for the market so the caller knows what will be
+      cancelled.
+    operationId: get_open_orders
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    - name: symbol
+      in: query
+      value: $inputs.symbol
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      openOrders: $response.body
+  - stepId: cancelAll
+    description: >-
+      Cancel all open orders on the specified market.
+    operationId: cancel_open_orders
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    requestBody:
+      contentType: application/json; charset=utf-8
+      payload:
+        symbol: $inputs.symbol
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      cancelledOrders: $response.body
+  - stepId: confirmCleared
+    description: >-
+      Re-list the open orders for the market to confirm none remain after the
+      bulk cancel.
+    operationId: get_open_orders
+    parameters:
+    - name: X-API-KEY
+      in: header
+      value: $inputs.apiKey
+    - name: X-SIGNATURE
+      in: header
+      value: $inputs.signature
+    - name: X-TIMESTAMP
+      in: header
+      value: $inputs.timestamp
+    - name: X-WINDOW
+      in: header
+      value: $inputs.window
+    - name: symbol
+      in: query
+      value: $inputs.symbol
+    successCriteria:
+    - condition: $statusCode == 200
+    - context: $response.body
+      condition: $.length == 0
+      type: jsonpath
+    outputs:
+      remainingOrders: $response.body
+  outputs:
+    cancelledOrders: $steps.cancelAll.outputs.cancelledOrders
+    remainingOrders: $steps.confirmCleared.outputs.remainingOrders
