@@ -1,336 +1,328 @@
 aid: backpack
 url: https://raw.githubusercontent.com/api-evangelist/backpack/refs/heads/main/apis.yml
 apis:
-- aid: backpack:backpack-exchange-api
-  name: Backpack Exchange API
-  tags:
+  - aid: backpack:backpack-exchange-api
+    name: Backpack Exchange API
+    tags:
+      - Crypto
+      - Exchange
+      - Trading
+      - Spot
+      - Perpetuals
+      - Order Book
+      - Market Data
+      - Solana
+      - Web3
+      - DeFi
+    humanURL: https://docs.backpack.exchange/
+    baseURL: https://api.backpack.exchange
+    properties:
+      - url: https://docs.backpack.exchange/
+        type: Documentation
+      - url: https://docs.backpack.exchange/#section/Authentication
+        type: Authentication
+      - url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+        type: Authentication
+      - url: https://docs.backpack.exchange/#section/Infrastructure
+        type: Documentation
+      - url: https://docs.backpack.exchange/#section/Changelog
+        type: ChangeLog
+      - url: openapi/backpack-exchange-openapi.yml
+        type: OpenAPI
+      - url: json-schema/backpack-order-schema.json
+        type: JSONSchema
+      - url: json-schema/backpack-market-schema.json
+        type: JSONSchema
+      - url: json-schema/backpack-position-schema.json
+        type: JSONSchema
+      - url: json-schema/backpack-balance-schema.json
+        type: JSONSchema
+      - url: json-schema/backpack-trade-schema.json
+        type: JSONSchema
+      - url: json-ld/backpack-context.jsonld
+        type: JSONLD
+      - url: examples/backpack-order-execute-example.json
+        type: Example
+      - url: examples/backpack-markets-list-example.json
+        type: Example
+      - url: examples/backpack-depth-example.json
+        type: Example
+    description: >-
+      The Backpack Exchange API is the canonical programmatic surface for the Backpack Exchange centralized crypto venue
+      — spot, perpetual futures, dated futures, prediction markets, borrow/lend, RFQ, strategies, and vaults.
+      Authentication is ED25519 keypair-based: every signed request carries X-API-Key, X-Signature, X-Timestamp, and
+      X-Window headers, with each operation bound to a named instruction (orderExecute, balanceQuery, borrowLendExecute,
+      etc.). Resource groups include Account, Account Limits, Capital, Order, Position, Borrow Lend, Markets, Trades,
+      Assets, RFQ, Strategy, Vaults, Withdrawal Delays, and System, plus public and authenticated WebSocket streams on
+      wss://ws.backpack.exchange/.
+  - aid: backpack:backpack-exchange-streams-api
+    name: Backpack Exchange WebSocket Streams API
+    tags:
+      - Crypto
+      - Exchange
+      - WebSocket
+      - Streaming
+      - Market Data
+      - Real-Time
+      - Order Updates
+      - Position Updates
+    humanURL: https://docs.backpack.exchange/#tag/Streams
+    baseURL: wss://ws.backpack.exchange
+    properties:
+      - url: https://docs.backpack.exchange/#tag/Streams
+        type: Documentation
+      - url: openapi/backpack-exchange-openapi.yml
+        type: OpenAPI
+      - url: asyncapi/backpack-asyncapi.yml
+        type: AsyncAPI
+    description: >-
+      Real-time market and account event streams over WebSocket. Public streams cover ticker, depth, trades, klines,
+      mark price, open interest, and liquidation events keyed by symbol. Private (signed) streams cover per-symbol order
+      updates (account.orderUpdate.<symbol>), position updates (account.position), and RFQ updates (account.rfqUpdate).
+      Signing uses the same ED25519 instruction model as the REST API (subscribe instruction).
+  - aid: backpack:backpack-wallet
+    name: Backpack Wallet
+    tags:
+      - Crypto
+      - Wallet
+      - Solana
+      - Ethereum
+      - Bitcoin
+      - Multi-Chain
+      - xNFT
+      - Self-Custody
+    humanURL: https://backpack.app/
+    properties:
+      - url: https://backpack.app/
+        type: Documentation
+      - url: https://github.com/coral-xyz/backpack
+        type: GitHubRepository
+      - url: https://chromewebstore.google.com/detail/backpack/aflkmfhebedbjioipglgcbcmnbpgliof
+        name: Chrome / Brave Extension
+        type: Tool
+      - url: https://apps.apple.com/us/app/backpack-wallet-exchange/id6445964121
+        name: iOS App
+        type: Tool
+      - url: https://play.google.com/store/search?q=backpack+wallet+and+exchange&c=apps&hl=en_US
+        name: Android App
+        type: Tool
+    description: >-
+      Backpack Wallet is a self-custodial multichain wallet for Solana, Ethereum, and Bitcoin, originally built around
+      the xNFT (executable NFT) protocol that lets dApps run as plugins inside the wallet. Available as a Chrome/Brave
+      extension and iOS/Android mobile app, sharing identity and session with Backpack Exchange when linked. Open source
+      under GPL-3.0 at github.com/coral-xyz/backpack.
+name: Backpack
+tags:
   - Crypto
   - Exchange
+  - Wallet
   - Trading
-  - Spot
   - Perpetuals
-  - Order Book
-  - Market Data
   - Solana
   - Web3
   - DeFi
-  humanURL: https://docs.backpack.exchange/
-  baseURL: https://api.backpack.exchange
-  properties:
-  - url: https://docs.backpack.exchange/
-    type: Documentation
-  - url: https://docs.backpack.exchange/#section/Authentication
-    type: Authentication
-  - url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
-    type: Authentication
-  - url: https://docs.backpack.exchange/#section/Infrastructure
-    type: Documentation
-  - url: https://docs.backpack.exchange/#section/Changelog
-    type: ChangeLog
-  - url: openapi/backpack-exchange-openapi.yml
-    type: OpenAPI
-  - type: NaftikoCapability
-    url: capabilities/account.yaml
-  - type: NaftikoCapability
-    url: capabilities/assets.yaml
-  - type: NaftikoCapability
-    url: capabilities/borrow-lend.yaml
-  - type: NaftikoCapability
-    url: capabilities/borrow-lend-markets.yaml
-  - type: NaftikoCapability
-    url: capabilities/capital.yaml
-  - type: NaftikoCapability
-    url: capabilities/markets.yaml
-  - type: NaftikoCapability
-    url: capabilities/order.yaml
-  - type: NaftikoCapability
-    url: capabilities/position.yaml
-  - type: NaftikoCapability
-    url: capabilities/rfq.yaml
-  - type: NaftikoCapability
-    url: capabilities/strategy.yaml
-  - type: NaftikoCapability
-    url: capabilities/system.yaml
-  - type: NaftikoCapability
-    url: capabilities/trades.yaml
-  - url: json-schema/backpack-order-schema.json
-    type: JSONSchema
-  - url: json-schema/backpack-market-schema.json
-    type: JSONSchema
-  - url: json-schema/backpack-position-schema.json
-    type: JSONSchema
-  - url: json-schema/backpack-balance-schema.json
-    type: JSONSchema
-  - url: json-schema/backpack-trade-schema.json
-    type: JSONSchema
-  - url: json-ld/backpack-context.jsonld
-    type: JSONLD
-  - url: examples/backpack-order-execute-example.json
-    type: Example
-  - url: examples/backpack-markets-list-example.json
-    type: Example
-  - url: examples/backpack-depth-example.json
-    type: Example
-  description: >-
-    The Backpack Exchange API is the canonical programmatic surface for the Backpack Exchange centralized crypto
-    venue — spot, perpetual futures, dated futures, prediction markets, borrow/lend, RFQ, strategies, and vaults.
-    Authentication is ED25519 keypair-based: every signed request carries X-API-Key, X-Signature, X-Timestamp,
-    and X-Window headers, with each operation bound to a named instruction (orderExecute, balanceQuery,
-    borrowLendExecute, etc.). Resource groups include Account, Account Limits, Capital, Order, Position,
-    Borrow Lend, Markets, Trades, Assets, RFQ, Strategy, Vaults, Withdrawal Delays, and System, plus public and
-    authenticated WebSocket streams on wss://ws.backpack.exchange/.
-- aid: backpack:backpack-exchange-streams-api
-  name: Backpack Exchange WebSocket Streams API
-  tags:
-  - Crypto
-  - Exchange
-  - WebSocket
-  - Streaming
-  - Market Data
-  - Real-Time
-  - Order Updates
-  - Position Updates
-  humanURL: https://docs.backpack.exchange/#tag/Streams
-  baseURL: wss://ws.backpack.exchange
-  properties:
-  - url: https://docs.backpack.exchange/#tag/Streams
-    type: Documentation
-  - url: openapi/backpack-exchange-openapi.yml
-    type: OpenAPI
-  - url: asyncapi/backpack-asyncapi.yml
-    type: AsyncAPI
-  description: >-
-    Real-time market and account event streams over WebSocket. Public streams cover ticker, depth, trades,
-    klines, mark price, open interest, and liquidation events keyed by symbol. Private (signed) streams cover
-    per-symbol order updates (account.orderUpdate.<symbol>), position updates (account.position), and RFQ
-    updates (account.rfqUpdate). Signing uses the same ED25519 instruction model as the REST API
-    (subscribe instruction).
-- aid: backpack:backpack-wallet
-  name: Backpack Wallet
-  tags:
-  - Crypto
-  - Wallet
-  - Solana
-  - Ethereum
-  - Bitcoin
-  - Multi-Chain
   - xNFT
+  - Anchor
+  - Coral
+  - Centralized Exchange
   - Self-Custody
-  humanURL: https://backpack.app/
-  properties:
-  - url: https://backpack.app/
-    type: Documentation
-  - url: https://github.com/coral-xyz/backpack
-    type: GitHubRepository
-  - url: https://chromewebstore.google.com/detail/backpack/aflkmfhebedbjioipglgcbcmnbpgliof
-    name: Chrome / Brave Extension
-    type: Tool
-  - url: https://apps.apple.com/us/app/backpack-wallet-exchange/id6445964121
-    name: iOS App
-    type: Tool
-  - url: https://play.google.com/store/search?q=backpack+wallet+and+exchange&c=apps&hl=en_US
-    name: Android App
-    type: Tool
-  description: >-
-    Backpack Wallet is a self-custodial multichain wallet for Solana, Ethereum, and Bitcoin, originally built
-    around the xNFT (executable NFT) protocol that lets dApps run as plugins inside the wallet. Available as a
-    Chrome/Brave extension and iOS/Android mobile app, sharing identity and session with Backpack Exchange
-    when linked. Open source under GPL-3.0 at github.com/coral-xyz/backpack.
-name: Backpack
-tags:
-- Crypto
-- Exchange
-- Wallet
-- Trading
-- Perpetuals
-- Solana
-- Web3
-- DeFi
-- xNFT
-- Anchor
-- Coral
-- Centralized Exchange
-- Self-Custody
 kind: contract
 image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
 access: 3rd-Party
 common:
-- type: ArazzoWorkflows
-  url: arazzo/
-  workflows:
-  - url: arazzo/backpack-balance-checked-market-buy-workflow.yml
-    name: Backpack Balance-Checked Market Buy
-    summary: Confirm available balance, read the ticker, then place a market buy and verify the fill.
-  - url: arazzo/backpack-balance-checked-withdrawal-workflow.yml
-    name: Backpack Balance-Checked Withdrawal
-    summary: Confirm available balance, request a withdrawal, then reconcile it against withdrawal history.
-  - url: arazzo/backpack-cancel-replace-order-workflow.yml
-    name: Backpack Cancel and Replace an Order
-    summary: Look up a resting order, cancel it, and place a replacement at a new price.
-  - url: arazzo/backpack-deposit-address-and-history-workflow.yml
-    name: Backpack Get Deposit Address and Reconcile History
-    summary: Fetch a blockchain deposit address, then read deposit history to reconcile incoming funds.
-  - url: arazzo/backpack-flatten-market-orders-workflow.yml
-    name: Backpack Flatten Open Orders on a Market
-    summary: List open orders on a market, cancel them all, and confirm none remain.
-  - url: arazzo/backpack-market-trade-analytics-workflow.yml
-    name: Backpack Market and Trade Analytics
-    summary: Discover markets, pull all tickers, and read recent trades for a chosen symbol.
-  - url: arazzo/backpack-place-limit-order-workflow.yml
-    name: Backpack Place a Limit Order
-    summary: Price a market from the ticker and order book, then place and confirm a limit order.
-  - url: arazzo/backpack-position-take-profit-workflow.yml
-    name: Backpack Add a Take-Profit to a Position
-    summary: Read an open futures position and the mark price, then place a reduce-only take-profit order.
-- type: Portal
-  url: https://backpack.app/
-- type: Portal
-  url: https://backpack.exchange/
-- type: Documentation
-  url: https://docs.backpack.exchange/
-- type: SignUp
-  url: https://backpack.exchange/join
-- type: SignUp
-  url: https://backpack.exchange/refer
-- type: GitHubOrganization
-  url: https://github.com/coral-xyz
-- type: GitHubRepository
-  url: https://github.com/coral-xyz/backpack
-  name: Backpack Wallet (open source)
-- type: GitHubRepository
-  url: https://github.com/coral-xyz/anchor
-  name: Anchor framework for Solana
-- type: GitHubRepository
-  url: https://github.com/coral-xyz/xnft
-  name: xNFT Executable NFT Protocol
-- type: GitHubRepository
-  url: https://github.com/coral-xyz/multisig
-  name: Squads-compatible multisig
-- type: GitHubRepository
-  url: https://github.com/coral-xyz/sealevel-attacks
-  name: Solana program security exploits library
-- type: StatusPage
-  url: https://status.backpack.exchange/
-- type: Blog
-  url: https://backpack.exchange/blog
-- type: Twitter
-  url: https://twitter.com/Backpack
-- type: Forum
-  url: https://discord.gg/backpack
-  name: Discord
-- type: LinkedIn
-  url: https://www.linkedin.com/company/backpack-exchange
-- type: Support
-  url: https://support.backpack.exchange/
-- type: FAQ
-  url: https://support.backpack.exchange/
-- type: TermsOfService
-  url: https://backpack.exchange/refer/terms
-- type: PrivacyPolicy
-  url: https://backpack.exchange/privacy
-- type: Authentication
-  url: https://docs.backpack.exchange/#section/Authentication
-  name: ED25519 Signed Requests
-- type: SpectralRules
-  url: rules/backpack-rules.yml
-- type: Vocabulary
-  url: vocabulary/backpack-vocabulary.yml
-- type: Plans
-  url: plans/backpack-plans-pricing.yml
-- type: RateLimits
-  url: rate-limits/backpack-rate-limits.yml
-- type: FinOps
-  url: finops/backpack-finops.yml
-- type: ChangeLog
-  url: https://docs.backpack.exchange/#section/Changelog
-- url: https://backpack.exchange/refer/api
-  type: SignUp
-  name: API Key Management
-- type: Features
-  data:
-  - All-in-one crypto app — spot, perpetual futures, dated futures, prediction markets, borrow/lend, RFQ, strategies, vaults
-  - Unified cross-margin — spot balances, perps margin, and lending balances live in one collateral pool
-  - ED25519 signed-request authentication with per-operation instruction binding and X-Window replay protection
-  - Public + authenticated WebSocket streams for market data, order updates, position updates, and RFQ
-  - Sub-accounts with aggregated VIP tier / fee tier across the main account
-  - Volume-based maker/taker fee tiers recalculated hourly, USDT/USDC pair at 0% fees
-  - Borrow/lend with auto-lend and manual modes, APY history endpoints, and liquidation-price simulation
-  - RFQ workflow with millisecond market-maker quotes and 2-minute acceptance windows
-  - Strategies API (grid bots and other programmatic strategies) with full lifecycle endpoints
-  - Configurable withdrawal delay policy (create/update/get) for account-level security
-  - Dust conversion endpoint for sweeping small balances
-  - Proof of Reserves publishing
-  - Multichain self-custodial wallet (Solana, Ethereum, Bitcoin) with xNFT plugin runtime
-  - Mobile apps (iOS, Android) and Chrome/Brave extension sharing exchange session
-  - Stocks and securities trading surface (regional)
-  - Prediction markets with tagged event discovery
-  - Vault tokens with mint/redeem flow and pending redemption queue
-  - Open source wallet under GPL-3.0 at github.com/coral-xyz/backpack
-  - Founded by Armani Ferrante (creator of the Anchor framework) and Tristan Yver via Coral
-  sources:
-  - https://docs.backpack.exchange/
-  - https://backpack.app/
-  - https://support.backpack.exchange/llms-full.txt
-  - https://github.com/coral-xyz/backpack
-- type: UseCases
-  data:
-  - name: Programmatic spot and perps trading
-    description: Build trading bots and execution algorithms against the Backpack Exchange order book using ED25519 signed requests and the orderExecute instruction set.
-  - name: Real-time market data ingestion
-    description: Subscribe to WebSocket streams (ticker, depth, trades, klines, mark price, open interest, liquidation) for low-latency market state in research pipelines and dashboards.
-  - name: Market making and RFQ liquidity provisioning
-    description: Respond to RFQs with quotes via /api/v1/rfq/quote and stream account.rfqUpdate events to compete on size-aware fills.
-  - name: Lending and borrowing automation
-    description: Use the Borrow Lend endpoints to automate APY hunting across markets, manage liquidation price thresholds, and reconcile interest history.
-  - name: Portfolio reconciliation and TaxOps
-    description: Pull fill, order, funding, settlement, deposit, and withdrawal history from /wapi/v1/history/* to build internal P&L and tax reporting.
-  - name: Multichain wallet integration
-    description: Embed or extend the open-source Backpack wallet for Solana / Ethereum / Bitcoin signing flows, or ship dApps as xNFTs inside the wallet runtime.
-- type: Integrations
-  data:
-  - name: Solana
-    description: Native settlement chain for the wallet and the home of the Anchor framework and xNFT protocol.
-  - name: Ethereum
-    description: Supported in the multichain wallet for EVM signing and asset management.
-  - name: Bitcoin
-    description: Supported in the multichain wallet for BTC custody and transfers.
-  - name: TradingView
-    description: Charting integration exposed via the TradingView tag in the API for klines and ticker data.
-  - name: Plaid
-    description: US fiat onramp identity verification used during KYC and bank-link flows.
-  - name: Banxa
-    description: Third-party crypto onramp partner integrated into the deposit flow.
-  - name: Easy Euro / Equals Money
-    description: EUR onramp partners surfaced as dedicated API tag groups in the exchange spec.
-  - name: Sygna Bridge
-    description: Travel Rule compliance partner for cross-VASP withdrawal information sharing.
-  - name: Coral / Anchor
-    description: Same founding team (Armani Ferrante) — Backpack ships on top of Anchor-based Solana programs.
-- type: Solutions
-  data:
-  - name: Backpack Exchange
-    description: Centralized crypto exchange with spot, perpetuals, lending, RFQ, strategies, and prediction markets — accessible via the REST + WebSocket API.
-  - name: Backpack Wallet
-    description: Self-custody multichain wallet with xNFT runtime, available as Chrome/Brave extension and iOS/Android apps.
-  - name: Backpack EU
-    description: Regulated European entity surfaced via European Private Beta and FTX EU Claims tags.
-  - name: FTX Creditor Claims processing
-    description: Dedicated tag group for processing FTX creditor and FTX EU claims through the exchange.
+  - type: PostmanWorkspace
+    url: https://www.postman.com/kinlaneapi/backpack/overview
+  - type: ArazzoWorkflows
+    url: arazzo/
+    workflows:
+      - url: arazzo/backpack-balance-checked-market-buy-workflow.yml
+        name: Backpack Balance-Checked Market Buy
+        summary: Confirm available balance, read the ticker, then place a market buy and verify the fill.
+      - url: arazzo/backpack-balance-checked-withdrawal-workflow.yml
+        name: Backpack Balance-Checked Withdrawal
+        summary: Confirm available balance, request a withdrawal, then reconcile it against withdrawal history.
+      - url: arazzo/backpack-cancel-replace-order-workflow.yml
+        name: Backpack Cancel and Replace an Order
+        summary: Look up a resting order, cancel it, and place a replacement at a new price.
+      - url: arazzo/backpack-deposit-address-and-history-workflow.yml
+        name: Backpack Get Deposit Address and Reconcile History
+        summary: Fetch a blockchain deposit address, then read deposit history to reconcile incoming funds.
+      - url: arazzo/backpack-flatten-market-orders-workflow.yml
+        name: Backpack Flatten Open Orders on a Market
+        summary: List open orders on a market, cancel them all, and confirm none remain.
+      - url: arazzo/backpack-market-trade-analytics-workflow.yml
+        name: Backpack Market and Trade Analytics
+        summary: Discover markets, pull all tickers, and read recent trades for a chosen symbol.
+      - url: arazzo/backpack-place-limit-order-workflow.yml
+        name: Backpack Place a Limit Order
+        summary: Price a market from the ticker and order book, then place and confirm a limit order.
+      - url: arazzo/backpack-position-take-profit-workflow.yml
+        name: Backpack Add a Take-Profit to a Position
+        summary: Read an open futures position and the mark price, then place a reduce-only take-profit order.
+  - type: Portal
+    url: https://backpack.app/
+  - type: Portal
+    url: https://backpack.exchange/
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: SignUp
+    url: https://backpack.exchange/join
+  - type: SignUp
+    url: https://backpack.exchange/refer
+  - type: GitHubOrganization
+    url: https://github.com/coral-xyz
+  - type: GitHubRepository
+    url: https://github.com/coral-xyz/backpack
+    name: Backpack Wallet (open source)
+  - type: GitHubRepository
+    url: https://github.com/coral-xyz/anchor
+    name: Anchor framework for Solana
+  - type: GitHubRepository
+    url: https://github.com/coral-xyz/xnft
+    name: xNFT Executable NFT Protocol
+  - type: GitHubRepository
+    url: https://github.com/coral-xyz/multisig
+    name: Squads-compatible multisig
+  - type: GitHubRepository
+    url: https://github.com/coral-xyz/sealevel-attacks
+    name: Solana program security exploits library
+  - type: StatusPage
+    url: https://status.backpack.exchange/
+  - type: Blog
+    url: https://backpack.exchange/blog
+  - type: Twitter
+    url: https://twitter.com/Backpack
+  - type: Forum
+    url: https://discord.gg/backpack
+    name: Discord
+  - type: LinkedIn
+    url: https://www.linkedin.com/company/backpack-exchange
+  - type: Support
+    url: https://support.backpack.exchange/
+  - type: FAQ
+    url: https://support.backpack.exchange/
+  - type: TermsOfService
+    url: https://backpack.exchange/refer/terms
+  - type: PrivacyPolicy
+    url: https://backpack.exchange/privacy
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+    name: ED25519 Signed Requests
+  - type: SpectralRules
+    url: rules/backpack-rules.yml
+  - type: Vocabulary
+    url: vocabulary/backpack-vocabulary.yml
+  - type: Plans
+    url: plans/backpack-plans-pricing.yml
+  - type: RateLimits
+    url: rate-limits/backpack-rate-limits.yml
+  - type: FinOps
+    url: finops/backpack-finops.yml
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - url: https://backpack.exchange/refer/api
+    type: SignUp
+    name: API Key Management
+  - type: Features
+    data:
+      - >-
+        All-in-one crypto app — spot, perpetual futures, dated futures, prediction markets, borrow/lend, RFQ,
+        strategies, vaults
+      - Unified cross-margin — spot balances, perps margin, and lending balances live in one collateral pool
+      - ED25519 signed-request authentication with per-operation instruction binding and X-Window replay protection
+      - Public + authenticated WebSocket streams for market data, order updates, position updates, and RFQ
+      - Sub-accounts with aggregated VIP tier / fee tier across the main account
+      - Volume-based maker/taker fee tiers recalculated hourly, USDT/USDC pair at 0% fees
+      - Borrow/lend with auto-lend and manual modes, APY history endpoints, and liquidation-price simulation
+      - RFQ workflow with millisecond market-maker quotes and 2-minute acceptance windows
+      - Strategies API (grid bots and other programmatic strategies) with full lifecycle endpoints
+      - Configurable withdrawal delay policy (create/update/get) for account-level security
+      - Dust conversion endpoint for sweeping small balances
+      - Proof of Reserves publishing
+      - Multichain self-custodial wallet (Solana, Ethereum, Bitcoin) with xNFT plugin runtime
+      - Mobile apps (iOS, Android) and Chrome/Brave extension sharing exchange session
+      - Stocks and securities trading surface (regional)
+      - Prediction markets with tagged event discovery
+      - Vault tokens with mint/redeem flow and pending redemption queue
+      - Open source wallet under GPL-3.0 at github.com/coral-xyz/backpack
+      - Founded by Armani Ferrante (creator of the Anchor framework) and Tristan Yver via Coral
+    sources:
+      - https://docs.backpack.exchange/
+      - https://backpack.app/
+      - https://support.backpack.exchange/llms-full.txt
+      - https://github.com/coral-xyz/backpack
+  - type: UseCases
+    data:
+      - name: Programmatic spot and perps trading
+        description: >-
+          Build trading bots and execution algorithms against the Backpack Exchange order book using ED25519 signed
+          requests and the orderExecute instruction set.
+      - name: Real-time market data ingestion
+        description: >-
+          Subscribe to WebSocket streams (ticker, depth, trades, klines, mark price, open interest, liquidation) for
+          low-latency market state in research pipelines and dashboards.
+      - name: Market making and RFQ liquidity provisioning
+        description: >-
+          Respond to RFQs with quotes via /api/v1/rfq/quote and stream account.rfqUpdate events to compete on size-aware
+          fills.
+      - name: Lending and borrowing automation
+        description: >-
+          Use the Borrow Lend endpoints to automate APY hunting across markets, manage liquidation price thresholds, and
+          reconcile interest history.
+      - name: Portfolio reconciliation and TaxOps
+        description: >-
+          Pull fill, order, funding, settlement, deposit, and withdrawal history from /wapi/v1/history/* to build
+          internal P&L and tax reporting.
+      - name: Multichain wallet integration
+        description: >-
+          Embed or extend the open-source Backpack wallet for Solana / Ethereum / Bitcoin signing flows, or ship dApps
+          as xNFTs inside the wallet runtime.
+  - type: Integrations
+    data:
+      - name: Solana
+        description: Native settlement chain for the wallet and the home of the Anchor framework and xNFT protocol.
+      - name: Ethereum
+        description: Supported in the multichain wallet for EVM signing and asset management.
+      - name: Bitcoin
+        description: Supported in the multichain wallet for BTC custody and transfers.
+      - name: TradingView
+        description: Charting integration exposed via the TradingView tag in the API for klines and ticker data.
+      - name: Plaid
+        description: US fiat onramp identity verification used during KYC and bank-link flows.
+      - name: Banxa
+        description: Third-party crypto onramp partner integrated into the deposit flow.
+      - name: Easy Euro / Equals Money
+        description: EUR onramp partners surfaced as dedicated API tag groups in the exchange spec.
+      - name: Sygna Bridge
+        description: Travel Rule compliance partner for cross-VASP withdrawal information sharing.
+      - name: Coral / Anchor
+        description: Same founding team (Armani Ferrante) — Backpack ships on top of Anchor-based Solana programs.
+  - type: Solutions
+    data:
+      - name: Backpack Exchange
+        description: >-
+          Centralized crypto exchange with spot, perpetuals, lending, RFQ, strategies, and prediction markets —
+          accessible via the REST + WebSocket API.
+      - name: Backpack Wallet
+        description: Self-custody multichain wallet with xNFT runtime, available as Chrome/Brave extension and iOS/Android apps.
+      - name: Backpack EU
+        description: Regulated European entity surfaced via European Private Beta and FTX EU Claims tags.
+      - name: FTX Creditor Claims processing
+        description: Dedicated tag group for processing FTX creditor and FTX EU claims through the exchange.
 created: '2026-05-24'
 modified: '2026-05-24'
 position: Consuming
 description: >-
-  Backpack is a Solana-first crypto company founded by Armani Ferrante and Tristan Yver — the same team behind
-  Coral and the Anchor framework that powers a majority of Solana programs. It operates two flagship products:
-  Backpack Wallet, an open-source self-custodial multichain wallet (Solana, Ethereum, Bitcoin) with an xNFT
-  plugin runtime, available as a Chrome/Brave extension and iOS/Android app; and Backpack Exchange, a fully
-  fledged centralized exchange offering spot, perpetual futures, dated futures, prediction markets, borrow/lend,
-  RFQ, strategies, vaults, and securities, with a comprehensive ED25519-signed REST + WebSocket API documented
-  at docs.backpack.exchange. Backpack Exchange acquired and processes FTX EU claims and is one of the more
-  technically transparent venues to emerge post-FTX.
+  Backpack is a Solana-first crypto company founded by Armani Ferrante and Tristan Yver — the same team behind Coral and
+  the Anchor framework that powers a majority of Solana programs. It operates two flagship products: Backpack Wallet, an
+  open-source self-custodial multichain wallet (Solana, Ethereum, Bitcoin) with an xNFT plugin runtime, available as a
+  Chrome/Brave extension and iOS/Android app; and Backpack Exchange, a fully fledged centralized exchange offering spot,
+  perpetual futures, dated futures, prediction markets, borrow/lend, RFQ, strategies, vaults, and securities, with a
+  comprehensive ED25519-signed REST + WebSocket API documented at docs.backpack.exchange. Backpack Exchange acquired and
+  processes FTX EU claims and is one of the more technically transparent venues to emerge post-FTX.
 maintainers:
-- FN: Kin Lane
-  email: info@apievangelist.com
-  X: apievangelist
-  url: https://apievangelist.com
+  - FN: Kin Lane
+    email: info@apievangelist.com
+    X: apievangelist
+    url: https://apievangelist.com
 specificationVersion: '0.16'
