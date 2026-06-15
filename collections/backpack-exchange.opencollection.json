@@ -1,0 +1,3074 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Account",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get account.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/account",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ]
+          },
+          "docs": "**Instruction:** `accountQuery`"
+        },
+        {
+          "info": {
+            "name": "Update account.",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.backpack.exchange/api/v1/account",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Update account settings.\n\n**Instruction:** `accountUpdate`"
+        },
+        {
+          "info": {
+            "name": "Get max borrow quantity.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/account/limits/borrow",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The asset to borrow."
+              }
+            ]
+          },
+          "docs": "Retrieves the maxmimum quantity an account can borrow\nfor a given asset based on the accounts existing exposure\nand margin requirements\n\n**Instruction:** `maxBorrowQuantity`"
+        },
+        {
+          "info": {
+            "name": "Get max order quantity.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/account/limits/order",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The market symbol to trade."
+              },
+              {
+                "name": "side",
+                "value": "",
+                "type": "query",
+                "description": "The side of the order."
+              },
+              {
+                "name": "price",
+                "value": "",
+                "type": "query",
+                "description": "The limit price of the order. Not included for market orders."
+              },
+              {
+                "name": "reduceOnly",
+                "value": "",
+                "type": "query",
+                "description": "Whether the order is reduce only."
+              },
+              {
+                "name": "autoBorrow",
+                "value": "",
+                "type": "query",
+                "description": "Whether the order uses auto borrow."
+              },
+              {
+                "name": "autoBorrowRepay",
+                "value": "",
+                "type": "query",
+                "description": "Whether the order uses auto borrow repay."
+              },
+              {
+                "name": "autoLendRedeem",
+                "value": "",
+                "type": "query",
+                "description": "Whether the order uses auto lend redeem."
+              }
+            ]
+          },
+          "docs": "Retrieves the maxmimum quantity an account can trade\nfor a given symbol based on the account's balances, existing exposure\nand margin requirements.\n\n**Instruction:** `maxOrderQuantity`"
+        },
+        {
+          "info": {
+            "name": "Get max withdrawal quantity.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/account/limits/withdrawal",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The asset to withdraw."
+              },
+              {
+                "name": "autoBorrow",
+                "value": "",
+                "type": "query",
+                "description": "Whether the withdrawal is with auto borrow."
+              },
+              {
+                "name": "autoLendRedeem",
+                "value": "",
+                "type": "query",
+                "description": "Whether the withdrawal is with auto lend redeem."
+              }
+            ]
+          },
+          "docs": "Retrieves the maxmimum quantity an account can withdraw\nfor a given asset based on the accounts existing exposure\nand margin requirements\nThe response will include the maximum quantity that can be withdrawn\nand whether the withdrawal is with auto borrow or auto lend redeem\nenabled.\n\n**Instruction:** `maxWithdrawalQuantity`"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Capital",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Convert a dust balance.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/account/convertDust",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Converts a dust balance to USDC. The balance (including lend) must be\nless than the minimum quantity tradable on the spot order book.\n\n**Instruction:** `convertDust`"
+        },
+        {
+          "info": {
+            "name": "Get balances.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/capital",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ]
+          },
+          "docs": "Retrieves account balances and the state of the balances (locked or\navailable).\n\nLocked assets are those that are currently in an open order.\n\n**Instruction:** `balanceQuery`"
+        },
+        {
+          "info": {
+            "name": "Get collateral.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/capital/collateral",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "subaccountId",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Retrieves collateral information for an account.\n\n**Instruction:** `collateralQuery`"
+        },
+        {
+          "info": {
+            "name": "Get deposits.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/capital/deposits",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "from",
+                "value": "",
+                "type": "query",
+                "description": "Filter to minimum time (milliseconds)."
+              },
+              {
+                "name": "to",
+                "value": "",
+                "type": "query",
+                "description": "Filter to maximum time (milliseconds)."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "excludePlatform",
+                "value": "",
+                "type": "query",
+                "description": "Exclude platform deposits originating from the exchange."
+              }
+            ]
+          },
+          "docs": "Retrieves deposit history.\n\n**Instruction:** `depositQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get deposit address.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/capital/deposit/address",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "blockchain",
+                "value": "",
+                "type": "query",
+                "description": "Blockchain symbol to get a deposit address for."
+              }
+            ]
+          },
+          "docs": "Retrieves the user specific deposit address if the user were to deposit\non the specified blockchain.\n\n**Instruction:** `depositAddressQuery`"
+        },
+        {
+          "info": {
+            "name": "Get withdrawals.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/capital/withdrawals",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "description": "Filter by withdrawal ID."
+              },
+              {
+                "name": "clientId",
+                "value": "",
+                "type": "query",
+                "description": "Filter by client ID."
+              },
+              {
+                "name": "from",
+                "value": "",
+                "type": "query",
+                "description": "Filter to minimum time (milliseconds)."
+              },
+              {
+                "name": "to",
+                "value": "",
+                "type": "query",
+                "description": "Filter to maximum time (milliseconds)."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              }
+            ]
+          },
+          "docs": "Retrieves withdrawal history.\n\n**Instruction:** `withdrawalQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Request withdrawal.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/wapi/v1/capital/withdrawals",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Requests a withdrawal from the exchange.\n\nThe `twoFactorToken` field is required if the withdrawal address is not\nan address that is configured in the address book to not require\n2FA.\n\nTo configure a 2FA exempt address, please [add an\naddress](https://backpack.exchange/settings/address-book) to the address book\nand toggle the `Two Factor Authentication Required` option.\n\n**Instruction:** `withdraw`"
+        },
+        {
+          "info": {
+            "name": "Get dust conversion history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/dust",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "description": "Filter to a given dust conversion id."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Retrieves the dust conversion history for the user.\n\n**Instruction:** `dustHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get settlement history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/settlement",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              },
+              {
+                "name": "source",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "History of settlement operations for the account.\n\n**Instruction:** `settlementHistoryQueryAll`"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Assets",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get assets.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/assets",
+            "params": [
+              {
+                "name": "country",
+                "value": "",
+                "type": "query",
+                "description": "Optional ISO 3166-1 alpha-2 country code. When provided, the token\nlist is filtered to the assets available in that jurisdiction."
+              }
+            ]
+          },
+          "docs": "Get assets."
+        },
+        {
+          "info": {
+            "name": "Get collateral.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/collateral"
+          },
+          "docs": "Get collateral parameters for assets."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Borrow Lend",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get borrow lend positions.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend/positions",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ]
+          },
+          "docs": "Retrieves all the open borrow lending positions for the account.\n\n**Instruction:** `borrowLendPositionQuery`"
+        },
+        {
+          "info": {
+            "name": "Get estimated liquidation price.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend/position/liquidationPrice",
+            "params": [
+              {
+                "name": "subaccountId",
+                "value": "",
+                "type": "query",
+                "description": "Optional subaccount."
+              },
+              {
+                "name": "borrow",
+                "value": "",
+                "type": "query",
+                "description": "Standard base64 encoded json of [`BorrowLendExecutePayload`]"
+              }
+            ]
+          },
+          "docs": "Retrieves the estimated liquidation price for a potential borrow lend\nposition."
+        },
+        {
+          "info": {
+            "name": "Execute borrow lend.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "**Instruction:** `borrowLendExecute`"
+        },
+        {
+          "info": {
+            "name": "Get borrow history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/borrowLend",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Filter to history for either borrows or lends."
+              },
+              {
+                "name": "sources",
+                "value": "",
+                "type": "query",
+                "description": "Filter to return history for a particular source. Can be a single\nsource, or multiple sources separated by commas."
+              },
+              {
+                "name": "positionId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to return history for a borrow lend position."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "History of borrow and lend operations for the account.\n\n**Instruction:** `borrowHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get interest history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/interest",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "asset",
+                "value": "",
+                "type": "query",
+                "description": "Asset to query. If not set, all assets are returned."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query. If not set, all markets are returned. If a\nfutures symbol is supplied, then interest payments on unrealized pnl\nwill be returned. Spot market symbols refer to interest payments on\nregular borrow lend positions."
+              },
+              {
+                "name": "positionId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to return history for a borrow lend position."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              },
+              {
+                "name": "source",
+                "value": "",
+                "type": "query",
+                "description": "Filter to return interest payments of a particular source. Borrow\ninterest payments through two mechanisms: borrow lend\npositions; interest paid on unrealized pnl."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "History of the interest payments for borrows and lends for the account.\n\n**Instruction:** `interestHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get borrow position history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/borrowLend/positions",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "side",
+                "value": "",
+                "type": "query",
+                "description": "Return only borrows or only lends."
+              },
+              {
+                "name": "state",
+                "value": "",
+                "type": "query",
+                "description": "Return only open positions or closed positions."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "History of borrow and lend positions for the account.\n\n**Instruction:** `borrowPositionHistoryQueryAll`"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Borrow Lend Markets",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get borrow lend markets.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend/markets"
+          },
+          "docs": "Get borrow lend markets."
+        },
+        {
+          "info": {
+            "name": "Get borrow lend market history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend/markets/history",
+            "params": [
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query",
+                "description": "Filter for an interval."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query. If not set, all markets are returned."
+              }
+            ]
+          },
+          "docs": "Get borrow lend market history."
+        },
+        {
+          "info": {
+            "name": "Get APY rates for borrow/lend markets and staking.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend/apy",
+            "params": [
+              {
+                "name": "tierId",
+                "value": "",
+                "type": "query",
+                "description": "Optional VIP tier ID. If omitted, returns the base (non-VIP) rate."
+              }
+            ]
+          },
+          "docs": "Get APY rates for borrow/lend markets and staking."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Markets",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get markets.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/markets",
+            "params": [
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type. Defaults to return spot and perp."
+              }
+            ]
+          },
+          "docs": "Retrieves all the markets that are supported by the exchange."
+        },
+        {
+          "info": {
+            "name": "Get market.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/market",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Retrieves a market supported by the exchange."
+        },
+        {
+          "info": {
+            "name": "Get depth.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/depth",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Limit on the number of price levels to return on each side. Defaults to `1000`."
+              }
+            ]
+          },
+          "docs": "Retrieves the order book depth for a given market symbol."
+        },
+        {
+          "info": {
+            "name": "Get prediction events.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/prediction",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The market symbol for the prediction market."
+              },
+              {
+                "name": "tagSlug",
+                "value": "",
+                "type": "query",
+                "description": "The tag slug of the prediction event."
+              },
+              {
+                "name": "eventSlug",
+                "value": "",
+                "type": "query",
+                "description": "The event slug that the prediction market is based on."
+              },
+              {
+                "name": "seriesSlug",
+                "value": "",
+                "type": "query",
+                "description": "The series slug that the prediction event belongs to."
+              },
+              {
+                "name": "resolved",
+                "value": "",
+                "type": "query",
+                "description": "Whether the prediction market is resolved."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              }
+            ]
+          },
+          "docs": "Retrieves all the events and associated markets that are supported by the exchange."
+        },
+        {
+          "info": {
+            "name": "Get prediction tags.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/prediction/tags"
+          },
+          "docs": "Retrieves all prediction tags supported by the exchange."
+        },
+        {
+          "info": {
+            "name": "Get market sessions.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/market-sessions"
+          },
+          "docs": "Retrieves the list of market sessions. To see which sessions a\nspecific security trades in, and its quantity constraints per session, see `/api/v1/securities`."
+        },
+        {
+          "info": {
+            "name": "Get securities.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/securities"
+          },
+          "docs": "Retrieves tradable securities."
+        },
+        {
+          "info": {
+            "name": "Get mark prices.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/markPrices",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type. Defaults to return perp."
+              }
+            ]
+          },
+          "docs": "Retrieves mark prices, index prices, and funding rates for futures\nproducts, or a specified symbol."
+        },
+        {
+          "info": {
+            "name": "Get open interest.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/openInterest",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Retrieves the current open interest for the given market.\nIf no market is provided, then all markets are returned."
+        },
+        {
+          "info": {
+            "name": "Get funding interval rates.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/fundingRates",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `10000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              }
+            ]
+          },
+          "docs": "Funding interval rate history for futures."
+        },
+        {
+          "info": {
+            "name": "Get K-lines.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/klines",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol, e.g. `SOL_USDC`."
+              },
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "startTime",
+                "value": "",
+                "type": "query",
+                "description": "UTC timestamp in seconds."
+              },
+              {
+                "name": "endTime",
+                "value": "",
+                "type": "query",
+                "description": "UTC timestamp in seconds. Defaults to now."
+              },
+              {
+                "name": "priceType",
+                "value": "",
+                "type": "query",
+                "description": "K-line price type. Defaults to `last`."
+              }
+            ]
+          },
+          "docs": "Returns candles for the given market and interval. Recent data is\nserved from the in-memory store; requests reaching further back\nthan the store's retention window fall through to ClickHouse."
+        },
+        {
+          "info": {
+            "name": "Get ticker for a single market.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/ticker",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Get ticker for a single market."
+        },
+        {
+          "info": {
+            "name": "Get tickers for every market.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/tickers",
+            "params": [
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Get tickers for every market."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Order",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get open order.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/order",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "clientId",
+                "value": "",
+                "type": "query",
+                "description": "Client ID of the order."
+              },
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "query",
+                "description": "ID of the order."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol for the order."
+              }
+            ]
+          },
+          "docs": "Retrieves an open order from the order book. This only returns the order\nif it is resting on the order book (i.e. has not been completely filled,\nexpired, or cancelled).\n\nOne of `orderId` or `clientId` must be specified. If both are specified\nthen the request will be rejected.\n\n**Instruction:** `orderQuery`"
+        },
+        {
+          "info": {
+            "name": "Execute order.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/order",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              },
+              {
+                "name": "X-BROKER-ID",
+                "value": ""
+              },
+              {
+                "name": "X-BROKER-KEY",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Submits an order to the matching engine for execution.\n\n**Instruction:** `orderExecute`"
+        },
+        {
+          "info": {
+            "name": "Cancel open order.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.backpack.exchange/api/v1/order",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Cancels an open order from the order book.\n\nOne of `orderId` or `clientId` must be specified. If both are specified\nthen the request will be rejected.\n\n**Instruction:** `orderCancel`"
+        },
+        {
+          "info": {
+            "name": "Get open orders.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/orders",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "The market for the orders (SPOT or PERP)."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The symbol of the market for the orders."
+              }
+            ]
+          },
+          "docs": "Retrieves all open orders. If a symbol is provided, only open orders for\nthat market will be returned, otherwise all open orders are\nreturned.\n\n**Instruction:** `orderQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Execute orders.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/orders",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              },
+              {
+                "name": "X-BROKER-ID",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Submits a set of orders to the matching engine for execution in a batch.\n\n**Batch commands instruction:** `orderExecute`"
+        },
+        {
+          "info": {
+            "name": "Cancel open orders.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.backpack.exchange/api/v1/orders",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Cancels all open orders on the specified market.\n\n**Instruction:** `orderCancelAll`"
+        },
+        {
+          "info": {
+            "name": "Get fill history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/fills",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given order."
+              },
+              {
+                "name": "strategyId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given strategy."
+              },
+              {
+                "name": "from",
+                "value": "",
+                "type": "query",
+                "description": "Filter to minimum time (milliseconds)."
+              },
+              {
+                "name": "to",
+                "value": "",
+                "type": "query",
+                "description": "Filter to maximum time (milliseconds)."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "fillType",
+                "value": "",
+                "type": "query",
+                "description": "Filter to return fills for different fill types"
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Retrieves historical fills, with optional filtering for a specific order\nor symbol.\n\n**Instruction:** `fillHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get order history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/orders",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given order."
+              },
+              {
+                "name": "strategyId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given strategy."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Retrieves the order history for the user. This includes orders that have\nbeen filled and are no longer on the book. It may include orders\nthat are on the book, but the `/orders` endpoint contains more up to\ndate data.\n\n**Instruction:** `orderHistoryQueryAll`"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Position",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get open positions.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/position",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter for a single position by symbol."
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "The market for the orders (SPOT or PERP)."
+              }
+            ]
+          },
+          "docs": "Retrieves account position summary.\n\n**Instruction:** `positionQuery`"
+        },
+        {
+          "info": {
+            "name": "Get funding payments.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/funding",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "subaccountId",
+                "value": "",
+                "type": "query",
+                "description": "Filter for a subaccount."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query. If not set, all markets are returned."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Users funding payment history for futures.\n\n**Instruction:** `fundingHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get position history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/position",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query position history for."
+              },
+              {
+                "name": "state",
+                "value": "",
+                "type": "query",
+                "description": "Position state to filter positions."
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Retrieves historical positions, with optional filtering for a specific symbol.\n\n**Instruction:** `positionHistoryQueryAll`"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "RFQ",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Submit quote.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/rfq/quote",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Submit a quote in response to an RFQ. If valid, the quote may be\naccepted within the specified time window.\n\n**Instruction:** `quoteSubmit`"
+        },
+        {
+          "info": {
+            "name": "Get open RFQs.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/rfqs",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter by market symbol."
+              },
+              {
+                "name": "rfqId",
+                "value": "",
+                "type": "query",
+                "description": "Filter by RFQ ID."
+              },
+              {
+                "name": "deferredSettlement",
+                "value": "",
+                "type": "query",
+                "description": "Filter for deferred settlement RFQs only (`true`), non-deferred\nonly (`false`), or return all (`null`/omitted)."
+              },
+              {
+                "name": "subaccountId",
+                "value": "",
+                "type": "query",
+                "description": "Subaccount ID for unsigned requests."
+              }
+            ]
+          },
+          "docs": "Retrieves open RFQs submitted by the account, along with the quotes\nsubmitted for them. Optionally filter by symbol, RFQ ID, or deferred\nsettlement status.\n\n**Instruction:** `rfqQuery`"
+        },
+        {
+          "info": {
+            "name": "Submit RFQ.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/rfq",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Submit an RFQ (Request For Quote). The RFQ will be available for\na specified time window for makers to respond to.\n\n**Instruction:** `rfqSubmit`"
+        },
+        {
+          "info": {
+            "name": "Accept quote.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/rfq/accept",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Accept a specific quote from a maker in response to an RFQ.\n\n**Instruction:** `quoteAccept`"
+        },
+        {
+          "info": {
+            "name": "Refresh RFQ.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/rfq/refresh",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Refresh a RFQ, extending the time window it is available for.\n\n**Instruction:** `rfqRefresh`"
+        },
+        {
+          "info": {
+            "name": "Cancel RFQ.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/rfq/cancel",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "**Instruction:** `rfqCancel`"
+        },
+        {
+          "info": {
+            "name": "Get RFQ history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/rfq",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "rfqId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given rfq."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given status."
+              },
+              {
+                "name": "side",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given side."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              },
+              {
+                "name": "deferredSettlement",
+                "value": "",
+                "type": "query",
+                "description": "Filter to deferred settlement RFQs only (`true`) or non-deferred only (`false`)."
+              }
+            ]
+          },
+          "docs": "This includes RFQs that have been filled or expired.\n\n**Instruction:** `rfqHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get quote history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/quote",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "quoteId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given quote."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given status."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              },
+              {
+                "name": "deferredSettlement",
+                "value": "",
+                "type": "query",
+                "description": "Filter to deferred settlement quotes only (`true`) or non-deferred only (`false`)."
+              }
+            ]
+          },
+          "docs": "Retrieves the quote history for the user. This includes quotes that have\nbeen filled or expired.\n\n**Instruction:** `quoteHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get RFQ fill history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/rfq/fill",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "quoteId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given RFQ."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "side",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given side."
+              },
+              {
+                "name": "fillType",
+                "value": "",
+                "type": "query",
+                "description": "Filter by fill type (system order type)."
+              },
+              {
+                "name": "deferredSettlement",
+                "value": "",
+                "type": "query",
+                "description": "If `true`, return only deferred settlement fills. If `false`, return only non-deferred settlement fills. If omitted, return fills regardless of settlement type."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Retrieves RFQ fill history for the user.\n\n**Instruction:** `rfqFillHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get quote fill history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/quote/fill",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "quoteId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given quote."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "side",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given side."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Retrieves the quote fill history for the user.\n\n**Instruction:** `quoteFillHistoryQueryAll`"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Strategy",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get open strategy.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/strategy",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "clientStrategyId",
+                "value": "",
+                "type": "query",
+                "description": "Client ID of the strategy."
+              },
+              {
+                "name": "strategyId",
+                "value": "",
+                "type": "query",
+                "description": "ID of the strategy."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol for the strategy."
+              }
+            ]
+          },
+          "docs": "Retrieves an open strategy from the engine. This only returns the\nstrategy if it is active (i.e. has not been completely filled,\ncancelled by the user, or cancelled by the system).\n\nOne of `strategyId` or `clientStrategyId` must be specified.\n\n**Instruction:** `strategyQuery`"
+        },
+        {
+          "info": {
+            "name": "Create strategy.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/strategy",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              },
+              {
+                "name": "X-BROKER-ID",
+                "value": ""
+              },
+              {
+                "name": "X-BROKER-KEY",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Submits a strategy to the engine for processing.\n\n**Instruction:** `strategyCreate`"
+        },
+        {
+          "info": {
+            "name": "Cancel open strategy.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.backpack.exchange/api/v1/strategy",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Cancels an open strategy currently being run.\n\nOne of `strategyId` or `clientStrategyId` must be specified.\n\n**Instruction:** `strategyCancel`"
+        },
+        {
+          "info": {
+            "name": "Get open strategies.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/strategies",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "The market for the strategies (SPOT or PERP)."
+              },
+              {
+                "name": "strategyType",
+                "value": "",
+                "type": "query",
+                "description": "The strategy type."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The symbol of the market for the strategies."
+              }
+            ]
+          },
+          "docs": "Retrieves all open strategies. If a symbol is provided, only open\nstrategies for that market will be returned, otherwise all open\nstrategies are returned.\n\n**Instruction:** `strategyQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Cancel open strategies.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.backpack.exchange/api/v1/strategies",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Cancels all open strategies on the specified market.\n\n**Instruction:** `strategyCancelAll`"
+        },
+        {
+          "info": {
+            "name": "Get strategy history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/strategies",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "strategyId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given strategy."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Retrieves the strategy history for the user. This returns strategies\nthat are no longer active as they have either been\ncompleted, cancelled by the user or cancelled by the system.\n\n**Instruction:** `strategyHistoryQueryAll`"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "System",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get system status.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/status"
+          },
+          "docs": "Get system status."
+        },
+        {
+          "info": {
+            "name": "Ping.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/ping"
+          },
+          "docs": "Responds with `pong`."
+        },
+        {
+          "info": {
+            "name": "Get system time.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/time"
+          },
+          "docs": "Retrieves the current system time."
+        },
+        {
+          "info": {
+            "name": "Get wallets.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/wallets"
+          },
+          "docs": "Returns all configured blockchain wallets and their addresses."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Trades",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get recent trades.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/trades",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query fills for."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Limit the number of fills returned. Default `100`, maximum `1000`."
+              }
+            ]
+          },
+          "docs": "Retrieve the most recent trades for a symbol. This is public data and\nis not specific to any account.\n\nThe maximum available recent trades is `1000`. If you need more than\n`1000` trades use the historical trades endpoint."
+        },
+        {
+          "info": {
+            "name": "Get historical trades.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/trades/history",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Limit the number of trades returned. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              }
+            ]
+          },
+          "docs": "Retrieves all historical trades for the given symbol. This is public\ntrade data and is not specific to any account."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Vaults",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get vaults.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/vaults"
+          },
+          "docs": "Returns information about all available vaults on the exchange."
+        },
+        {
+          "info": {
+            "name": "Mint vault tokens",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/vault/mint",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Deposits an asset into a vault and receives vault tokens in return.\n\n**Instruction:** `vaultMint`"
+        },
+        {
+          "info": {
+            "name": "Request vault redeem",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/vault/redeem",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Submits a request to redeem vault tokens for USDC. The request will be\nqueued and attempted after the vault's redeem delay period.\n\n**Instruction:** `vaultRedeemRequest`"
+        },
+        {
+          "info": {
+            "name": "Cancel vault redeem request.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.backpack.exchange/api/v1/vault/redeem",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Cancels a pending redeem request for a vault.\n\n**Instruction:** `vaultRedeemCancel`"
+        },
+        {
+          "info": {
+            "name": "Get pending vault redeems.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/vault/redeems/pending",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "vaultId",
+                "value": "",
+                "type": "query",
+                "description": "The vault ID to get pending redeems for."
+              }
+            ]
+          },
+          "docs": "Returns pending redeem requests for a vault. Only accessible when\nauthenticated with a key registered to the vault's system account.\n\n**Instruction:** `vaultPendingRedeemsQuery`"
+        },
+        {
+          "info": {
+            "name": "Get vault NAV",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/vault/nav"
+          },
+          "docs": "Returns live NAV data for a vault, including spot NAV, TWAP NAV,\nmint NAV, and redeem NAV. Only accessible by the vault's own account.\n\n**Instruction:** `vaultNavQuery`"
+        },
+        {
+          "info": {
+            "name": "Get vault history",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/vaults/history",
+            "params": [
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query",
+                "description": "Time interval for historical data."
+              },
+              {
+                "name": "vaultId",
+                "value": "",
+                "type": "query",
+                "description": "Optional vault ID to filter by."
+              }
+            ]
+          },
+          "docs": "Returns historical vault data - NAV, vault equity,\nand tokens in circulation at regular intervals."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Withdrawal Delays",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get withdrawal delay.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/capital/withdrawals/delay"
+          },
+          "docs": "Retrieves the configured hourly delay for withdrawals to non-whitelisted\naddresses. This security feature adds a time delay before withdrawals are\nprocessed, allowing time to cancel unauthorized withdrawals."
+        },
+        {
+          "info": {
+            "name": "Create withdrawal delay.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/wapi/v1/capital/withdrawals/delay",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables a configurable hourly delay for withdrawals to non-whitelisted\naddresses. This security feature helps protect the account by adding a\ntime buffer before withdrawals are processed. Requires 2FA verification."
+        },
+        {
+          "info": {
+            "name": "Update withdrawal delay.",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.backpack.exchange/wapi/v1/capital/withdrawals/delay",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the hourly delay for withdrawals to non-whitelisted addresses.\nChanges will take effect after the current delay period ends. Requires\n2FA verification."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
