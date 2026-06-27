@@ -42,11 +42,11 @@ apis:
       - url: json-ld/backpack-context.jsonld
         type: JSONLD
       - url: examples/backpack-order-execute-example.json
-        type: Example
+        type: Examples
       - url: examples/backpack-markets-list-example.json
-        type: Example
+        type: Examples
       - url: examples/backpack-depth-example.json
-        type: Example
+        type: Examples
     description: >-
       The Backpack Exchange API is the canonical programmatic surface for the Backpack Exchange centralized crypto venue
       — spot, perpetual futures, dated futures, prediction markets, borrow/lend, RFQ, strategies, and vaults.
@@ -99,13 +99,13 @@ apis:
         type: GitHubRepository
       - url: https://chromewebstore.google.com/detail/backpack/aflkmfhebedbjioipglgcbcmnbpgliof
         name: Chrome / Brave Extension
-        type: Tool
+        type: Tools
       - url: https://apps.apple.com/us/app/backpack-wallet-exchange/id6445964121
         name: iOS App
-        type: Tool
+        type: Tools
       - url: https://play.google.com/store/search?q=backpack+wallet+and+exchange&c=apps&hl=en_US
         name: Android App
-        type: Tool
+        type: Tools
     description: >-
       Backpack Wallet is a self-custodial multichain wallet for Solana, Ethereum, and Bitcoin, originally built around
       the xNFT (executable NFT) protocol that lets dApps run as plugins inside the wallet. Available as a Chrome/Brave
@@ -132,42 +132,39 @@ access: 3rd-Party
 common:
   - type: PostmanWorkspace
     url: https://www.postman.com/kinlaneapi/backpack/overview
-  - type: ArazzoWorkflows
-    url: arazzo/
-    workflows:
-      - url: arazzo/backpack-balance-checked-market-buy-workflow.yml
-        name: Backpack Balance-Checked Market Buy
-        summary: Confirm available balance, read the ticker, then place a market buy and verify the fill.
-      - url: arazzo/backpack-balance-checked-withdrawal-workflow.yml
-        name: Backpack Balance-Checked Withdrawal
-        summary: Confirm available balance, request a withdrawal, then reconcile it against withdrawal history.
-      - url: arazzo/backpack-cancel-replace-order-workflow.yml
-        name: Backpack Cancel and Replace an Order
-        summary: Look up a resting order, cancel it, and place a replacement at a new price.
-      - url: arazzo/backpack-deposit-address-and-history-workflow.yml
-        name: Backpack Get Deposit Address and Reconcile History
-        summary: Fetch a blockchain deposit address, then read deposit history to reconcile incoming funds.
-      - url: arazzo/backpack-flatten-market-orders-workflow.yml
-        name: Backpack Flatten Open Orders on a Market
-        summary: List open orders on a market, cancel them all, and confirm none remain.
-      - url: arazzo/backpack-market-trade-analytics-workflow.yml
-        name: Backpack Market and Trade Analytics
-        summary: Discover markets, pull all tickers, and read recent trades for a chosen symbol.
-      - url: arazzo/backpack-place-limit-order-workflow.yml
-        name: Backpack Place a Limit Order
-        summary: Price a market from the ticker and order book, then place and confirm a limit order.
-      - url: arazzo/backpack-position-take-profit-workflow.yml
-        name: Backpack Add a Take-Profit to a Position
-        summary: Read an open futures position and the mark price, then place a reduce-only take-profit order.
+  - type: Arazzo
+    url: arazzo/backpack-balance-checked-market-buy-workflow.yml
+    name: Backpack Balance-Checked Market Buy
+  - type: Arazzo
+    url: arazzo/backpack-balance-checked-withdrawal-workflow.yml
+    name: Backpack Balance-Checked Withdrawal
+  - type: Arazzo
+    url: arazzo/backpack-cancel-replace-order-workflow.yml
+    name: Backpack Cancel and Replace an Order
+  - type: Arazzo
+    url: arazzo/backpack-deposit-address-and-history-workflow.yml
+    name: Backpack Get Deposit Address and Reconcile History
+  - type: Arazzo
+    url: arazzo/backpack-flatten-market-orders-workflow.yml
+    name: Backpack Flatten Open Orders on a Market
+  - type: Arazzo
+    url: arazzo/backpack-market-trade-analytics-workflow.yml
+    name: Backpack Market and Trade Analytics
+  - type: Arazzo
+    url: arazzo/backpack-place-limit-order-workflow.yml
+    name: Backpack Place a Limit Order
+  - type: Arazzo
+    url: arazzo/backpack-position-take-profit-workflow.yml
+    name: Backpack Add a Take-Profit to a Position
   - type: Portal
     url: https://backpack.app/
   - type: Portal
     url: https://backpack.exchange/
   - type: Documentation
     url: https://docs.backpack.exchange/
-  - type: SignUp
+  - type: Signup
     url: https://backpack.exchange/join
-  - type: SignUp
+  - type: Signup
     url: https://backpack.exchange/refer
   - type: GitHubOrganization
     url: https://github.com/coral-xyz
@@ -192,7 +189,7 @@ common:
     url: https://backpack.exchange/blog
   - type: Twitter
     url: https://twitter.com/Backpack
-  - type: Forum
+  - type: Forums
     url: https://discord.gg/backpack
     name: Discord
   - type: LinkedIn
@@ -221,7 +218,7 @@ common:
   - type: ChangeLog
     url: https://docs.backpack.exchange/#section/Changelog
   - url: https://backpack.exchange/refer/api
-    type: SignUp
+    type: Signup
     name: API Key Management
   - type: Features
     data:
