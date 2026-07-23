@@ -1,0 +1,2711 @@
+openapi: 3.0.0
+info:
+  title: Backpack Exchange Account Borrow Lend API
+  description: "\n# Introduction\n\nWelcome to the Backpack Exchange API. This API is for programmatic trade execution. All of the endpoints require requests to be signed with an ED25519 keypair for authentication.\n\nThe API is hosted at `https://api.backpack.exchange/` and the WS API is hosted at `wss://ws.backpack.exchange/`.\n\n# Authentication\n\n\n## Signing requests\n\nSigned requests are required for any API calls that mutate state. Additionally, some read only requests can be performed by signing or via session authentication.\n\nSigned requests require the following additional headers:\n\n- `X-Timestamp` - Unix time in milliseconds that the request was sent.\n- `X-Window` - Time window in milliseconds that the request is valid for, default is `5000` and maximum is `60000`.\n- `X-API-Key` - Base64 encoded verifying key of the ED25519 keypair.\n- `X-Signature` - Base64 encoded signature generated according to the instructions below.\n\n### Generate ED25519 Keys\n\nYou can generate a private/public ED25519 keypair using this Python one-liner:\n\n```python\npython3 -c \"from cryptography.hazmat.primitives.asymmetric import ed25519; import base64; key = ed25519.Ed25519PrivateKey.generate(); seed = key.private_bytes_raw(); pub = key.public_key().public_bytes_raw(); print(f'Seed: {base64.b64encode(seed).decode()}\\nPublic Key: {base64.b64encode(pub).decode()}')\"\n```\n\nThis will output your base64-encoded private key (seed) and public key that can be used for API authentication.\n\n### Signature Generation\n\nTo generate a signature perform the following:\n\n1) The key/values of the request body or query parameters should be ordered alphabetically and then turned into query string format.\n\n2) Append the header values for the timestamp and receive window to the above generated string in the format `&timestamp=<timestamp>&window=<window>`. If no `X-Window` header is passed the default value of `5000` still needs to be added to the signing string.\n\nEach request also has an instruction type, valid instructions are:\n\n```\naccountQuery\nbalanceQuery\nborrowLendExecute\nborrowHistoryQueryAll\ncollateralQuery\ndepositAddressQuery\ndepositQueryAll\nfillHistoryQueryAll\nfundingHistoryQueryAll\ninterestHistoryQueryAll\norderCancel\norderCancelAll\norderExecute\norderHistoryQueryAll\norderQuery\norderQueryAll\npnlHistoryQueryAll\npositionHistoryQueryAll\npositionQuery\nquoteSubmit\nstrategyCancel\nstrategyCancelAll\nstrategyCreate\nstrategyHistoryQueryAll\nstrategyQuery\nstrategyQueryAll\nwithdraw\nwithdrawalQueryAll\n```\n\nThe correct instruction type should be prefixed to the signing string. The instruction types for each request are documented alongside the request.\n\nFor example, an API request to cancel an order with the following body:\n\n```json\n{\n    \"orderId\": 28\n    \"symbol\": \"BTC_USDT\",\n}\n```\n\nWould require the following to be signed:\n\n```text\ninstruction=orderCancel&orderId=28&symbol=BTC_USDT&timestamp=1614550000000&window=5000\n```\n\nRegarding batch order execution (`POST /orders`), for each order in the batch, the order parameters should be ordered alphabetically and then turned into query string format. The orderExecute instruction should then be prefixed to that string.\nThe query strings for the orders should be concatenated with `&` and the timestamp and window appended at the end.\n\nFor example, an API request for an order execution batch with the following body:\n\n```json\n[\n    {\n        \"symbol\": \"SOL_USDC_PERP\",\n        \"side\": \"Bid\",\n        \"orderType\": \"Limit\",\n        \"price\": \"141\",\n        \"quantity\": \"12\"\n    },\n    {\n        \"symbol\": \"SOL_USDC_PERP\",\n        \"side\": \"Bid\",\n        \"orderType\": \"Limit\",\n        \"price\": \"140\",\n        \"quantity\": \"11\"\n    }\n]\n```\n\nWould require the following to be signed:\n\n```text\ninstruction=orderExecute&orderType=Limit&price=141&quantity=12&side=Bid&symbol=SOL_USDC_PERP&instruction=orderExecute&orderType=Limit&price=140&quantity=11&side=Bid&symbol=SOL_USDC_PERP&timestamp=1750793021519&window=5000\n```\n\nIf the API endpoint requires query parameters instead of a request body, the same procedure should be used on the query parameters. If the API endpoint does not have a request body or query parameters, only the timestamp and receive window need to be signed.\n\nThis message should be signed using the private key of the ED25519 keypair that corresponds to the public key in the `X-API-Key` header. The signature should then be base64 encoded and submitted in the `X-Signature` header.\n\n\n<br /><br />\n\n---\n\n\n# Infrastructure\n\nOrders are processed through a single linear command stream. All orders from all API instances feed into one stream, which is consumed by the matching engine sequentially.\n\n## Architecture\n\n```mermaid\nflowchart TB\n    subgraph Client[\"Client\"]\n        direction LR\n        REST[\"REST API Client\"]\n        WSC[\"WebSocket Client\"]\n    end\n\n    subgraph Edge[\"Edge\"]\n        direction LR\n        WAF[\"WAF\"]\n        CDN[\"CDN\"]\n    end\n\n    ALB[\"Load Balancer\"]\n    API[\"API<br/><i>N pods, Pre-validation</i>\"]\n    BUS[\"Message Bus\"]\n\n    subgraph Engine[\"Matching Engine\"]\n        direction LR\n        CLEARING[\"Clearing\"]\n        OB[\"Order Book\"]\n        SETTLE[\"Settlement\"]\n    end\n\n    WSLB[\"WebSocket LB\"]\n    APIWS[\"WebSocket API<br/><i>N pods</i>\"]\n\n    subgraph Persistence[\"Persistence\"]\n        direction LR\n        DB[\"Database\"]\n        SNAP[\"Snapshots\"]\n    end\n\n    REST <-->|\"Order / Execution Response\"| WAF\n    WAF <--> CDN\n    CDN <--> ALB\n    ALB <--> API\n    API <--> BUS\n    BUS <--> Engine\n\n    CLEARING --> OB\n    OB --> SETTLE\n\n    Engine --> WSLB\n    WSLB --> APIWS\n    APIWS -->|\"Order Updates / Depth / Trades\"| WSC\n\n    Engine -.-> Persistence\n\n    classDef hotpath fill:#ff6b6b,stroke:#c0392b,color:#fff\n    classDef bus fill:#f39c12,stroke:#e67e22,color:#fff\n    classDef client fill:#3498db,stroke:#2980b9,color:#fff\n    classDef persist fill:#95a5a6,stroke:#7f8c8d,color:#fff\n    classDef edge fill:#1abc9c,stroke:#16a085,color:#fff\n\n    class REST,WSC client\n    class WAF,CDN,ALB,WSLB edge\n    class API,APIWS,CLEARING,OB,SETTLE hotpath\n    class BUS bus\n    class DB,SNAP persist\n```\n\n## Order Lifecycle\n\n```mermaid\n%%{init: {'theme': 'neutral', 'themeVariables': {'fontSize': '12px'}}}%%\nsequenceDiagram\n    participant Client as Client\n    participant API as API\n    participant Engine as Matching Engine\n    participant WS as WebSocket API\n    Client->>+API: POST /api/v1/order (signed)\n    API->>+Engine: Order command\n    Note over Engine: Clear → Match → Settle\n    Engine-->>-API: Execution response\n    API->>-Client: HTTP 200 — Order result\n    Engine->>WS: Engine events\n    WS->>Client: Order updates / Depth / Trades\n```\n\n\n\n<br /><br />\n\n---\n\n# Changelog\n\n## 2025-11-12\n\n- Backstop liquidation fills now include a non-zero `tradeId` field on an on-going basis. Previously such fills had a\n  zero `tradeId`. This applies to the `/fills` endpoint as well as the trade stream.\n\n## 2025-11-10\n\n- Add a specific error message for withdrawal attempts to non-2FA exempt withdrawal addresses.\n- Set a default limit of `1000` levels each side of the book for `/depth` endpoint.\n\n## 2025-10-23\n\n- Add `j` and `k` fields to the order update stream (take profit limit price and stop loss limit price).\n\n## 2025-09-02\n\n- The `/depth` endpoint now returns a limit of 5,000 price levels on each side of the book.\n\n## 2025-09-01\n\n- The `cumulativeInterest` response field is being removed from the `/position`endpoint.\n- Estimated liquidation price or `l` is being removed from the position update stream. It will remain as a placeholder\n  and be set to 0. It will be removed in the future, so client's should not rely on its presence.\n- Liquidation price can be queried for a single position using the Positions API `/position` for example\n  `/position?symbol=BTC_USDC_PERP`.\n\n## 2025-08-07\n\n- `/history/pnl` has been removed.\n\n## 2025-06-08\n\n- The order id format is changing, it is no longer a byte shifted timestamp. It is no longer possible to derive the\n  order timestamp from the order id. This change will take place at Monday June 9th, 01:00 UTC.\n\n## 2025-04-22\n\n- The `/fills` endpoint now returns all fills for the account, including fills from system orders as well as client\n  orders. System orders include liquidations, ADLs and collateral conversions. Previously, by default, it only returned\n  fills from client orders. This behavior can be achieved by setting the `fillType` parameter to `User`.\n\n## 2025-04-08\n\n- Added funding rate lower and upper bounds to `/markets` and `/market` endpoints.\n\n## 2025-03-26\n\n- Add open interest stream `openInterest.<symbol>`.\n- Added the option to query `/history/borrowLend/positions` with a signed request using the instruction\n  `borrowPositionHistoryQueryAll`.\n\n## 2025-03-19\n\n- The leverage filter has been removed from `/markets` and `/market` endpoints.\n- Added `/openInterest` now takes `symbol` as an optional parameter. When not set, all markets are returned.\n- `/openInterests` has been deprecated.\n- Add stop loss and take profit fields to `/orders/execute`.\n- Add `I` field to the order update stream (related order id).\n- Add `a` and `b` fields to the order update stream (take profit trigger price and stop loss trigger price).\n\n## 2025-02-28\n\n- Added `clientId` to fill history.\n\n## 2025-02-11\n\n- An `O` field has been added to the order update stream. It denotes the origin of the update. The possible values are:\n    - `USER`: The origin of the update was due to order entry by the user.\n    - `LIQUIDATION_AUTOCLOSE`: The origin of the update was due to a liquidation by the liquidation engine.\n    - `ADL_AUTOCLOSE`: The origin of the update was due to an ADL (auto-deleveraging) event.\n    - `COLLATERAL_CONVERSION`: The origin of the update was due to a collateral conversion to settle debt on the\n      account.\n    - `SETTLEMENT_AUTOCLOSE`: The origin of the update was due to the settlement of a position on a dated market.\n    - `BACKSTOP_LIQUIDITY_PROVIDER`: The origin of the update was due to a backstop liquidity provider facilitating a\n      liquidation.\n\n## 2025-02-07\n\n- Added `r` to denote a reduce only order on the order updates stream.\n- Added `reduceOnly` to the get orders endpoint.\n\n## 2025-02-03\n\n- Added `openInterestLimit` to the markets endpoint. Applicable to futures markets only.\n- Added `orderModified` event to the order update stream. A resting reduce only order's quantity can be decreased in\n  order to prevent position side reversal.\n\n## 2025-01-09\n\n- Added `marketType` to the markets endpoint.\n- Added an optional `marketType` filter to the fills and the orders endpoints.\n\n## 2024-12-03\n\n- Add order expiry reason to order update stream.\n- Add `cumulativeInterest` to borrow lend position.\n\n## 2024-12-02\n\n- Add borrow lend history per position endpoint.\n\n## 2024-11-10\n\n- Add `timestamp` field denoting the system time in unix-epoch microseconds to the depth endpoint.\n\n## 2024-10-15\n\n- Convert all error responses to JSON and add a error code.\n\n## 2024-05-14\n\n- Add `executedQuantity` and `executedQuoteQuantity` to order history endpoint.\n\n## 2024-05-03\n\n- Add single market order update stream `account.orderUpdate.<symbol>`.\n\n## 2024-05-02\n\n- Add optional `from` and `to` timestamp to get withdrawals endpoint.\n\n## 2024-05-01\n\n- Add optional `from` and `to` timestamp to get deposits endpoint.\n\n## 2024-03-14\n\n- Add optional `orderId` filter to order history endpoint.\n- Add optional `from` and `to` timestamp to order fills endpoint.\n\n## 2024-02-28\n\n- Return the withdrawal in request withdrawal response.\n\n## 2024-02-24\n\n- An additional field `t` was added to the private order update stream. It is the `trade_id` of the fill that generated\n  the order update.\n- Added a maximum value for the `X-Window` header of `60000`.\n\n## 2024-01-16\n\n### Breaking\n\n- A new websocket API is available at `wss://ws.backpack.exchange`. Please see the documentation. The previous API\n  remains on the same endpoint and will be deprecated after a migration period. The new API changes the following:\n    - Subscription endpoint is now `wss://ws.backpack.exchange` instead of `wss://ws.backpack.exchange/stream`.\n    - Can subscribe and unsubscribe to/from multiple streams by passing more than one in the `params` field.\n    - Signature should now be sent in a separate `signature` field.\n    - Signature instruction changed from `accountQuery` to `subscribe`.\n    - Event and engine timestamps are now in `microseconds` instead of `milliseconds`.\n    - Add engine timestamp to `bookTicker`, `depth`, and `order` streams.\n    - Add quote asset volume to ticker stream.\n    - Add sequential trade id to trade stream.\n    - Rename the event type in the depth stream from `depthEvent` to `depth`.\n    - Change the format of streams from `<symbol>@<type>` to `<type>.<symbol>` or `kline.<interval>.<symbol>` for\n      K-lines.\n    - Flatten the K-Line in the K-line stream so its not nested.\n\n## 2024-01-11\n\n### Breaking\n\n- Replaced `identifier` field on deposits with `transaction_hash` and `provider_id`.\n  This aims to provide clearer representation of the field, particularly for fiat deposits.\n- Removed duplicate `pending` values from the `WithdrawalStatus` and `DepositStatus` spec enum.\n\n\n<br /><br />\n\n---\n    "
+  version: '1.0'
+  x-logo:
+    url: https://cdn.prod.website-files.com/66830ad123bea7f626bcf58f/68eccb03852237fd98ffad9b_Backpack-Icon-Color.svg
+    altText: Backpack Exchange
+  contact:
+    name: Backpack Exchange Support
+    url: https://support.backpack.exchange/
+  license:
+    name: Proprietary
+servers:
+- url: https://api.backpack.exchange
+tags:
+- name: Borrow Lend
+  description: Borrowing and lending.
+paths:
+  /api/v1/borrowLend/positions:
+    get:
+      tags:
+      - Borrow Lend
+      summary: Get borrow lend positions.
+      description: 'Retrieves all the open borrow lending positions for the account.
+
+
+        **Instruction:** `borrowLendPositionQuery`'
+      parameters:
+      - name: X-API-KEY
+        schema:
+          type: string
+        in: header
+        description: API key
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-SIGNATURE
+        schema:
+          type: string
+        in: header
+        description: Signature of the request
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-TIMESTAMP
+        schema:
+          type: integer
+          format: int64
+        in: header
+        description: Timestamp of the request in milliseconds
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-WINDOW
+        schema:
+          type: integer
+          format: uint64
+        in: header
+        description: Time the request is valid for in milliseconds (default `5000`, maximum `60000`)
+        required: false
+        deprecated: false
+        explode: true
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BorrowLendPositionWithMargin'
+        '400':
+          description: Bad request.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      operationId: get_borrow_lend_positions
+  /api/v1/borrowLend/position/liquidationPrice:
+    get:
+      tags:
+      - Borrow Lend
+      summary: Get estimated liquidation price.
+      description: 'Retrieves the estimated liquidation price for a potential borrow lend
+
+        position.'
+      parameters:
+      - name: subaccountId
+        schema:
+          type: integer
+          format: uint16
+        in: query
+        description: Optional subaccount.
+        required: false
+        deprecated: false
+        explode: true
+      - name: borrow
+        schema:
+          type: string
+        in: query
+        description: Standard base64 encoded json of [`BorrowLendExecutePayload`]
+        required: true
+        deprecated: false
+        explode: true
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/PositionEstimatedLiquidationPrice'
+        '400':
+          description: Bad request.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      operationId: get_borrow_lend_estimated_liquidation_price
+  /api/v1/borrowLend:
+    post:
+      tags:
+      - Borrow Lend
+      summary: Execute borrow lend.
+      description: '**Instruction:** `borrowLendExecute`'
+      parameters:
+      - name: X-API-KEY
+        schema:
+          type: string
+        in: header
+        description: API key
+        required: true
+        deprecated: false
+        explode: true
+      - name: X-SIGNATURE
+        schema:
+          type: string
+        in: header
+        description: Signature of the request
+        required: true
+        deprecated: false
+        explode: true
+      - name: X-TIMESTAMP
+        schema:
+          type: integer
+          format: int64
+        in: header
+        description: Timestamp of the request in milliseconds
+        required: true
+        deprecated: false
+        explode: true
+      - name: X-WINDOW
+        schema:
+          type: integer
+          format: uint64
+        in: header
+        description: Time the request is valid for in milliseconds (default `5000`, maximum `60000`)
+        required: false
+        deprecated: false
+        explode: true
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/BorrowLendExecutePayload'
+        required: true
+      responses:
+        '200':
+          description: Success.
+        '400':
+          description: Bad request.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '503':
+          description: System under maintenance.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      operationId: execute_borrow_lend
+  /wapi/v1/history/borrowLend:
+    get:
+      tags:
+      - Borrow Lend
+      summary: Get borrow history.
+      description: 'History of borrow and lend operations for the account.
+
+
+        **Instruction:** `borrowHistoryQueryAll`'
+      parameters:
+      - name: X-API-KEY
+        schema:
+          type: string
+        in: header
+        description: API key
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-SIGNATURE
+        schema:
+          type: string
+        in: header
+        description: Signature of the request
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-TIMESTAMP
+        schema:
+          type: integer
+          format: int64
+        in: header
+        description: Timestamp of the request in milliseconds
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-WINDOW
+        schema:
+          type: integer
+          format: uint64
+        in: header
+        description: Time the request is valid for in milliseconds (default `5000`, maximum `60000`)
+        required: false
+        deprecated: false
+        explode: true
+      - name: type
+        schema:
+          $ref: '#/components/schemas/BorrowLendEventType'
+        in: query
+        description: Filter to history for either borrows or lends.
+        required: false
+        deprecated: false
+        explode: true
+      - name: sources
+        schema:
+          type: string
+        in: query
+        description: 'Filter to return history for a particular source. Can be a single
+
+          source, or multiple sources separated by commas.'
+        required: false
+        deprecated: false
+        explode: true
+      - name: positionId
+        schema:
+          type: string
+        in: query
+        description: Filter to return history for a borrow lend position.
+        required: false
+        deprecated: false
+        explode: true
+      - name: symbol
+        schema:
+          type: string
+        in: query
+        description: Filter to the given symbol.
+        required: false
+        deprecated: false
+        explode: true
+      - name: limit
+        schema:
+          type: integer
+          format: uint64
+        in: query
+        description: Maximum number to return. Default `100`, maximum `1000`.
+        required: false
+        deprecated: false
+        explode: true
+      - name: offset
+        schema:
+          type: integer
+          format: uint64
+        in: query
+        description: Offset for pagination. Default `0`.
+        required: false
+        deprecated: false
+        explode: true
+      - name: sortDirection
+        schema:
+          $ref: '#/components/schemas/SortDirection'
+        in: query
+        description: Sort direction.
+        required: false
+        deprecated: false
+        explode: true
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BorrowLendMovement'
+          headers:
+            ACCESS-CONTROL-EXPOSE-HEADERS:
+              required: true
+              deprecated: false
+              schema:
+                type: string
+            X-PAGE-COUNT:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            X-CURRENT-PAGE:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            X-PAGE-SIZE:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            X-TOTAL:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            CACHE-CONTROL:
+              required: true
+              deprecated: false
+              schema:
+                type: string
+        '400':
+          description: Bad request.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      operationId: get_borrow_lend_history
+  /wapi/v1/history/interest:
+    get:
+      tags:
+      - Borrow Lend
+      summary: Get interest history.
+      description: 'History of the interest payments for borrows and lends for the account.
+
+
+        **Instruction:** `interestHistoryQueryAll`'
+      parameters:
+      - name: X-API-KEY
+        schema:
+          type: string
+        in: header
+        description: API key
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-SIGNATURE
+        schema:
+          type: string
+        in: header
+        description: Signature of the request
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-TIMESTAMP
+        schema:
+          type: integer
+          format: int64
+        in: header
+        description: Timestamp of the request in milliseconds
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-WINDOW
+        schema:
+          type: integer
+          format: uint64
+        in: header
+        description: Time the request is valid for in milliseconds (default `5000`, maximum `60000`)
+        required: false
+        deprecated: false
+        explode: true
+      - name: asset
+        schema:
+          type: string
+        in: query
+        description: Asset to query. If not set, all assets are returned.
+        required: false
+        deprecated: false
+        explode: true
+      - name: symbol
+        schema:
+          type: string
+        in: query
+        description: 'Market symbol to query. If not set, all markets are returned. If a
+
+          futures symbol is supplied, then interest payments on unrealized pnl
+
+          will be returned. Spot market symbols refer to interest payments on
+
+          regular borrow lend positions.'
+        required: false
+        deprecated: false
+        explode: true
+      - name: positionId
+        schema:
+          type: string
+        in: query
+        description: Filter to return history for a borrow lend position.
+        required: false
+        deprecated: false
+        explode: true
+      - name: limit
+        schema:
+          type: integer
+          format: uint64
+        in: query
+        description: Maximum number to return. Default `100`, maximum `1000`.
+        required: false
+        deprecated: false
+        explode: true
+      - name: offset
+        schema:
+          type: integer
+          format: uint64
+        in: query
+        description: Offset for pagination. Default `0`.
+        required: false
+        deprecated: false
+        explode: true
+      - name: source
+        schema:
+          $ref: '#/components/schemas/InterestPaymentSource'
+        in: query
+        description: 'Filter to return interest payments of a particular source. Borrow
+
+          interest payments through two mechanisms: borrow lend
+
+          positions; interest paid on unrealized pnl.'
+        required: false
+        deprecated: false
+        explode: true
+      - name: sortDirection
+        schema:
+          $ref: '#/components/schemas/SortDirection'
+        in: query
+        description: Sort direction.
+        required: false
+        deprecated: false
+        explode: true
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InterestPayment'
+          headers:
+            ACCESS-CONTROL-EXPOSE-HEADERS:
+              required: true
+              deprecated: false
+              schema:
+                type: string
+            X-PAGE-COUNT:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            X-CURRENT-PAGE:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            X-PAGE-SIZE:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            X-TOTAL:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            CACHE-CONTROL:
+              required: true
+              deprecated: false
+              schema:
+                type: string
+        '400':
+          description: Bad request.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      operationId: get_interest_history
+  /wapi/v1/history/borrowLend/positions:
+    get:
+      tags:
+      - Borrow Lend
+      summary: Get borrow position history.
+      description: 'History of borrow and lend positions for the account.
+
+
+        **Instruction:** `borrowPositionHistoryQueryAll`'
+      parameters:
+      - name: X-API-KEY
+        schema:
+          type: string
+        in: header
+        description: API key
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-SIGNATURE
+        schema:
+          type: string
+        in: header
+        description: Signature of the request
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-TIMESTAMP
+        schema:
+          type: integer
+          format: int64
+        in: header
+        description: Timestamp of the request in milliseconds
+        required: false
+        deprecated: false
+        explode: true
+      - name: X-WINDOW
+        schema:
+          type: integer
+          format: uint64
+        in: header
+        description: Time the request is valid for in milliseconds (default `5000`, maximum `60000`)
+        required: false
+        deprecated: false
+        explode: true
+      - name: symbol
+        schema:
+          type: string
+        in: query
+        description: Filter to the given symbol.
+        required: false
+        deprecated: false
+        explode: true
+      - name: side
+        schema:
+          $ref: '#/components/schemas/BorrowLendSide'
+        in: query
+        description: Return only borrows or only lends.
+        required: false
+        deprecated: false
+        explode: true
+      - name: state
+        schema:
+          $ref: '#/components/schemas/BorrowLendPositionState'
+        in: query
+        description: Return only open positions or closed positions.
+        required: false
+        deprecated: false
+        explode: true
+      - name: limit
+        schema:
+          type: integer
+          format: uint64
+        in: query
+        description: Maximum number to return. Default `100`, maximum `1000`.
+        required: false
+        deprecated: false
+        explode: true
+      - name: offset
+        schema:
+          type: integer
+          format: uint64
+        in: query
+        description: Offset for pagination. Default `0`.
+        required: false
+        deprecated: false
+        explode: true
+      - name: sortDirection
+        schema:
+          $ref: '#/components/schemas/SortDirection'
+        in: query
+        description: Sort direction.
+        required: false
+        deprecated: false
+        explode: true
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BorrowLendPositionRow'
+          headers:
+            ACCESS-CONTROL-EXPOSE-HEADERS:
+              required: true
+              deprecated: false
+              schema:
+                type: string
+            X-PAGE-COUNT:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            X-CURRENT-PAGE:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            X-PAGE-SIZE:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            X-TOTAL:
+              required: true
+              deprecated: false
+              schema:
+                type: integer
+                format: uint64
+            CACHE-CONTROL:
+              required: true
+              deprecated: false
+              schema:
+                type: string
+        '400':
+          description: Bad request.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      operationId: get_borrow_lend_position_history
+components:
+  schemas:
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
+    BorrowLendMovement:
+      type: object
+      title: BorrowLendMovement
+      required:
+      - eventType
+      - positionId
+      - quantity
+      - source
+      - symbol
+      - timestamp
+      properties:
+        eventType:
+          description: Type of event.
+          allOf:
+          - $ref: '#/components/schemas/BorrowLendEventType'
+          - description: Type of event.
+        positionId:
+          type: string
+          description: ID of the borrow lend position the event is associated with.
+        positionQuantity:
+          type: string
+          format: decimal
+          description: Running total quantity of borrow lend position.
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity of the borrow lend event.
+        source:
+          description: Source of the borrow lend event.
+          allOf:
+          - $ref: '#/components/schemas/BorrowLendSource'
+          - description: Source of the borrow lend event.
+        symbol:
+          type: string
+          description: Symbol of the asset the borrow lend is for.
+        timestamp:
+          type: string
+          format: naive-date-time
+          description: The timestamp of the borrow lend event (UTC).
+        spotMarginOrderId:
+          type: string
+          description: 'The order id associated with the borrow lend event created through spot
+
+            margin.'
+    BorrowLendPositionWithMargin:
+      type: object
+      title: BorrowLendPositionWithMargin
+      required:
+      - cumulativeInterest
+      - id
+      - imf
+      - imfFunction
+      - netQuantity
+      - markPrice
+      - mmf
+      - mmfFunction
+      - netExposureQuantity
+      - netExposureNotional
+      - symbol
+      - estLiquidationPrice
+      properties:
+        cumulativeInterest:
+          type: string
+          format: decimal
+          description: Cumulative interest payments quantity.
+        id:
+          type: string
+          description: Uniquely identifies the position.
+        imf:
+          type: string
+          format: decimal
+          description: Initial margin fraction for this position.
+        imfFunction:
+          description: IMF function.
+          allOf:
+          - $ref: '#/components/schemas/PositionImfFunction'
+          - description: IMF function.
+        netQuantity:
+          type: string
+          format: decimal
+          description: Net quantity of the position, positive if long, negative if short.
+        markPrice:
+          type: string
+          format: decimal
+          description: Mark price of the underlying asset.
+        mmf:
+          type: string
+          format: decimal
+          description: Maintenance margin fraction for this position.
+        mmfFunction:
+          description: MMF function.
+          allOf:
+          - $ref: '#/components/schemas/PositionImfFunction'
+          - description: MMF function.
+        netExposureQuantity:
+          type: string
+          format: decimal
+          description: 'Net exposure of the position, positive if long, negative if short. Lends
+
+            have no exposure.'
+        netExposureNotional:
+          type: string
+          format: decimal
+          description: Notional value of the position.
+        symbol:
+          description: Symbol of the underlying asset.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: Symbol of the underlying asset.
+        estLiquidationPrice:
+          type: string
+          format: decimal
+          description: Estimated liquidation price of the position.
+    CustodyAsset:
+      type: string
+      enum:
+      - BTC
+      - ETH
+      - SOL
+      - USDC
+      - USDT
+      - PYTH
+      - JTO
+      - BONK
+      - HNT
+      - MOBILE
+      - WIF
+      - JUP
+      - RENDER
+      - WEN
+      - W
+      - TNSR
+      - PRCL
+      - SHARK
+      - KMNO
+      - MEW
+      - BOME
+      - RAY
+      - HONEY
+      - SHFL
+      - BODEN
+      - IO
+      - DRIFT
+      - PEPE
+      - SHIB
+      - LINK
+      - UNI
+      - ONDO
+      - FTM
+      - MATIC
+      - STRK
+      - BLUR
+      - WLD
+      - GALA
+      - NYAN
+      - HLG
+      - MON
+      - ZKJ
+      - MANEKI
+      - HABIBI
+      - UNA
+      - ZRO
+      - ZEX
+      - AAVE
+      - LDO
+      - MOTHER
+      - CLOUD
+      - MAX
+      - POL
+      - TRUMPWIN
+      - HARRISWIN
+      - MOODENG
+      - DBR
+      - GOAT
+      - ACT
+      - DOGE
+      - BCH
+      - LTC
+      - APE
+      - ENA
+      - ME
+      - EIGEN
+      - CHILLGUY
+      - PENGU
+      - EUR
+      - SONIC
+      - J
+      - TRUMP
+      - MELANIA
+      - ANIME
+      - XRP
+      - SUI
+      - VINE
+      - ADA
+      - MOVE
+      - BERA
+      - IP
+      - HYPE
+      - BNB
+      - KAITO
+      - kPEPE
+      - kBONK
+      - kSHIB
+      - AVAX
+      - S
+      - POINTS
+      - ROAM
+      - AI16Z
+      - LAYER
+      - FARTCOIN
+      - NEAR
+      - PNUT
+      - ARB
+      - DOT
+      - APT
+      - OP
+      - PYUSD
+      - HUMA
+      - WAL
+      - DEEP
+      - CETUS
+      - SEND
+      - BLUE
+      - NS
+      - HAEDAL
+      - JPY
+      - TAO
+      - VIRTUAL
+      - TIA
+      - TRX
+      - FRAG
+      - PUMP
+      - WCT
+      - ES
+      - SEI
+      - CRV
+      - TON
+      - HBAR
+      - XLM
+      - ZORA
+      - WLFI
+      - BPEUR
+      - SWTCH
+      - LINEA
+      - XPL
+      - BARD
+      - FLOCK
+      - AVNT
+      - PENDLE
+      - AERO
+      - ASTER
+      - GLXY
+      - 0G
+      - 2Z
+      - FWDI
+      - ZEUS
+      - APEX
+      - EDEN
+      - FF
+      - ORDER
+      - MNT
+      - ZEC
+      - PAXG
+      - MORPHO
+      - ATH
+      - KGEN
+      - XAUT
+      - FOGO
+      - SPX
+      - ETHFI
+      - APR
+      - PIPE
+      - MET
+      - MONP
+      - STABLE
+      - GUSDT
+      - BTCD121025
+      - BTCD121125
+      - BTCD121225
+      - SOLWP011526A160
+      - SOLD121125
+      - SOLD121225
+      - BTCW12122590000
+      - BTCW12122591000
+      - BTCW12122592000
+      - BTCW12122593000
+      - BTCW12122594000
+      - BTCW12122595000
+      - BTCW121225100000
+      - SOLW121225140000
+      - SOLW121225145000
+      - SOLW121225150000
+      - SOLW121225155000
+      - SOLW121225160000
+      - SOLW121225165000
+      - SOLW121225170000
+      - BTCM1225130000
+      - BTCM1225140000
+      - BTCM1225150000
+      - BTCM1225160000
+      - BTCM1225170000
+      - BTCM1225200000
+      - BTCM1225500000
+      - BTCM12251000000
+      - SOLDUD011226
+      - BTCDUD011326
+      - SOLDUD011326
+      - BTCDUD011426
+      - SOLDUD011426
+      - BTCDUD011526
+      - SOLDUD011526
+      - SOLWP011526U120
+      - SOLWP011526T120
+      - SOLWP011526T130
+      - SOLWP011526T140
+      - SOLWP011526T150
+      - DEMS28NEWSOM
+      - DEMS28AOC
+      - DEMS28BUTTIGIEG
+      - DEMS28SHAPIRO
+      - DEMS28KELLY
+      - DEMS28OSSOFF
+      - DEMS28KAMALA
+      - DEMS28MOORE
+      - DEMS28PRITZKER
+      - DEMS28BESHEAR
+      - DEMS28WHITMER
+      - DEMS28THEROCK
+      - DEMS28EMANUEL
+      - DEMS28MAMDANI
+      - LIT
+      - FOMC0126H0
+      - FOMC0126C25
+      - FOMC0126C50P
+      - FOMC0126H25P
+      - BTCWP011526U84
+      - BTCWP011526T84
+      - BTCWP011526T89
+      - BTCWP011526T94
+      - BTCWP011526T99
+      - BTCWP011526A104
+      - BTCDUD011026
+      - SOLDUD011026
+      - BTCDUD011126
+      - SOLDUD011126
+      - BTCDUD011226
+      - WHITEWHALE
+      - INX
+      - SKR
+      - XMR
+      - BTCWP011626T1
+      - BTCWP011626T2
+      - BTCWP011626T3
+      - BTCWP011626T4
+      - BTCWP011626T5
+      - BTCWP011626T6
+      - BTCWP011626T7
+      - BTCWP011626T8
+      - BTCWP011726T1
+      - BTCWP011726T2
+      - BTCWP011726T3
+      - BTCWP011726T4
+      - BTCWP011726T5
+      - BTCWP011726T6
+      - BTCWP011726T7
+      - BTCWP011726T8
+      - BTCWP011826T1
+      - BTCWP011826T2
+      - BTCWP011826T3
+      - BTCWP011826T4
+      - BTCWP011826T5
+      - BTCWP011826T6
+      - BTCWP011826T7
+      - BTCWP011826T8
+      - BTCWP011926T1
+      - BTCWP011926T2
+      - BTCWP011926T3
+      - BTCWP011926T4
+      - BTCWP011926T5
+      - BTCWP011926T6
+      - BTCWP011926T7
+      - BTCWP011926T8
+      - BTCWP012026T1
+      - BTCWP012026T2
+      - BTCWP012026T3
+      - BTCWP012026T4
+      - BTCWP012026T5
+      - BTCWP012026T6
+      - BTCWP012026T7
+      - BTCWP012026T8
+      - BTCWP012126T1
+      - BTCWP012126T2
+      - BTCWP012126T3
+      - BTCWP012126T4
+      - BTCWP012126T5
+      - BTCWP012126T6
+      - BTCWP012126T7
+      - BTCWP012126T8
+      - BTCWP012226T1
+      - BTCWP012226T2
+      - BTCWP012226T3
+      - BTCWP012226T4
+      - BTCWP012226T5
+      - BTCWP012226T6
+      - BTCWP012226T7
+      - BTCWP012226T8
+      - BTCWP012326T1
+      - BTCWP012326T2
+      - BTCWP012326T3
+      - BTCWP012326T4
+      - BTCWP012326T5
+      - BTCWP012326T6
+      - BTCWP012326T7
+      - BTCWP012326T8
+      - BTCWMS011626T1
+      - BTCWMS011626T2
+      - BTCWMS011626T3
+      - BTCWMS011626T4
+      - BTCWMS011626T5
+      - BTCWMS011626T6
+      - BTCWMS011626T7
+      - BTCWMS011626T8
+      - BTCWMS011726T1
+      - BTCWMS011726T2
+      - BTCWMS011726T3
+      - BTCWMS011726T4
+      - BTCWMS011726T5
+      - BTCWMS011726T6
+      - BTCWMS011726T7
+      - BTCWMS011726T8
+      - BTCWMS011826T1
+      - BTCWMS011826T2
+      - BTCWMS011826T3
+      - BTCWMS011826T4
+      - BTCWMS011826T5
+      - BTCWMS011826T6
+      - BTCWMS011826T7
+      - BTCWMS011826T8
+      - BTCWMS011926T1
+      - BTCWMS011926T2
+      - BTCWMS011926T3
+      - BTCWMS011926T4
+      - BTCWMS011926T5
+      - BTCWMS011926T6
+      - BTCWMS011926T7
+      - BTCWMS011926T8
+      - BTCWMS012026T1
+      - BTCWMS012026T2
+      - BTCWMS012026T3
+      - BTCWMS012026T4
+      - BTCWMS012026T5
+      - BTCWMS012026T6
+      - BTCWMS012026T7
+      - BTCWMS012026T8
+      - BTCWMS012126T1
+      - BTCWMS012126T2
+      - BTCWMS012126T3
+      - BTCWMS012126T4
+      - BTCWMS012126T5
+      - BTCWMS012126T6
+      - BTCWMS012126T7
+      - BTCWMS012126T8
+      - BTCWMS012226T1
+      - BTCWMS012226T2
+      - BTCWMS012226T3
+      - BTCWMS012226T4
+      - BTCWMS012226T5
+      - BTCWMS012226T6
+      - BTCWMS012226T7
+      - BTCWMS012226T8
+      - BTCWMS012326T1
+      - BTCWMS012326T2
+      - BTCWMS012326T3
+      - BTCWMS012326T4
+      - BTCWMS012326T5
+      - BTCWMS012326T6
+      - BTCWMS012326T7
+      - BTCWMS012326T8
+      - SOLWP011626T1
+      - SOLWP011626T2
+      - SOLWP011626T3
+      - SOLWP011626T4
+      - SOLWP011626T5
+      - SOLWP011726T1
+      - SOLWP011726T2
+      - SOLWP011726T3
+      - SOLWP011726T4
+      - SOLWP011726T5
+      - SOLWP011826T1
+      - SOLWP011826T2
+      - SOLWP011826T3
+      - SOLWP011826T4
+      - SOLWP011826T5
+      - SOLWP011926T1
+      - SOLWP011926T2
+      - SOLWP011926T3
+      - SOLWP011926T4
+      - SOLWP011926T5
+      - SOLWP012026T1
+      - SOLWP012026T2
+      - SOLWP012026T3
+      - SOLWP012026T4
+      - SOLWP012026T5
+      - SOLWP012126T1
+      - SOLWP012126T2
+      - SOLWP012126T3
+      - SOLWP012126T4
+      - SOLWP012126T5
+      - SOLWP012226T1
+      - SOLWP012226T2
+      - SOLWP012226T3
+      - SOLWP012226T4
+      - SOLWP012226T5
+      - SOLWP012326T1
+      - SOLWP012326T2
+      - SOLWP012326T3
+      - SOLWP012326T4
+      - SOLWP012326T5
+      - SOLWMS011626T1
+      - SOLWMS011626T2
+      - SOLWMS011626T3
+      - SOLWMS011626T4
+      - SOLWMS011626T5
+      - SOLWMS011726T1
+      - SOLWMS011726T2
+      - SOLWMS011726T3
+      - SOLWMS011726T4
+      - SOLWMS011726T5
+      - SOLWMS011826T1
+      - SOLWMS011826T2
+      - SOLWMS011826T3
+      - SOLWMS011826T4
+      - SOLWMS011826T5
+      - SOLWMS011926T1
+      - SOLWMS011926T2
+      - SOLWMS011926T3
+      - SOLWMS011926T4
+      - SOLWMS011926T5
+      - SOLWMS012026T1
+      - SOLWMS012026T2
+      - SOLWMS012026T3
+      - SOLWMS012026T4
+      - SOLWMS012026T5
+      - SOLWMS012126T1
+      - SOLWMS012126T2
+      - SOLWMS012126T3
+      - SOLWMS012126T4
+      - SOLWMS012126T5
+      - SOLWMS012226T1
+      - SOLWMS012226T2
+      - SOLWMS012226T3
+      - SOLWMS012226T4
+      - SOLWMS012226T5
+      - SOLWMS012326T1
+      - SOLWMS012326T2
+      - SOLWMS012326T3
+      - SOLWMS012326T4
+      - SOLWMS012326T5
+      - ETHWP011626T1
+      - ETHWP011626T2
+      - ETHWP011626T3
+      - ETHWP011626T4
+      - ETHWP011626T5
+      - ETHWP011626T6
+      - ETHWP011626T7
+      - ETHWP011626T8
+      - ETHWP011726T1
+      - ETHWP011726T2
+      - ETHWP011726T3
+      - ETHWP011726T4
+      - ETHWP011726T5
+      - ETHWP011726T6
+      - ETHWP011726T7
+      - ETHWP011726T8
+      - ETHWP011826T1
+      - ETHWP011826T2
+      - ETHWP011826T3
+      - ETHWP011826T4
+      - ETHWP011826T5
+      - ETHWP011826T6
+      - ETHWP011826T7
+      - ETHWP011826T8
+      - ETHWP011926T1
+      - ETHWP011926T2
+      - ETHWP011926T3
+      - ETHWP011926T4
+      - ETHWP011926T5
+      - ETHWP011926T6
+      - ETHWP011926T7
+      - ETHWP011926T8
+      - ETHWP012026T1
+      - ETHWP012026T2
+      - ETHWP012026T3
+      - ETHWP012026T4
+      - ETHWP012026T5
+      - ETHWP012026T6
+      - ETHWP012026T7
+      - ETHWP012026T8
+      - ETHWP012126T1
+      - ETHWP012126T2
+      - ETHWP012126T3
+      - ETHWP012126T4
+      - ETHWP012126T5
+      - ETHWP012126T6
+      - ETHWP012126T7
+      - ETHWP012126T8
+      - ETHWP012226T1
+      - ETHWP012226T2
+      - ETHWP012226T3
+      - ETHWP012226T4
+      - ETHWP012226T5
+      - ETHWP012226T6
+      - ETHWP012226T7
+      - ETHWP012226T8
+      - ETHWP012326T1
+      - ETHWP012326T2
+      - ETHWP012326T3
+      - ETHWP012326T4
+      - ETHWP012326T5
+      - ETHWP012326T6
+      - ETHWP012326T7
+      - ETHWP012326T8
+      - ETHWMS011626T1
+      - ETHWMS011626T2
+      - ETHWMS011626T3
+      - ETHWMS011626T4
+      - ETHWMS011626T5
+      - ETHWMS011626T6
+      - ETHWMS011626T7
+      - ETHWMS011626T8
+      - ETHWMS011726T1
+      - ETHWMS011726T2
+      - ETHWMS011726T3
+      - ETHWMS011726T4
+      - ETHWMS011726T5
+      - ETHWMS011726T6
+      - ETHWMS011726T7
+      - ETHWMS011726T8
+      - ETHWMS011826T1
+      - ETHWMS011826T2
+      - ETHWMS011826T3
+      - ETHWMS011826T4
+      - ETHWMS011826T5
+      - ETHWMS011826T6
+      - ETHWMS011826T7
+      - ETHWMS011826T8
+      - ETHWMS011926T1
+      - ETHWMS011926T2
+      - ETHWMS011926T3
+      - ETHWMS011926T4
+      - ETHWMS011926T5
+      - ETHWMS011926T6
+      - ETHWMS011926T7
+      - ETHWMS011926T8
+      - ETHWMS012026T1
+      - ETHWMS012026T2
+      - ETHWMS012026T3
+      - ETHWMS012026T4
+      - ETHWMS012026T5
+      - ETHWMS012026T6
+      - ETHWMS012026T7
+      - ETHWMS012026T8
+      - ETHWMS012126T1
+      - ETHWMS012126T2
+      - ETHWMS012126T3
+      - ETHWMS012126T4
+      - ETHWMS012126T5
+      - ETHWMS012126T6
+      - ETHWMS012126T7
+      - ETHWMS012126T8
+      - ETHWMS012226T1
+      - ETHWMS012226T2
+      - ETHWMS012226T3
+      - ETHWMS012226T4
+      - ETHWMS012226T5
+      - ETHWMS012226T6
+      - ETHWMS012226T7
+      - ETHWMS012226T8
+      - ETHWMS012326T1
+      - ETHWMS012326T2
+      - ETHWMS012326T3
+      - ETHWMS012326T4
+      - ETHWMS012326T5
+      - ETHWMS012326T6
+      - ETHWMS012326T7
+      - ETHWMS012326T8
+      - BTCDUD011626
+      - BTCDUD011726
+      - BTCDUD011826
+      - BTCDUD011926
+      - BTCDUD012026
+      - BTCDUD012126
+      - BTCDUD012226
+      - BTCDUD012326
+      - SOLDUD011626
+      - SOLDUD011726
+      - SOLDUD011826
+      - SOLDUD011926
+      - SOLDUD012026
+      - SOLDUD012126
+      - SOLDUD012226
+      - SOLDUD012326
+      - ETHDUD011626
+      - ETHDUD011726
+      - ETHDUD011826
+      - ETHDUD011926
+      - ETHDUD012026
+      - ETHDUD012126
+      - ETHDUD012226
+      - ETHDUD012326
+      - FDVEDGEX1B
+      - FDVEDGEX2B
+      - FDVEDGEX3B
+      - FDVEDGEX4B
+      - FDVEDGEX5B
+      - FDVEXTD300M
+      - FDVEXTD500M
+      - FDVEXTD800M
+      - FDVEXTD1B
+      - FDVEXTD2B
+      - FDVEXTD3B
+      - FDVPARA300M
+      - FDVPARA500M
+      - FDVPARA750M
+      - FDVPARA1N5B
+      - FDVPARA3B
+      - FDVPARA5B
+      - FDVINX200M
+      - FDVINX300M
+      - FDVINX400M
+      - FDVINX600M
+      - FDVINX800M
+      - FDVINX1B
+      - FDVVAR500M
+      - FDVVAR800M
+      - FDVVAR1B
+      - FDVVAR2B
+      - FDVVAR3B
+      - FDVVAR4B
+      - FDVVAR5B
+      - NBA26HA012026H
+      - NBA26HA012026A
+      - NBA26HA012026HN2
+      - NBA26HA012026AP2
+      - NBA26HA012026TTLO222
+      - NBA26HA012026TTLU222
+      - NBA26HA012026P1O30
+      - NBA26HA012026P1U30
+      - NHL26HA012026H
+      - NHL26HA012026A
+      - NHL26HA012026HN2
+      - NHL26HA012026AP2
+      - NHL26HA012026TTLO4
+      - NHL26HA012026TTLU4
+      - NHL26HA012026P1O2
+      - NHL26HA012026P1U2
+      - CC
+      - DASH
+      - AXS
+      - BTCWP012626T1
+      - BTCWP012626T2
+      - BTCWP012626T3
+      - BTCWP012626T4
+      - BTCWP012626T5
+      - BTCWP012626T6
+      - BTCWP012626T7
+      - BTCWP012626T8
+      - BTCWP012826T1
+      - BTCWP012826T2
+      - BTCWP012826T3
+      - BTCWP012826T4
+      - BTCWP012826T5
+      - BTCWP012826T6
+      - BTCWP012826T7
+      - BTCWP012826T8
+      - BTCWP013026T1
+      - BTCWP013026T2
+      - BTCWP013026T3
+      - BTCWP013026T4
+      - BTCWP013026T5
+      - BTCWP013026T6
+      - BTCWP013026T7
+      - BTCWP013026T8
+      - BTCWP020226T1
+      - BTCWP020226T2
+      - BTCWP020226T3
+      - BTCWP020226T4
+      - BTCWP020226T5
+      - BTCWP020226T6
+      - BTCWP020226T7
+      - BTCWP020226T8
+      - BTCWP020426T1
+      - BTCWP020426T2
+      - BTCWP020426T3
+      - BTCWP020426T4
+      - BTCWP020426T5
+      - BTCWP020426T6
+      - BTCWP020426T7
+      - BTCWP020426T8
+      - BTCWP020626T1
+      - BTCWP020626T2
+      - BTCWP020626T3
+      - BTCWP020626T4
+      - BTCWP020626T5
+      - BTCWP020626T6
+      - BTCWP020626T7
+      - BTCWP020626T8
+      - SOLWP012626T1
+      - SOLWP012626T2
+      - SOLWP012626T3
+      - SOLWP012626T4
+      - SOLWP012626T5
+      - SOLWP012626T6
+      - SOLWP012826T1
+      - SOLWP012826T2
+      - SOLWP012826T3
+      - SOLWP012826T4
+      - SOLWP012826T5
+      - SOLWP012826T6
+      - SOLWP013026T1
+      - SOLWP013026T2
+      - SOLWP013026T3
+      - SOLWP013026T4
+      - SOLWP013026T5
+      - SOLWP013026T6
+      - SOLWP020226T1
+      - SOLWP020226T2
+      - SOLWP020226T3
+      - SOLWP020226T4
+      - SOLWP020226T5
+      - SOLWP020226T6
+      - SOLWP020426T1
+      - SOLWP020426T2
+      - SOLWP020426T3
+      - SOLWP020426T4
+      - SOLWP020426T5
+      - SOLWP020426T6
+      - SOLWP020626T1
+      - SOLWP020626T2
+      - SOLWP020626T3
+      - SOLWP020626T4
+      - SOLWP020626T5
+      - SOLWP020626T6
+      - ETHWP012626T1
+      - ETHWP012626T2
+      - ETHWP012626T3
+      - ETHWP012626T4
+      - ETHWP012626T5
+      - ETHWP012626T6
+      - ETHWP012626T7
+      - ETHWP012626T8
+      - ETHWP012826T1
+      - ETHWP012826T2
+      - ETHWP012826T3
+      - ETHWP012826T4
+      - ETHWP012826T5
+      - ETHWP012826T6
+      - ETHWP012826T7
+      - ETHWP012826T8
+      - ETHWP013026T1
+      - ETHWP013026T2
+      - ETHWP013026T3
+      - ETHWP013026T4
+      - ETHWP013026T5
+      - ETHWP013026T6
+      - ETHWP013026T7
+      - ETHWP013026T8
+      - ETHWP020226T1
+      - ETHWP020226T2
+      - ETHWP020226T3
+      - ETHWP020226T4
+      - ETHWP020226T5
+      - ETHWP020226T6
+      - ETHWP020226T7
+      - ETHWP020226T8
+      - ETHWP020426T1
+      - ETHWP020426T2
+      - ETHWP020426T3
+      - ETHWP020426T4
+      - ETHWP020426T5
+      - ETHWP020426T6
+      - ETHWP020426T7
+      - ETHWP020426T8
+      - ETHWP020626T1
+      - ETHWP020626T2
+      - ETHWP020626T3
+      - ETHWP020626T4
+      - ETHWP020626T5
+      - ETHWP020626T6
+      - ETHWP020626T7
+      - ETHWP020626T8
+      - BTCDUD012426
+      - BTCDUD012526
+      - BTCDUD012626
+      - BTCDUD012726
+      - BTCDUD012826
+      - BTCDUD012926
+      - BTCDUD013026
+      - BTCDUD013126
+      - BTCDUD020126
+      - BTCDUD020226
+      - BTCDUD020326
+      - BTCDUD020426
+      - BTCDUD020526
+      - BTCDUD020626
+      - SOLDUD012426
+      - SOLDUD012526
+      - SOLDUD012626
+      - SOLDUD012726
+      - SOLDUD012826
+      - SOLDUD012926
+      - SOLDUD013026
+      - SOLDUD013126
+      - SOLDUD020126
+      - SOLDUD020226
+      - SOLDUD020326
+      - SOLDUD020426
+      - SOLDUD020526
+      - SOLDUD020626
+      - ETHDUD012426
+      - ETHDUD012526
+      - ETHDUD012626
+      - ETHDUD012726
+      - ETHDUD012826
+      - ETHDUD012926
+      - ETHDUD013026
+      - ETHDUD013126
+      - ETHDUD020126
+      - ETHDUD020226
+      - ETHDUD020326
+      - ETHDUD020426
+      - ETHDUD020526
+      - ETHDUD020626
+      - XRPUD012426
+      - XRPUD012526
+      - XRPUD012626
+      - XRPUD012726
+      - XRPUD012826
+      - XRPUD012926
+      - XRPUD013026
+      - XRPUD013126
+      - XRPUD020126
+      - XRPUD020226
+      - XRPUD020326
+      - XRPUD020426
+      - XRPUD020526
+      - XRPUD020626
+      - BNBUD012426
+      - BNBUD012526
+      - BNBUD012626
+      - BNBUD012726
+      - BNBUD012826
+      - BNBUD012926
+      - BNBUD013026
+      - BNBUD013126
+      - BNBUD020126
+      - BNBUD020226
+      - BNBUD020326
+      - BNBUD020426
+      - BNBUD020526
+      - BNBUD020626
+      - ZAMA
+      - MEGA
+      - RNBW
+      - BLT
+      - BP
+      - AZTEC
+      - RIVER
+      - GRASS
+      - VVV
+      - OPN
+      - AAPL.US
+      - MSFT.US
+      - NVDA.US
+      - AMZN.US
+      - GOOGL.US
+      - META.US
+      - TSLA.US
+      - AVGO.US
+      - LLY.US
+      - JPM.US
+      - EDGE
+      - GOOG.US
+      - WMT.US
+      - BRK.B.US
+      - SPY.US
+      - QQQ.US
+      - GLD.US
+      - COIN.US
+      - STRC.US
+      - A.US
+      - ABBV.US
+      - ABNB.US
+      - ABT.US
+      - ACGL.US
+      - ACN.US
+      - ADBE.US
+      - ADI.US
+      - ADM.US
+      - ADP.US
+      - ADSK.US
+      - AEE.US
+      - AEP.US
+      - AES.US
+      - AFL.US
+      - AIG.US
+      - AIZ.US
+      - AJG.US
+      - AKAM.US
+      - ALB.US
+      - ALGN.US
+      - ALL.US
+      - ALLE.US
+      - AMAT.US
+      - AMCR.US
+      - AMD.US
+      - AME.US
+      - AMGN.US
+      - AMP.US
+      - AMT.US
+      - ANET.US
+      - AON.US
+      - AOS.US
+      - APA.US
+      - APD.US
+      - APH.US
+      - APO.US
+      - APP.US
+      - APTV.US
+      - ARE.US
+      - ARES.US
+      - ATO.US
+      - AVB.US
+      - AVY.US
+      - AWK.US
+      - AXON.US
+      - AXP.US
+      - AZO.US
+      - BA.US
+      - BAC.US
+      - BALL.US
+      - BAX.US
+      - BBY.US
+      - BDX.US
+      - BEN.US
+      - BF.B.US
+      - BG.US
+      - BIIB.US
+      - BK.US
+      - BKNG.US
+      - BKR.US
+      - BLDR.US
+      - BLK.US
+      - BMY.US
+      - BR.US
+      - BRO.US
+      - BSX.US
+      - BX.US
+      - BXP.US
+      - C.US
+      - CAG.US
+      - CAH.US
+      - CARR.US
+      - CASY.US
+      - CAT.US
+      - CB.US
+      - CBOE.US
+      - CBRE.US
+      - CCI.US
+      - CCL.US
+      - CDNS.US
+      - CDW.US
+      - CEG.US
+      - CF.US
+      - CFG.US
+      - CHD.US
+      - CHRW.US
+      - CHTR.US
+      - CI.US
+      - CIEN.US
+      - CINF.US
+      - CL.US
+      - CLX.US
+      - CMCSA.US
+      - CME.US
+      - CMG.US
+      - CMI.US
+      - CMS.US
+      - CNC.US
+      - CNP.US
+      - COF.US
+      - COHR.US
+      - COO.US
+      - COP.US
+      - COR.US
+      - COST.US
+      - CPAY.US
+      - CPB.US
+      - CPRT.US
+      - CPT.US
+      - CRH.US
+      - CRL.US
+      - CRM.US
+      - CRWD.US
+      - CSCO.US
+      - CSGP.US
+      - CSX.US
+      - CTAS.US
+      - CTRA.US
+      - CTSH.US
+      - CTVA.US
+      - CVNA.US
+      - CVS.US
+      - CVX.US
+      - D.US
+      - DAL.US
+      - DASH.US
+      - DD.US
+      - DDOG.US
+      - DE.US
+      - DECK.US
+      - DELL.US
+      - DG.US
+      - DGX.US
+      - DHI.US
+      - DHR.US
+      - DIS.US
+      - DLR.US
+      - DLTR.US
+      - DOC.US
+      - DOV.US
+      - DOW.US
+      - DPZ.US
+      - DRI.US
+      - DTE.US
+      - DUK.US
+      - DVA.US
+      - DVN.US
+      - DXCM.US
+      - EA.US
+      - EBAY.US
+      - ECL.US
+      - ED.US
+      - EFX.US
+      - EG.US
+      - EIX.US
+      - EL.US
+      - ELV.US
+      - EME.US
+      - EMR.US
+      - EOG.US
+      - EPAM.US
+      - EQIX.US
+      - EQR.US
+      - EQT.US
+      - ERIE.US
+      - ES.US
+      - ESS.US
+      - ETN.US
+      - ETR.US
+      - EVRG.US
+      - EW.US
+      - EXC.US
+      - EXE.US
+      - EXPD.US
+      - EXPE.US
+      - EXR.US
+      - F.US
+      - FANG.US
+      - FAST.US
+      - FCX.US
+      - FDS.US
+      - FDX.US
+      - FE.US
+      - FFIV.US
+      - FICO.US
+      - FIS.US
+      - FISV.US
+      - FITB.US
+      - FIX.US
+      - FOX.US
+      - FOXA.US
+      - FRT.US
+      - FSLR.US
+      - FTNT.US
+      - FTV.US
+      - GD.US
+      - GDDY.US
+      - GE.US
+      - GEHC.US
+      - GEN.US
+      - GEV.US
+      - GILD.US
+      - GIS.US
+      - GL.US
+      - GLW.US
+      - GM.US
+      - GNRC.US
+      - GPC.US
+      - GPN.US
+      - GRMN.US
+      - GS.US
+      - GWW.US
+      - HAL.US
+      - HAS.US
+      - HBAN.US
+      - HCA.US
+      - HD.US
+      - HIG.US
+      - HII.US
+      - HLT.US
+      - HON.US
+      - HOOD.US
+      - HPE.US
+      - HPQ.US
+      - HRL.US
+      - HSIC.US
+      - HST.US
+      - HSY.US
+      - HUBB.US
+      - HUM.US
+      - HWM.US
+      - IBKR.US
+      - IBM.US
+      - ICE.US
+      - IDXX.US
+      - IEX.US
+      - IFF.US
+      - INCY.US
+      - INTC.US
+      - INTU.US
+      - INVH.US
+      - IP.US
+      - IQV.US
+      - IR.US
+      - IRM.US
+      - ISRG.US
+      - IT.US
+      - ITW.US
+      - IVZ.US
+      - J.US
+      - JBHT.US
+      - JBL.US
+      - JCI.US
+      - JKHY.US
+      - JNJ.US
+      - KDP.US
+      - KEY.US
+      - KEYS.US
+      - KHC.US
+      - KIM.US
+      - KKR.US
+      - KLAC.US
+      - KMB.US
+      - KMI.US
+      - KO.US
+      - KR.US
+      - KVUE.US
+      - L.US
+      - LDOS.US
+      - LEN.US
+      - LH.US
+      - LHX.US
+      - LII.US
+      - LIN.US
+      - LITE.US
+      - LMT.US
+      - LNT.US
+      - LOW.US
+      - LRCX.US
+      - LULU.US
+      - LUV.US
+      - LVS.US
+      - LYB.US
+      - LYV.US
+      - MA.US
+      - MAA.US
+      - MAR.US
+      - MAS.US
+      - MCD.US
+      - MCHP.US
+      - MCK.US
+      - MCO.US
+      - MDLZ.US
+      - MDT.US
+      - MET.US
+      - MGM.US
+      - MKC.US
+      - MLM.US
+      - MMM.US
+      - MNST.US
+      - MO.US
+      - MOS.US
+      - MPC.US
+      - MPWR.US
+      - MRK.US
+      - MRNA.US
+      - MRSH.US
+      - MS.US
+      - MSCI.US
+      - MSI.US
+      - MTB.US
+      - MTD.US
+      - MU.US
+      - NCLH.US
+      - NDAQ.US
+      - NDSN.US
+      - NEE.US
+      - NEM.US
+      - NFLX.US
+      - NI.US
+      - NKE.US
+      - NOC.US
+      - NOW.US
+      - NRG.US
+      - NSC.US
+      - NTAP.US
+      - NTRS.US
+      - NUE.US
+      - NVR.US
+      - NWS.US
+      - NWSA.US
+      - NXPI.US
+      - O.US
+      - ODFL.US
+      - OKE.US
+      - OMC.US
+      - ON.US
+      - ORCL.US
+      - ORLY.US
+      - OTIS.US
+      - OXY.US
+      - PANW.US
+      - PAYX.US
+      - PCAR.US
+      - PCG.US
+      - PEG.US
+      - PEP.US
+      - PFE.US
+      - PFG.US
+      - PG.US
+      - PGR.US
+      - PH.US
+      - PHM.US
+      - PKG.US
+      - PLD.US
+      - PLTR.US
+      - PM.US
+      - PNC.US
+      - PNR.US
+      - PNW.US
+      - PODD.US
+      - POOL.US
+      - PPG.US
+      - PPL.US
+      - PRU.US
+      - PSA.US
+      - PSKY.US
+      - PSX.US
+      - PTC.US
+      - PWR.US
+      - PYPL.US
+      - Q.US
+      - QCOM.US
+      - RCL.US
+      - REG.US
+      - REGN.US
+      - RF.US
+      - RJF.US
+      - RL.US
+      - RMD.US
+      - ROK.US
+      - ROL.US
+      - ROP.US
+      - ROST.US
+      - RSG.US
+      - RTX.US
+      - RVTY.US
+      - SATS.US
+      - SBAC.US
+      - SBUX.US
+      - SCHW.US
+      - SHW.US
+      - SJM.US
+      - SLB.US
+      - SMCI.US
+      - SNA.US
+      - SNDK.US
+      - SNPS.US
+      - SO.US
+      - SOLV.US
+      - SPG.US
+      - SPGI.US
+      - SRE.US
+      - STE.US
+      - STLD.US
+      - STT.US
+      - STX.US
+      - STZ.US
+      - SW.US
+      - SWK.US
+      - SWKS.US
+      - SYF.US
+      - SYK.US
+      - SYY.US
+      - T.US
+      - TAP.US
+      - TDG.US
+      - TDY.US
+      - TECH.US
+      - TEL.US
+      - TER.US
+      - TFC.US
+      - TGT.US
+      - TJX.US
+      - TKO.US
+      - TMO.US
+      - TMUS.US
+      - TPL.US
+      - TPR.US
+      - TRGP.US
+      - TRMB.US
+      - TROW.US
+      - TRV.US
+      - TSCO.US
+      - TSN.US
+      - TT.US
+      - TTD.US
+      - TTWO.US
+      - TXN.US
+      - TXT.US
+      - TYL.US
+      - UAL.US
+      - UBER.US
+      - UDR.US
+      - UHS.US
+      - ULTA.US
+      - UNH.US
+      - UNP.US
+      - UPS.US
+      - URI.US
+      - USB.US
+      - V.US
+      - VICI.US
+      - VLO.US
+      - VLTO.US
+      - VMC.US
+      - VRSK.US
+      - VRSN.US
+      - VRT.US
+      - VRTX.US
+      - VST.US
+      - VTR.US
+      - VTRS.US
+      - VZ.US
+      - WAB.US
+      - WAT.US
+      - WBD.US
+      - WDAY.US
+      - WDC.US
+      - WEC.US
+      - WELL.US
+      - WFC.US
+      - WM.US
+      - WMB.US
+      - WRB.US
+      - WSM.US
+      - WST.US
+      - WTW.US
+      - WY.US
+      - WYNN.US
+      - XEL.US
+      - XOM.US
+      - XYL.US
+      - XYZ.US
+      - YUM.US
+      - ZBH.US
+      - ZBRA.US
+      - ZTS.US
+      - EURC
+      - CHIP
+      - BILL
+      - VOO.US
+      - IVV.US
+      - VTI.US
+      - VEA.US
+      - VUG.US
+      - IEFA.US
+      - VTV.US
+      - IEMG.US
+      - BND.US
+      - VXUS.US
+      - SPYM.US
+      - AGG.US
+      - VGT.US
+      - IWF.US
+      - VWO.US
+      - IJH.US
+      - XLK.US
+      - VIG.US
+      - IJR.US
+      - VO.US
+      - SCHD.US
+      - ITOT.US
+      - RSP.US
+      - SGOV.US
+      - QQQM.US
+      - IWM.US
+      - BNDX.US
+      - VYM.US
+      - VB.US
+      - EFA.US
+      - IWD.US
+      - VT.US
+      - IVW.US
+      - IAU.US
+      - SCHX.US
+      - IBIT.US
+      - VCIT.US
+      - VEU.US
+      - SCHF.US
+      - SMH.US
+      - IXUS.US
+      - SCHG.US
+      - IWR.US
+      - XLF.US
+      - VV.US
+      - SPYG.US
+      - QUAL.US
+      - IVE.US
+      - IEF.US
+      - IWB.US
+      - BIL.US
+      - JEPI.US
+      - DFAC.US
+      - BSV.US
+      - MUB.US
+      - VTEB.US
+      - VONG.US
+      - TLT.US
+      - XLE.US
+      - DIA.US
+      - VCSH.US
+      - SCHB.US
+      - GOVT.US
+      - VGIT.US
+      - DGRO.US
+      - SPDW.US
+      - MBB.US
+      - JEPQ.US
+      - JPST.US
+      - XLV.US
+      - VNQ.US
+      - IUSB.US
+      - SLV.US
+      - VBR.US
+      - DYNF.US
+      - SPYV.US
+      - CGDV.US
+      - MGK.US
+      - TQQQ.US
+      - ACWI.US
+      - SOXX.US
+      - GLDM.US
+      - IUSG.US
+      - XLI.US
+      - EFV.US
+      - VGK.US
+      - LQD.US
+      - IDEV.US
+      - VGSH.US
+      - EEM.US
+      - VXF.US
+      - BIV.US
+      - JAAA.US
+      - USHY.US
+      - AVUV.US
+      - MDY.US
+      - GDX.US
+      - TZA.US
+      - BMNU.US
+      - BITO.US
+      - SOXS.US
+      - SOXL.US
+      - TSLL.US
+      - NVD.US
+      - SPDN.US
+      - SQQQ.US
+      - PLTD.US
+      - UVIX.US
+      - HYG.US
+      - TSLG.US
+      - SCO.US
+      - MSTU.US
+      - ETHA.US
+      - USO.US
+      - EWZ.US
+      - TSDD.US
+      - DRIP.US
+      - FXI.US
+      - IGV.US
+      - XLU.US
+      - KWEB.US
+      - RWM.US
+      - EWY.US
+      - QID.US
+      - BKLN.US
+      - CONL.US
+      - MSTZ.US
+      - AMDD.US
+      - KRE.US
+      - XLP.US
+      - GGLS.US
+      - SPXS.US
+      - BTCZ.US
+      - XLB.US
+      - NVDX.US
+      - PSLV.US
+      - SH.US
+      - AMDL.US
+      - BITX.US
+      - BOIL.US
+      - VXX.US
+      - ZSL.US
+      - AMZD.US
+      - TSLQ.US
+      - UNG.US
+      - PSQ.US
+      - TNA.US
+      - XLY.US
+      - ARKK.US
+      - EMB.US
+      - UCO.US
+      - SNXX.US
+      - PDBC.US
+      - EWJ.US
+      - QYLD.US
+      - NVDL.US
+      - XLRE.US
+      - XLC.US
+      - EWA.US
+      - EWU.US
+      - EWQ.US
+      - EWW.US
+      - EPI.US
+      - DRAM.US
+      - AIQ.US
+      - UFO.US
+      - MARS.US
+      - URA.US
+      - ARKX.US
+      - EWC.US
+      - EWT.US
+      - UVXY.US
+      - GEMI.US
+      - CRCL.US
+      - IREN.US
+      - NVTS.US
+      - ASML.US
+      - SHEL.US
+      - TSM.US
+      - ARM.US
+      - SNOW.US
+      - CRWV.US
+      - MSTR.US
+      - TCEHY.US
+      - BABA.US
+      - AZN.US
+      - TM.US
+      - NVO.US
+      - SAP.US
+      - SPOT.US
+      - PDD.US
+      - NTES.US
+      - JD.US
+      - BIDU.US
+      - SFTBY.US
+      - MUFG.US
+      - SONY.US
+      - KORU.US
+      - PGJ.US
+      - YINN.US
+      - CQQQ.US
+      - MCHI.US
+      - BNO.US
+      - URNM.US
+      - CPER.US
+      - TIP.US
+      - INDA.US
+      - COPX.US
+      - BAI.US
+      - SHLD.US
+      - PAVE.US
+      - BOTZ.US
+      - QTUM.US
+      - CIBR.US
+      - DTCR.US
+      - CBRS.US
+      - CBRG.US
+      - SCBR.US
+      - GPUX.US
+      - LYTE.US
+      - THYP.US
+      - BHYP.US
+      - SPCX.US
+      - BWGC.US
+      - RIKU.US
+      - HACK.US
+      - BUG.US
+      - ARKG.US
+      - EMXC.US
+      - ITA.US
+      - SRVR.US
+      - GRID.US
+      - EWH.US
+      - NLR.US
+      - FUTU.US
+    BorrowLendSource:
+      type: string
+      enum:
+      - AdlProvider
+      - AutoBorrowRepay
+      - AutoLend
+      - BackstopProvider
+      - DustConversion
+      - Interest
+      - Liquidation
+      - LiquidationAdl
+      - LiquidationBackstop
+      - Manual
+      - Reconciliation
+      - Rfq
+      - SpotMargin
+      - Withdrawal
+    PositionImfFunction_SqrtFunction:
+      allOf:
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum:
+            - sqrt
+            example: sqrt
+      - $ref: '#/components/schemas/SqrtFunction'
+    PositionEstimatedLiquidationPrice:
+      type: object
+      title: PositionEstimatedLiquidationPrice
+      required:
+      - liquidationPrice
+      - markPrice
+      properties:
+        liquidationPrice:
+          type: string
+          format: decimal
+        markPrice:
+          type: string
+          format: decimal
+    InterestPayment:
+      type: object
+      title: InterestPayment
+      required:
+      - paymentType
+      - interestRate
+      - interval
+      - marketSymbol
+      - positionId
+      - quantity
+      - symbol
+      - timestamp
+      properties:
+        paymentType:
+          description: Type of payment.
+          allOf:
+          - $ref: '#/components/schemas/PaymentType'
+          - description: Type of payment.
+        interestRate:
+          type: string
+          format: decimal
+          description: The rate of interest.
+        interval:
+          type: integer
+          format: uint64
+          description: The interval duration of the payment.
+        marketSymbol:
+          type: string
+          description: 'The market symbol for which the interest payment can be attributed. For
+
+            interest payments corresponding to borrow lend positions, this is
+
+            the spot market symbol. For interest payments corresponding to
+
+            unrealized pnl on futures markets, this will be the futures market
+
+            symbol.'
+        positionId:
+          type: string
+          description: ID of the borrow lend position the interest payment is for.
+        quantity:
+          type: string
+          format: decimal
+          description: Amount of the payment.
+        symbol:
+          description: The symbol of the market asset the payment is associated with.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: The symbol of the market asset the payment is associated with.
+        timestamp:
+          type: string
+          format: naive-date-time
+          description: The timestamp for the borrow lending interest payment (UTC).
+    BorrowLendPositionState:
+      type: string
+      enum:
+      - Open
+      - Closed
+    BorrowLendPositionRow:
+      type: object
+      title: BorrowLendPositionRow
+      required:
+      - positionId
+      - quantity
+      - symbol
+      - source
+      - cumulativeInterest
+      - avgInterestRate
+      - side
+      - createdAt
+      properties:
+        positionId:
+          type: string
+          description: ID of the borrow lend position the event is associated with.
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity of the borrow lend event.
+        symbol:
+          type: string
+          description: Symbol of the asset the borrow lend is for.
+        source:
+          description: Initial source of position.
+          allOf:
+          - $ref: '#/components/schemas/BorrowLendSource'
+          - description: Initial source of position.
+        cumulativeInterest:
+          type: string
+          format: decimal
+          description: Cumulative interest payments quantity.
+        avgInterestRate:
+          type: string
+          format: decimal
+          description: Average interest rate over the time this position was open.
+        side:
+          description: Borrow or lend.
+          allOf:
+          - $ref: '#/components/schemas/BorrowLendSide'
+          - description: Borrow or lend.
+        createdAt:
+          type: string
+          format: naive-date-time
+          description: The timestamp the borrow lend event was created at (UTC).
+    BorrowLendSide:
+      type: string
+      enum:
+      - Borrow
+      - Lend
+    BorrowLendEventType:
+      type: string
+      enum:
+      - Borrow
+      - BorrowRepay
+      - Lend
+      - LendRedeem
+    ApiErrorCode:
+      type: string
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
+    PositionImfFunction:
+      type: object
+      anyOf:
+      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
+      discriminator:
+        propertyName: type
+        mapping:
+          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
+    SqrtFunction:
+      type: object
+      title: SqrtFunction
+      required:
+      - base
+      - factor
+      properties:
+        base:
+          type: string
+          format: decimal
+        factor:
+          type: string
+          format: decimal
+    BorrowLendExecutePayload:
+      type: object
+      title: BorrowLendExecutePayload
+      required:
+      - quantity
+      - side
+      - symbol
+      properties:
+        quantity:
+          type: string
+          format: decimal
+          description: The quantity of the asset to repay.
+        side:
+          description: Side of the borrow lend.
+          allOf:
+          - $ref: '#/components/schemas/BorrowLendSide'
+          - description: Side of the borrow lend.
+        symbol:
+          description: The asset to repay.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: The asset to repay.
+    PaymentType:
+      type: string
+      enum:
+      - EntryFee
+      - Borrow
+      - Lend
+      - UnrealizedPositivePnl
+      - UnrealizedNegativePnl
+    InterestPaymentSource:
+      type: string
+      enum:
+      - UnrealizedPnl
+      - BorrowLend
+    SortDirection:
+      type: string
+      enum:
+      - Asc
+      - Desc
+x-tagGroups:
+- name: Public Endpoints
+  tags:
+  - Assets
+  - Borrow Lend Markets
+  - Markets
+  - System
+  - Trades
+- name: Authenticated Endpoints
+  tags:
+  - Account
+  - Borrow Lend
+  - Capital
+  - Order
+  - Position
+  - RFQ
+  - Strategy
+- name: Websocket
+  tags:
+  - Streams
