@@ -1,116 +1,625 @@
 aid: backpack
 url: https://raw.githubusercontent.com/api-evangelist/backpack/refs/heads/main/apis.yml
 apis:
-  - aid: backpack:backpack-exchange-api
-    name: Backpack Exchange API
-    tags:
-      - Crypto
-      - Exchange
-      - Trading
-      - Spot
-      - Perpetuals
-      - Order Book
-      - Market Data
-      - Solana
-      - Web3
-      - DeFi
-    humanURL: https://docs.backpack.exchange/
-    baseURL: https://api.backpack.exchange
-    properties:
-      - url: https://docs.backpack.exchange/
-        type: Documentation
-      - url: https://docs.backpack.exchange/#section/Authentication
-        type: Authentication
-      - url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
-        type: Authentication
-      - url: https://docs.backpack.exchange/#section/Infrastructure
-        type: Documentation
-      - url: https://docs.backpack.exchange/#section/Changelog
-        type: ChangeLog
-      - url: openapi/backpack-exchange-openapi.yml
-        type: OpenAPI
-      - url: json-schema/backpack-order-schema.json
-        type: JSONSchema
-      - url: json-schema/backpack-market-schema.json
-        type: JSONSchema
-      - url: json-schema/backpack-position-schema.json
-        type: JSONSchema
-      - url: json-schema/backpack-balance-schema.json
-        type: JSONSchema
-      - url: json-schema/backpack-trade-schema.json
-        type: JSONSchema
-      - url: json-ld/backpack-context.jsonld
-        type: JSONLD
-      - url: examples/backpack-order-execute-example.json
-        type: Examples
-      - url: examples/backpack-markets-list-example.json
-        type: Examples
-      - url: examples/backpack-depth-example.json
-        type: Examples
-    description: >-
-      The Backpack Exchange API is the canonical programmatic surface for the Backpack Exchange centralized crypto venue
-      — spot, perpetual futures, dated futures, prediction markets, borrow/lend, RFQ, strategies, and vaults.
-      Authentication is ED25519 keypair-based: every signed request carries X-API-Key, X-Signature, X-Timestamp, and
-      X-Window headers, with each operation bound to a named instruction (orderExecute, balanceQuery, borrowLendExecute,
-      etc.). Resource groups include Account, Account Limits, Capital, Order, Position, Borrow Lend, Markets, Trades,
-      Assets, RFQ, Strategy, Vaults, Withdrawal Delays, and System, plus public and authenticated WebSocket streams on
-      wss://ws.backpack.exchange/.
-  - aid: backpack:backpack-exchange-streams-api
-    name: Backpack Exchange WebSocket Streams API
-    tags:
-      - Crypto
-      - Exchange
-      - WebSocket
-      - Streaming
-      - Market Data
-      - Real-Time
-      - Order Updates
-      - Position Updates
-    humanURL: https://docs.backpack.exchange/#tag/Streams
-    baseURL: wss://ws.backpack.exchange
-    properties:
-      - url: https://docs.backpack.exchange/#tag/Streams
-        type: Documentation
-      - url: openapi/backpack-exchange-openapi.yml
-        type: OpenAPI
-      - url: asyncapi/backpack-asyncapi.yml
-        type: AsyncAPI
-    description: >-
-      Real-time market and account event streams over WebSocket. Public streams cover ticker, depth, trades, klines,
-      mark price, open interest, and liquidation events keyed by symbol. Private (signed) streams cover per-symbol order
-      updates (account.orderUpdate.<symbol>), position updates (account.position), and RFQ updates (account.rfqUpdate).
-      Signing uses the same ED25519 instruction model as the REST API (subscribe instruction).
-  - aid: backpack:backpack-wallet
-    name: Backpack Wallet
-    tags:
-      - Crypto
-      - Wallet
-      - Solana
-      - Ethereum
-      - Bitcoin
-      - Multi-Chain
-      - xNFT
-      - Self-Custody
-    humanURL: https://backpack.app/
-    properties:
-      - url: https://backpack.app/
-        type: Documentation
-      - url: https://github.com/coral-xyz/backpack
-        type: GitHubRepository
-      - url: https://chromewebstore.google.com/detail/backpack/aflkmfhebedbjioipglgcbcmnbpgliof
-        name: Chrome / Brave Extension
-        type: Tools
-      - url: https://apps.apple.com/us/app/backpack-wallet-exchange/id6445964121
-        name: iOS App
-        type: Tools
-      - url: https://play.google.com/store/search?q=backpack+wallet+and+exchange&c=apps&hl=en_US
-        name: Android App
-        type: Tools
-    description: >-
-      Backpack Wallet is a self-custodial multichain wallet for Solana, Ethereum, and Bitcoin, originally built around
-      the xNFT (executable NFT) protocol that lets dApps run as plugins inside the wallet. Available as a Chrome/Brave
-      extension and iOS/Android mobile app, sharing identity and session with Backpack Exchange when linked. Open source
-      under GPL-3.0 at github.com/coral-xyz/backpack.
+- aid: backpack:backpack-wallet
+  name: Backpack Wallet
+  tags:
+  - Crypto
+  - Wallet
+  - Solana
+  - Ethereum
+  - Bitcoin
+  - Multi-Chain
+  - xNFT
+  - Self-Custody
+  humanURL: https://backpack.app/
+  properties:
+  - url: https://backpack.app/
+    type: Documentation
+  - url: https://github.com/coral-xyz/backpack
+    type: GitHubRepository
+  - url: https://chromewebstore.google.com/detail/backpack/aflkmfhebedbjioipglgcbcmnbpgliof
+    name: Chrome / Brave Extension
+    type: Tools
+  - url: https://apps.apple.com/us/app/backpack-wallet-exchange/id6445964121
+    name: iOS App
+    type: Tools
+  - url: https://play.google.com/store/search?q=backpack+wallet+and+exchange&c=apps&hl=en_US
+    name: Android App
+    type: Tools
+  description: >-
+    Backpack Wallet is a self-custodial multichain wallet for Solana, Ethereum, and Bitcoin, originally
+    built around the xNFT (executable NFT) protocol that lets dApps run as plugins inside the wallet.
+    Available as a Chrome/Brave extension and iOS/Android mobile app, sharing identity and session with
+    Backpack Exchange when linked. Open source under GPL-3.0 at github.com/coral-xyz/backpack.
+- aid: backpack:backpack-account-api
+  name: Backpack Account API
+  description: Account settings and limits.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Account
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-account-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-assets-api
+  name: Backpack Assets API
+  description: Assets and collateral data.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Assets
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-assets-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-borrow-lend-api
+  name: Backpack Borrow Lend API
+  description: Borrowing and lending.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Borrow Lend
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-borrow-lend-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-borrow-lend-markets-api
+  name: Backpack Borrow Lend Markets API
+  description: Borrowing and lending.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Borrow Lend Markets
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-borrow-lend-markets-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-capital-api
+  name: Backpack Capital API
+  description: Capital management.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Capital
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-capital-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-markets-api
+  name: Backpack Markets API
+  description: Public market data.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Markets
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-markets-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-order-api
+  name: Backpack Order API
+  description: Order management.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Order
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-order-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-position-api
+  name: Backpack Position API
+  description: Positions and futures data.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Position
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-position-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-rfq-api
+  name: Backpack RFQ API
+  description: RFQ (Request For Quote) - Maker.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - RFQ
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-rfq-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-strategy-api
+  name: Backpack Strategy API
+  description: Strategies.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Strategy
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-strategy-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-system-api
+  name: Backpack System API
+  description: Exchange system status.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - System
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-system-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-trades-api
+  name: Backpack Trades API
+  description: Public trade data.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Trades
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-trades-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-vaults-api
+  name: Backpack Vaults API
+  description: Vault data.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Vaults
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-vaults-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
+- aid: backpack:backpack-withdrawal-delays-api
+  name: Backpack Withdrawal Delays API
+  description: Withdrawal delays.
+  humanURL: https://docs.backpack.exchange/
+  baseURL: https://api.backpack.exchange
+  tags:
+  - Withdrawal Delays
+  properties:
+  - type: OpenAPI
+    url: openapi/backpack-withdrawal-delays-api-openapi.yml
+  - type: Documentation
+    url: https://docs.backpack.exchange/
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication
+  - type: Authentication
+    url: https://docs.backpack.exchange/#section/Authentication/Signing-requests
+  - type: Documentation
+    url: https://docs.backpack.exchange/#section/Infrastructure
+  - type: ChangeLog
+    url: https://docs.backpack.exchange/#section/Changelog
+  - type: JSONSchema
+    url: json-schema/backpack-order-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-market-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-position-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-balance-schema.json
+  - type: JSONSchema
+    url: json-schema/backpack-trade-schema.json
+  - type: JSONLD
+    url: json-ld/backpack-context.jsonld
+  - type: Examples
+    url: examples/backpack-order-execute-example.json
+  - type: Examples
+    url: examples/backpack-markets-list-example.json
+  - type: Examples
+    url: examples/backpack-depth-example.json
+  - type: Documentation
+    url: https://docs.backpack.exchange/#tag/Streams
+  - type: AsyncAPI
+    url: asyncapi/backpack-asyncapi.yml
 name: Backpack
 tags:
   - Crypto
@@ -127,7 +636,19 @@ tags:
   - Centralized Exchange
   - Self-Custody
 kind: contract
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+accessModel:
+  pricing: unknown
+  onboarding: unknown
+  trial: false
+  try_now: false
+  public: false
+  label: Unknown
+  confidence: low
+  source:
+  - plans
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/backpack.png
 access: 3rd-Party
 common:
   - type: AgenticAccess
