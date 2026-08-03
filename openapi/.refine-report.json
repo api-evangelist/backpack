@@ -1,0 +1,40 @@
+{
+  "provider": "backpack",
+  "sources": [
+    "backpack-account-api-openapi.yml",
+    "backpack-assets-api-openapi.yml",
+    "backpack-borrow-lend-api-openapi.yml",
+    "backpack-borrow-lend-markets-api-openapi.yml",
+    "backpack-capital-api-openapi.yml",
+    "backpack-markets-api-openapi.yml",
+    "backpack-order-api-openapi.yml",
+    "backpack-position-api-openapi.yml",
+    "backpack-rfq-api-openapi.yml",
+    "backpack-strategy-api-openapi.yml",
+    "backpack-system-api-openapi.yml",
+    "backpack-trades-api-openapi.yml",
+    "backpack-vaults-api-openapi.yml",
+    "backpack-withdrawal-delays-api-openapi.yml"
+  ],
+  "outputs": [
+    "backpack-account-api-openapi.yml",
+    "backpack-assets-api-openapi.yml",
+    "backpack-borrow-lend-api-openapi.yml",
+    "backpack-borrow-lend-markets-api-openapi.yml",
+    "backpack-capital-api-openapi.yml",
+    "backpack-markets-api-openapi.yml",
+    "backpack-order-api-openapi.yml",
+    "backpack-position-api-openapi.yml",
+    "backpack-rfq-api-openapi.yml",
+    "backpack-strategy-api-openapi.yml",
+    "backpack-system-api-openapi.yml",
+    "backpack-trades-api-openapi.yml",
+    "backpack-vaults-api-openapi.yml",
+    "backpack-withdrawal-delays-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}
