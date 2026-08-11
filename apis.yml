@@ -651,6 +651,15 @@ accessModel:
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/backpack.png
 access: 3rd-Party
 common:
+  - type: IssueTracker
+    url: https://github.com/coral-xyz/backpack/issues
+  - type: Releases
+    url: https://github.com/coral-xyz/backpack/releases
+  - type: SecurityPolicy
+    url: https://github.com/coral-xyz/backpack/blob/master/SECURITY.md
+  - type: License
+    name: GPL-3.0
+    url: https://github.com/coral-xyz/backpack/blob/master/LICENSE
   - type: AgenticAccess
     url: agentic-access/backpack-agentic-access.yml
   - type: DomainSecurity
