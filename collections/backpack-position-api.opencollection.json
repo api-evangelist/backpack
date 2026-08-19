@@ -1,0 +1,189 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account Position API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Position",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get open positions.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/position",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter for a single position by symbol."
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "The market for the orders (SPOT or PERP)."
+              }
+            ]
+          },
+          "docs": "Retrieves account position summary.\n\n**Instruction:** `positionQuery`"
+        },
+        {
+          "info": {
+            "name": "Get funding payments.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/funding",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "subaccountId",
+                "value": "",
+                "type": "query",
+                "description": "Filter for a subaccount."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query. If not set, all markets are returned."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Users funding payment history for futures.\n\n**Instruction:** `fundingHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get position history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/position",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query position history for."
+              },
+              {
+                "name": "state",
+                "value": "",
+                "type": "query",
+                "description": "Position state to filter positions."
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Retrieves historical positions, with optional filtering for a specific symbol.\n\n**Instruction:** `positionHistoryQueryAll`"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

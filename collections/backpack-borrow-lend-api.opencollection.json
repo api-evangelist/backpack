@@ -1,0 +1,318 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account Borrow Lend API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Borrow Lend",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get borrow lend positions.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend/positions",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ]
+          },
+          "docs": "Retrieves all the open borrow lending positions for the account.\n\n**Instruction:** `borrowLendPositionQuery`"
+        },
+        {
+          "info": {
+            "name": "Get estimated liquidation price.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend/position/liquidationPrice",
+            "params": [
+              {
+                "name": "subaccountId",
+                "value": "",
+                "type": "query",
+                "description": "Optional subaccount."
+              },
+              {
+                "name": "borrow",
+                "value": "",
+                "type": "query",
+                "description": "Standard base64 encoded json of [`BorrowLendExecutePayload`]"
+              }
+            ]
+          },
+          "docs": "Retrieves the estimated liquidation price for a potential borrow lend\nposition."
+        },
+        {
+          "info": {
+            "name": "Execute borrow lend.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "**Instruction:** `borrowLendExecute`"
+        },
+        {
+          "info": {
+            "name": "Get borrow history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/borrowLend",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Filter to history for either borrows or lends."
+              },
+              {
+                "name": "sources",
+                "value": "",
+                "type": "query",
+                "description": "Filter to return history for a particular source. Can be a single\nsource, or multiple sources separated by commas."
+              },
+              {
+                "name": "positionId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to return history for a borrow lend position."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "History of borrow and lend operations for the account.\n\n**Instruction:** `borrowHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get interest history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/interest",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "asset",
+                "value": "",
+                "type": "query",
+                "description": "Asset to query. If not set, all assets are returned."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query. If not set, all markets are returned. If a\nfutures symbol is supplied, then interest payments on unrealized pnl\nwill be returned. Spot market symbols refer to interest payments on\nregular borrow lend positions."
+              },
+              {
+                "name": "positionId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to return history for a borrow lend position."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              },
+              {
+                "name": "source",
+                "value": "",
+                "type": "query",
+                "description": "Filter to return interest payments of a particular source. Borrow\ninterest payments through two mechanisms: borrow lend\npositions; interest paid on unrealized pnl."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "History of the interest payments for borrows and lends for the account.\n\n**Instruction:** `interestHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get borrow position history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/borrowLend/positions",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "side",
+                "value": "",
+                "type": "query",
+                "description": "Return only borrows or only lends."
+              },
+              {
+                "name": "state",
+                "value": "",
+                "type": "query",
+                "description": "Return only open positions or closed positions."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "History of borrow and lend positions for the account.\n\n**Instruction:** `borrowPositionHistoryQueryAll`"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

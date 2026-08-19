@@ -1,0 +1,59 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account Withdrawal Delays API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Withdrawal Delays",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get withdrawal delay.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/capital/withdrawals/delay"
+          },
+          "docs": "Retrieves the configured hourly delay for withdrawals to non-whitelisted\naddresses. This security feature adds a time delay before withdrawals are\nprocessed, allowing time to cancel unauthorized withdrawals."
+        },
+        {
+          "info": {
+            "name": "Create withdrawal delay.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/wapi/v1/capital/withdrawals/delay",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables a configurable hourly delay for withdrawals to non-whitelisted\naddresses. This security feature helps protect the account by adding a\ntime buffer before withdrawals are processed. Requires 2FA verification."
+        },
+        {
+          "info": {
+            "name": "Update withdrawal delay.",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.backpack.exchange/wapi/v1/capital/withdrawals/delay",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the hourly delay for withdrawals to non-whitelisted addresses.\nChanges will take effect after the current delay period ends. Requires\n2FA verification."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

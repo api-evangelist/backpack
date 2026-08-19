@@ -1,0 +1,147 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account Vaults API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Vaults",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get vaults.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/vaults"
+          },
+          "docs": "Returns information about all available vaults on the exchange."
+        },
+        {
+          "info": {
+            "name": "Mint vault tokens",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/vault/mint",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Deposits an asset into a vault and receives vault tokens in return.\n\n**Instruction:** `vaultMint`"
+        },
+        {
+          "info": {
+            "name": "Request vault redeem",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/vault/redeem",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Submits a request to redeem vault tokens for USDC. The request will be\nqueued and attempted after the vault's redeem delay period.\n\n**Instruction:** `vaultRedeemRequest`"
+        },
+        {
+          "info": {
+            "name": "Cancel vault redeem request.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.backpack.exchange/api/v1/vault/redeem",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Cancels a pending redeem request for a vault.\n\n**Instruction:** `vaultRedeemCancel`"
+        },
+        {
+          "info": {
+            "name": "Get pending vault redeems.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/vault/redeems/pending",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "vaultId",
+                "value": "",
+                "type": "query",
+                "description": "The vault ID to get pending redeems for."
+              }
+            ]
+          },
+          "docs": "Returns pending redeem requests for a vault. Only accessible when\nauthenticated with a key registered to the vault's system account.\n\n**Instruction:** `vaultPendingRedeemsQuery`"
+        },
+        {
+          "info": {
+            "name": "Get vault NAV",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/vault/nav"
+          },
+          "docs": "Returns live NAV data for a vault, including spot NAV, TWAP NAV,\nmint NAV, and redeem NAV. Only accessible by the vault's own account.\n\n**Instruction:** `vaultNavQuery`"
+        },
+        {
+          "info": {
+            "name": "Get vault history",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/vaults/history",
+            "params": [
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query",
+                "description": "Time interval for historical data."
+              },
+              {
+                "name": "vaultId",
+                "value": "",
+                "type": "query",
+                "description": "Optional vault ID to filter by."
+              }
+            ]
+          },
+          "docs": "Returns historical vault data - NAV, vault equity,\nand tokens in circulation at regular intervals."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

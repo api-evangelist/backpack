@@ -1,0 +1,418 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account Order API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Order",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get open order.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/order",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "clientId",
+                "value": "",
+                "type": "query",
+                "description": "Client ID of the order."
+              },
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "query",
+                "description": "ID of the order."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol for the order."
+              }
+            ]
+          },
+          "docs": "Retrieves an open order from the order book. This only returns the order\nif it is resting on the order book (i.e. has not been completely filled,\nexpired, or cancelled).\n\nOne of `orderId` or `clientId` must be specified. If both are specified\nthen the request will be rejected.\n\n**Instruction:** `orderQuery`"
+        },
+        {
+          "info": {
+            "name": "Execute order.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/order",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              },
+              {
+                "name": "X-BROKER-ID",
+                "value": ""
+              },
+              {
+                "name": "X-BROKER-KEY",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Submits an order to the matching engine for execution.\n\n**Instruction:** `orderExecute`"
+        },
+        {
+          "info": {
+            "name": "Cancel open order.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.backpack.exchange/api/v1/order",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Cancels an open order from the order book.\n\nOne of `orderId` or `clientId` must be specified. If both are specified\nthen the request will be rejected.\n\n**Instruction:** `orderCancel`"
+        },
+        {
+          "info": {
+            "name": "Get open orders.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/orders",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "The market for the orders (SPOT or PERP)."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The symbol of the market for the orders."
+              }
+            ]
+          },
+          "docs": "Retrieves all open orders. If a symbol is provided, only open orders for\nthat market will be returned, otherwise all open orders are\nreturned.\n\n**Instruction:** `orderQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Execute orders.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/orders",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              },
+              {
+                "name": "X-BROKER-ID",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Submits a set of orders to the matching engine for execution in a batch.\n\n**Batch commands instruction:** `orderExecute`"
+        },
+        {
+          "info": {
+            "name": "Cancel open orders.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.backpack.exchange/api/v1/orders",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Cancels all open orders on the specified market.\n\n**Instruction:** `orderCancelAll`"
+        },
+        {
+          "info": {
+            "name": "Get fill history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/fills",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given order."
+              },
+              {
+                "name": "strategyId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given strategy."
+              },
+              {
+                "name": "from",
+                "value": "",
+                "type": "query",
+                "description": "Filter to minimum time (milliseconds)."
+              },
+              {
+                "name": "to",
+                "value": "",
+                "type": "query",
+                "description": "Filter to maximum time (milliseconds)."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "fillType",
+                "value": "",
+                "type": "query",
+                "description": "Filter to return fills for different fill types"
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Retrieves historical fills, with optional filtering for a specific order\nor symbol.\n\n**Instruction:** `fillHistoryQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Get order history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/orders",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given order."
+              },
+              {
+                "name": "strategyId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given strategy."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Retrieves the order history for the user. This includes orders that have\nbeen filled and are no longer on the book. It may include orders\nthat are on the book, but the `/orders` endpoint contains more up to\ndate data.\n\n**Instruction:** `orderHistoryQueryAll`"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

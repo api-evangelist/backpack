@@ -1,0 +1,73 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account Borrow Lend Markets API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Borrow Lend Markets",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get borrow lend markets.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend/markets"
+          },
+          "docs": "Get borrow lend markets."
+        },
+        {
+          "info": {
+            "name": "Get borrow lend market history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend/markets/history",
+            "params": [
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query",
+                "description": "Filter for an interval."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query. If not set, all markets are returned."
+              }
+            ]
+          },
+          "docs": "Get borrow lend market history."
+        },
+        {
+          "info": {
+            "name": "Get APY rates for borrow/lend markets and staking.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/borrowLend/apy",
+            "params": [
+              {
+                "name": "tierId",
+                "value": "",
+                "type": "query",
+                "description": "Optional VIP tier ID. If omitted, returns the base (non-VIP) rate."
+              }
+            ]
+          },
+          "docs": "Get APY rates for borrow/lend markets and staking."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,239 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Account",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get account.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/account",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ]
+          },
+          "docs": "**Instruction:** `accountQuery`"
+        },
+        {
+          "info": {
+            "name": "Update account.",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.backpack.exchange/api/v1/account",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Update account settings.\n\n**Instruction:** `accountUpdate`"
+        },
+        {
+          "info": {
+            "name": "Get max borrow quantity.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/account/limits/borrow",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The asset to borrow."
+              }
+            ]
+          },
+          "docs": "Retrieves the maxmimum quantity an account can borrow\nfor a given asset based on the accounts existing exposure\nand margin requirements\n\n**Instruction:** `maxBorrowQuantity`"
+        },
+        {
+          "info": {
+            "name": "Get max order quantity.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/account/limits/order",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The market symbol to trade."
+              },
+              {
+                "name": "side",
+                "value": "",
+                "type": "query",
+                "description": "The side of the order."
+              },
+              {
+                "name": "price",
+                "value": "",
+                "type": "query",
+                "description": "The limit price of the order. Not included for market orders."
+              },
+              {
+                "name": "reduceOnly",
+                "value": "",
+                "type": "query",
+                "description": "Whether the order is reduce only."
+              },
+              {
+                "name": "autoBorrow",
+                "value": "",
+                "type": "query",
+                "description": "Whether the order uses auto borrow."
+              },
+              {
+                "name": "autoBorrowRepay",
+                "value": "",
+                "type": "query",
+                "description": "Whether the order uses auto borrow repay."
+              },
+              {
+                "name": "autoLendRedeem",
+                "value": "",
+                "type": "query",
+                "description": "Whether the order uses auto lend redeem."
+              }
+            ]
+          },
+          "docs": "Retrieves the maxmimum quantity an account can trade\nfor a given symbol based on the account's balances, existing exposure\nand margin requirements.\n\n**Instruction:** `maxOrderQuantity`"
+        },
+        {
+          "info": {
+            "name": "Get max withdrawal quantity.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/account/limits/withdrawal",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The asset to withdraw."
+              },
+              {
+                "name": "autoBorrow",
+                "value": "",
+                "type": "query",
+                "description": "Whether the withdrawal is with auto borrow."
+              },
+              {
+                "name": "autoLendRedeem",
+                "value": "",
+                "type": "query",
+                "description": "Whether the withdrawal is with auto lend redeem."
+              }
+            ]
+          },
+          "docs": "Retrieves the maxmimum quantity an account can withdraw\nfor a given asset based on the accounts existing exposure\nand margin requirements\nThe response will include the maximum quantity that can be withdrawn\nand whether the withdrawal is with auto borrow or auto lend redeem\nenabled.\n\n**Instruction:** `maxWithdrawalQuantity`"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

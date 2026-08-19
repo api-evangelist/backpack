@@ -1,0 +1,48 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account Assets API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Assets",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get assets.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/assets",
+            "params": [
+              {
+                "name": "country",
+                "value": "",
+                "type": "query",
+                "description": "Optional ISO 3166-1 alpha-2 country code. When provided, the token\nlist is filtered to the assets available in that jurisdiction."
+              }
+            ]
+          },
+          "docs": "Get assets."
+        },
+        {
+          "info": {
+            "name": "Get collateral.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/collateral"
+          },
+          "docs": "Get collateral parameters for assets."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

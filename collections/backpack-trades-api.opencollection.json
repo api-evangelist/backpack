@@ -1,0 +1,73 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account Trades API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Trades",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get recent trades.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/trades",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query fills for."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Limit the number of fills returned. Default `100`, maximum `1000`."
+              }
+            ]
+          },
+          "docs": "Retrieve the most recent trades for a symbol. This is public data and\nis not specific to any account.\n\nThe maximum available recent trades is `1000`. If you need more than\n`1000` trades use the historical trades endpoint."
+        },
+        {
+          "info": {
+            "name": "Get historical trades.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/trades/history",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Limit the number of trades returned. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              }
+            ]
+          },
+          "docs": "Retrieves all historical trades for the given symbol. This is public\ntrade data and is not specific to any account."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

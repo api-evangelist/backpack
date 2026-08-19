@@ -1,0 +1,290 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account Strategy API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Strategy",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get open strategy.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/strategy",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "clientStrategyId",
+                "value": "",
+                "type": "query",
+                "description": "Client ID of the strategy."
+              },
+              {
+                "name": "strategyId",
+                "value": "",
+                "type": "query",
+                "description": "ID of the strategy."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol for the strategy."
+              }
+            ]
+          },
+          "docs": "Retrieves an open strategy from the engine. This only returns the\nstrategy if it is active (i.e. has not been completely filled,\ncancelled by the user, or cancelled by the system).\n\nOne of `strategyId` or `clientStrategyId` must be specified.\n\n**Instruction:** `strategyQuery`"
+        },
+        {
+          "info": {
+            "name": "Create strategy.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.backpack.exchange/api/v1/strategy",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              },
+              {
+                "name": "X-BROKER-ID",
+                "value": ""
+              },
+              {
+                "name": "X-BROKER-KEY",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Submits a strategy to the engine for processing.\n\n**Instruction:** `strategyCreate`"
+        },
+        {
+          "info": {
+            "name": "Cancel open strategy.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.backpack.exchange/api/v1/strategy",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Cancels an open strategy currently being run.\n\nOne of `strategyId` or `clientStrategyId` must be specified.\n\n**Instruction:** `strategyCancel`"
+        },
+        {
+          "info": {
+            "name": "Get open strategies.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/strategies",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "The market for the strategies (SPOT or PERP)."
+              },
+              {
+                "name": "strategyType",
+                "value": "",
+                "type": "query",
+                "description": "The strategy type."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The symbol of the market for the strategies."
+              }
+            ]
+          },
+          "docs": "Retrieves all open strategies. If a symbol is provided, only open\nstrategies for that market will be returned, otherwise all open\nstrategies are returned.\n\n**Instruction:** `strategyQueryAll`"
+        },
+        {
+          "info": {
+            "name": "Cancel open strategies.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.backpack.exchange/api/v1/strategies",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Cancels all open strategies on the specified market.\n\n**Instruction:** `strategyCancelAll`"
+        },
+        {
+          "info": {
+            "name": "Get strategy history.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/wapi/v1/history/strategies",
+            "headers": [
+              {
+                "name": "X-API-KEY",
+                "value": ""
+              },
+              {
+                "name": "X-SIGNATURE",
+                "value": ""
+              },
+              {
+                "name": "X-TIMESTAMP",
+                "value": ""
+              },
+              {
+                "name": "X-WINDOW",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "strategyId",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given strategy."
+              },
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Filter to the given symbol."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type."
+              },
+              {
+                "name": "sortDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction."
+              }
+            ]
+          },
+          "docs": "Retrieves the strategy history for the user. This returns strategies\nthat are no longer active as they have either been\ncompleted, cancelled by the user or cancelled by the system.\n\n**Instruction:** `strategyHistoryQueryAll`"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

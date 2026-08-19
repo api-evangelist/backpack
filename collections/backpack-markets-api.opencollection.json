@@ -1,0 +1,323 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account Markets API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Markets",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get markets.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/markets",
+            "params": [
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type. Defaults to return spot and perp."
+              }
+            ]
+          },
+          "docs": "Retrieves all the markets that are supported by the exchange."
+        },
+        {
+          "info": {
+            "name": "Get market.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/market",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Retrieves a market supported by the exchange."
+        },
+        {
+          "info": {
+            "name": "Get depth.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/depth",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Limit on the number of price levels to return on each side. Defaults to `1000`."
+              }
+            ]
+          },
+          "docs": "Retrieves the order book depth for a given market symbol."
+        },
+        {
+          "info": {
+            "name": "Get prediction events.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/prediction",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "The market symbol for the prediction market."
+              },
+              {
+                "name": "tagSlug",
+                "value": "",
+                "type": "query",
+                "description": "The tag slug of the prediction event."
+              },
+              {
+                "name": "eventSlug",
+                "value": "",
+                "type": "query",
+                "description": "The event slug that the prediction market is based on."
+              },
+              {
+                "name": "seriesSlug",
+                "value": "",
+                "type": "query",
+                "description": "The series slug that the prediction event belongs to."
+              },
+              {
+                "name": "resolved",
+                "value": "",
+                "type": "query",
+                "description": "Whether the prediction market is resolved."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `1000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset. Default `0`."
+              }
+            ]
+          },
+          "docs": "Retrieves all the events and associated markets that are supported by the exchange."
+        },
+        {
+          "info": {
+            "name": "Get prediction tags.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/prediction/tags"
+          },
+          "docs": "Retrieves all prediction tags supported by the exchange."
+        },
+        {
+          "info": {
+            "name": "Get market sessions.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/market-sessions"
+          },
+          "docs": "Retrieves the list of market sessions. To see which sessions a\nspecific security trades in, and its quantity constraints per session, see `/api/v1/securities`."
+        },
+        {
+          "info": {
+            "name": "Get securities.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/securities"
+          },
+          "docs": "Retrieves tradable securities."
+        },
+        {
+          "info": {
+            "name": "Get mark prices.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/markPrices",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "marketType",
+                "value": "",
+                "type": "query",
+                "description": "Market type. Defaults to return perp."
+              }
+            ]
+          },
+          "docs": "Retrieves mark prices, index prices, and funding rates for futures\nproducts, or a specified symbol."
+        },
+        {
+          "info": {
+            "name": "Get open interest.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/openInterest",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Retrieves the current open interest for the given market.\nIf no market is provided, then all markets are returned."
+        },
+        {
+          "info": {
+            "name": "Get funding interval rates.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/fundingRates",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol to query"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number to return. Default `100`, maximum `10000`."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for pagination. Default `0`."
+              }
+            ]
+          },
+          "docs": "Funding interval rate history for futures."
+        },
+        {
+          "info": {
+            "name": "Get K-lines.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/klines",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query",
+                "description": "Market symbol, e.g. `SOL_USDC`."
+              },
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "startTime",
+                "value": "",
+                "type": "query",
+                "description": "UTC timestamp in seconds."
+              },
+              {
+                "name": "endTime",
+                "value": "",
+                "type": "query",
+                "description": "UTC timestamp in seconds. Defaults to now."
+              },
+              {
+                "name": "priceType",
+                "value": "",
+                "type": "query",
+                "description": "K-line price type. Defaults to `last`."
+              }
+            ]
+          },
+          "docs": "Returns candles for the given market and interval. Recent data is\nserved from the in-memory store; requests reaching further back\nthan the store's retention window fall through to ClickHouse."
+        },
+        {
+          "info": {
+            "name": "Get ticker for a single market.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/ticker",
+            "params": [
+              {
+                "name": "symbol",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Get ticker for a single market."
+        },
+        {
+          "info": {
+            "name": "Get tickers for every market.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/tickers",
+            "params": [
+              {
+                "name": "interval",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Get tickers for every market."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

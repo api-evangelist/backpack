@@ -1,0 +1,62 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Backpack Exchange Account System API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "System",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get system status.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/status"
+          },
+          "docs": "Get system status."
+        },
+        {
+          "info": {
+            "name": "Ping.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/ping"
+          },
+          "docs": "Responds with `pong`."
+        },
+        {
+          "info": {
+            "name": "Get system time.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/time"
+          },
+          "docs": "Retrieves the current system time."
+        },
+        {
+          "info": {
+            "name": "Get wallets.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.backpack.exchange/api/v1/wallets"
+          },
+          "docs": "Returns all configured blockchain wallets and their addresses."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
