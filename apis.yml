@@ -5,6 +5,15 @@ apis:
   name: Backpack Wallet
   tags:
   - Crypto
+  - Wallets
+  - Solana
+  - Ethereum
+  - Bitcoin
+  - Multi-Chain
+  - xNFT
+  - Self-Custody
+  tags_raw:
+  - Crypto
   - Wallet
   - Solana
   - Ethereum
@@ -542,6 +551,8 @@ apis:
   humanURL: https://docs.backpack.exchange/
   baseURL: https://api.backpack.exchange
   tags:
+  - Vault
+  tags_raw:
   - Vaults
   properties:
   - type: OpenAPI
@@ -622,6 +633,20 @@ apis:
     url: asyncapi/backpack-asyncapi.yml
 name: Backpack
 tags:
+  - Crypto
+  - Exchange
+  - Wallets
+  - Trading
+  - Perpetuals
+  - Solana
+  - Web3
+  - DeFi
+  - xNFT
+  - Anchor
+  - Coral
+  - Centralized Exchange
+  - Self-Custody
+tags_raw:
   - Crypto
   - Exchange
   - Wallet
