@@ -12,8 +12,14 @@ info:
     OpenAPI description.
   version: 1.0.0
 sourceDescriptions:
-- name: backpackApi
-  url: ../openapi/backpack-exchange-openapi.yml
+- name: capitalApi
+  url: ../openapi/backpack-capital-api-openapi.yml
+  type: openapi
+- name: marketsApi
+  url: ../openapi/backpack-markets-api-openapi.yml
+  type: openapi
+- name: orderApi
+  url: ../openapi/backpack-order-api-openapi.yml
   type: openapi
 workflows:
 - workflowId: balance-checked-market-buy

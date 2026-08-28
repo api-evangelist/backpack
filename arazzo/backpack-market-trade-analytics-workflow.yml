@@ -11,8 +11,11 @@ info:
     without opening the underlying OpenAPI description.
   version: 1.0.0
 sourceDescriptions:
-- name: backpackApi
-  url: ../openapi/backpack-exchange-openapi.yml
+- name: marketsApi
+  url: ../openapi/backpack-markets-api-openapi.yml
+  type: openapi
+- name: tradesApi
+  url: ../openapi/backpack-trades-api-openapi.yml
   type: openapi
 workflows:
 - workflowId: market-trade-analytics

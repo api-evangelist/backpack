@@ -12,8 +12,8 @@ info:
     the underlying OpenAPI description.
   version: 1.0.0
 sourceDescriptions:
-- name: backpackApi
-  url: ../openapi/backpack-exchange-openapi.yml
+- name: capitalApi
+  url: ../openapi/backpack-capital-api-openapi.yml
   type: openapi
 workflows:
 - workflowId: balance-checked-withdrawal

@@ -12,8 +12,11 @@ info:
     the underlying OpenAPI description.
   version: 1.0.0
 sourceDescriptions:
-- name: backpackApi
-  url: ../openapi/backpack-exchange-openapi.yml
+- name: marketsApi
+  url: ../openapi/backpack-markets-api-openapi.yml
+  type: openapi
+- name: orderApi
+  url: ../openapi/backpack-order-api-openapi.yml
   type: openapi
 workflows:
 - workflowId: place-limit-order
