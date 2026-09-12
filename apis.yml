@@ -690,6 +690,8 @@ accessModel:
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/backpack.png
 access: 3rd-Party
 common:
+  - type: Website
+    url: https://www.backpack.exchange/
   - type: IssueTracker
     url: https://github.com/coral-xyz/backpack/issues
   - type: Releases
