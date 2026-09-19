@@ -509,6 +509,8 @@ apis:
   humanURL: https://docs.backpack.exchange/
   baseURL: https://api.backpack.exchange
   tags:
+  - Trade
+  tags_raw:
   - Trades
   properties:
   - type: OpenAPI
