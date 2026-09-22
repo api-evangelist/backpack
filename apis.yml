@@ -1,5 +1,9 @@
 aid: backpack
 url: https://raw.githubusercontent.com/api-evangelist/backpack/refs/heads/main/apis.yml
+x-docs-platform: redocly
+x-docs-platform-confidence: medium
+x-docs-platform-checked: 2026-09-20
+x-docs-hosting: github-pages
 apis:
 - aid: backpack:backpack-wallet
   name: Backpack Wallet
