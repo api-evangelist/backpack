@@ -1,20 +1,7 @@
 {
   "provider": "backpack",
   "sources": [
-    "backpack-account-api-openapi.yml",
-    "backpack-assets-api-openapi.yml",
-    "backpack-borrow-lend-api-openapi.yml",
-    "backpack-borrow-lend-markets-api-openapi.yml",
-    "backpack-capital-api-openapi.yml",
-    "backpack-markets-api-openapi.yml",
-    "backpack-order-api-openapi.yml",
-    "backpack-position-api-openapi.yml",
-    "backpack-rfq-api-openapi.yml",
-    "backpack-strategy-api-openapi.yml",
-    "backpack-system-api-openapi.yml",
-    "backpack-trades-api-openapi.yml",
-    "backpack-vaults-api-openapi.yml",
-    "backpack-withdrawal-delays-api-openapi.yml"
+    "_original/backpack-exchange-openapi.yml"
   ],
   "outputs": [
     "backpack-account-api-openapi.yml",
@@ -35,6 +22,25 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "backpack-exchange-openapi.yml: upgraded openapi 3.0.0 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "backpack-account-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-assets-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-borrow-lend-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-borrow-lend-markets-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-capital-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-markets-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-order-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-position-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-rfq-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-strategy-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-system-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-trades-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-vaults-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "backpack-withdrawal-delays-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }
