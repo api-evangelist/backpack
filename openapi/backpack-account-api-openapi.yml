@@ -465,31 +465,65 @@ paths:
       operationId: get_max_withdrawal_quantity
 components:
   schemas:
-    UpdateAccountSettingsRequest:
+    MaxWithdrawalQuantity:
       type: object
-      title: UpdateAccountSettingsRequest
+      title: MaxWithdrawalQuantity
+      required:
+      - maxWithdrawalQuantity
+      - symbol
       properties:
-        autoBorrowSettlements:
+        autoBorrow:
           type: boolean
-          description: 'If true, then tries to borrow during collateral reconciliation.
-
-            Collateral reconciliation is a process in which the system reconciles
-
-            the negative account debt or positive account equity.'
-        autoLend:
+        autoLendRedeem:
           type: boolean
-          description: Determines if the account should automatically lend.
-        autoRepayBorrows:
-          type: boolean
-          description: 'Determines if the account should automatically repay borrows with
-
-            available balance.'
-        leverageLimit:
+        maxWithdrawalQuantity:
           type: string
           format: decimal
-          description: 'Determines the maximum leverage allowed for the main account or
-
-            subaccount.'
+        symbol:
+          type: string
+    Side:
+      type: string
+      enum:
+      - Bid
+      - Ask
+    ApiErrorCode:
+      type: string
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
     AccountSummary:
       type: object
       title: AccountSummary
@@ -562,34 +596,6 @@ components:
           type: integer
           format: uint64
           description: Number of open trigger orders.
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
-    Side:
-      type: string
-      enum:
-      - Bid
-      - Ask
-    MaxBorrowQuantity:
-      type: object
-      title: MaxBorrowQuantity
-      required:
-      - maxBorrowQuantity
-      - symbol
-      properties:
-        maxBorrowQuantity:
-          type: string
-          format: decimal
-        symbol:
-          type: string
     MaxOrderQuantity:
       type: object
       title: MaxOrderQuantity
@@ -616,60 +622,54 @@ components:
           type: string
         reduceOnly:
           type: boolean
-    ApiErrorCode:
-      type: string
-      enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
-    MaxWithdrawalQuantity:
+    MaxBorrowQuantity:
       type: object
-      title: MaxWithdrawalQuantity
+      title: MaxBorrowQuantity
       required:
-      - maxWithdrawalQuantity
+      - maxBorrowQuantity
       - symbol
       properties:
-        autoBorrow:
-          type: boolean
-        autoLendRedeem:
-          type: boolean
-        maxWithdrawalQuantity:
+        maxBorrowQuantity:
           type: string
           format: decimal
         symbol:
           type: string
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
+    UpdateAccountSettingsRequest:
+      type: object
+      title: UpdateAccountSettingsRequest
+      properties:
+        autoBorrowSettlements:
+          type: boolean
+          description: 'If true, then tries to borrow during collateral reconciliation.
+
+            Collateral reconciliation is a process in which the system reconciles
+
+            the negative account debt or positive account equity.'
+        autoLend:
+          type: boolean
+          description: Determines if the account should automatically lend.
+        autoRepayBorrows:
+          type: boolean
+          description: 'Determines if the account should automatically repay borrows with
+
+            available balance.'
+        leverageLimit:
+          type: string
+          format: decimal
+          description: 'Determines the maximum leverage allowed for the main account or
+
+            subaccount.'
 x-tagGroups:
 - name: Public Endpoints
   tags:

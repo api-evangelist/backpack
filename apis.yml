@@ -652,6 +652,7 @@ tags:
   - Coral
   - Centralized Exchange
   - Self-Custody
+  - Real-Time
 tags_raw:
   - Crypto
   - Exchange
@@ -666,6 +667,7 @@ tags_raw:
   - Coral
   - Centralized Exchange
   - Self-Custody
+  - Real-Time
 kind: contract
 deliveryModel:
   model: open-core

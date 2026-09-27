@@ -330,6 +330,67 @@ paths:
       operationId: get_vault_history
 components:
   schemas:
+    VaultMintRequest:
+      type: object
+      title: VaultMintRequest
+      description: Request payload for minting vault tokens.
+      required:
+      - vaultId
+      - symbol
+      - quantity
+      properties:
+        vaultId:
+          type: integer
+          format: uint32
+          description: The vault ID to mint tokens from.
+        symbol:
+          type: string
+          description: The symbol of the asset to deposit.
+        quantity:
+          type: string
+          format: decimal
+          description: Amount to deposit.
+        autoBorrow:
+          type: boolean
+          description: Whether to allow auto borrowing when depositing into vault.
+        autoLendRedeem:
+          type: boolean
+          description: Whether to allow auto redeem lent assets when depositing into vault.
+    VaultHistory:
+      type: object
+      title: VaultHistory
+      description: Historical vault data.
+      required:
+      - vaultId
+      - timestamp
+      properties:
+        vaultId:
+          type: integer
+          format: uint32
+          description: The vault ID.
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the snapshot.
+        nav:
+          type: string
+          format: decimal
+          description: Net asset value per token.
+        vaultEquity:
+          type: string
+          format: decimal
+          description: Total vault equity in USDC.
+        tokenCirculatingSupply:
+          type: string
+          format: decimal
+          description: Total circulating vault tokens.
+    VaultRedeemStatus:
+      type: string
+      description: Vault redeem status.
+      enum:
+      - Requested
+      - Redeemed
+      - Cancelled
     ApiErrorCode:
       type: string
       enum:
@@ -368,78 +429,51 @@ components:
       - TOO_MANY_REQUESTS
       - TRADING_PAUSED
       - UNAUTHORIZED
-    ApiErrorResponse:
+    VaultNav:
       type: object
-      title: ApiErrorResponse
+      title: VaultNav
+      description: Live vault NAV data.
       required:
-      - code
-      - message
+      - nav
+      - twapNav
+      - mintNav
+      - redeemNav
+      - vaultEquity
+      - netEquity
+      - tokenCirculatingSupply
       properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
-    VaultHistory:
-      type: object
-      title: VaultHistory
-      description: Historical vault data.
-      required:
-      - vaultId
-      - timestamp
-      properties:
-        vaultId:
-          type: integer
-          format: uint32
-          description: The vault ID.
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp of the snapshot.
         nav:
           type: string
           format: decimal
-          description: Net asset value per token.
+          description: Current spot NAV per vault token.
+        twapNav:
+          type: string
+          format: decimal
+          description: Time-weighted average NAV per vault token.
+        mintNav:
+          type: string
+          format: decimal
+          description: 'NAV used for mints: max(nav, twap_nav).'
+        redeemNav:
+          type: string
+          format: decimal
+          description: 'NAV used for redeems: min(nav, twap_nav).'
         vaultEquity:
           type: string
           format: decimal
-          description: Total vault equity in USDC.
+          description: Total vault account equity.
+        netEquity:
+          type: string
+          format: decimal
+          description: Net equity after haircuts applied.
         tokenCirculatingSupply:
           type: string
           format: decimal
-          description: Total circulating vault tokens.
-    VaultHistoryInterval:
-      type: string
-      enum:
-      - 1d
-      - 1w
-      - 1month
-      - 1year
-    VaultMintRequest:
-      type: object
-      title: VaultMintRequest
-      description: Request payload for minting vault tokens.
-      required:
-      - vaultId
-      - symbol
-      - quantity
-      properties:
-        vaultId:
+          description: Total circulating supply of vault tokens.
+        lastCrankTimestamp:
           type: integer
-          format: uint32
-          description: The vault ID to mint tokens from.
-        symbol:
-          type: string
-          description: The symbol of the asset to deposit.
-        quantity:
-          type: string
-          format: decimal
-          description: Amount to deposit.
-        autoBorrow:
-          type: boolean
-          description: Whether to allow auto borrowing when depositing into vault.
-        autoLendRedeem:
-          type: boolean
-          description: Whether to allow auto redeem lent assets when depositing into vault.
+          format: int64
+          description: Timestamp (ms) of the last NAV crank, if any.
     VaultRedeemRequest:
       type: object
       title: VaultRedeemRequest
@@ -457,13 +491,13 @@ components:
           description: 'Amount of vault tokens to deposit to redeem USDC.
 
             If not specified, uses all available vault tokens for the redemptions.'
-    VaultRedeemStatus:
+    VaultHistoryInterval:
       type: string
-      description: Vault redeem status.
       enum:
-      - Requested
-      - Redeemed
-      - Cancelled
+      - 1d
+      - 1w
+      - 1month
+      - 1year
     Vault:
       type: object
       title: Vault
@@ -516,17 +550,6 @@ components:
           format: decimal
           description: Remaining vault tokens available to mint.
           default: '0'
-    VaultRedeemCancelRequest:
-      type: object
-      title: VaultRedeemCancelRequest
-      description: Request payload for canceling a vault redeem request.
-      required:
-      - vaultId
-      properties:
-        vaultId:
-          type: integer
-          format: uint32
-          description: The vault ID to cancel the redeem request for.
     VaultRedeem:
       type: object
       title: VaultRedeem
@@ -575,51 +598,28 @@ components:
           type: integer
           format: int64
           description: Timestamp of the event in milliseconds.
-    VaultNav:
+    VaultRedeemCancelRequest:
       type: object
-      title: VaultNav
-      description: Live vault NAV data.
+      title: VaultRedeemCancelRequest
+      description: Request payload for canceling a vault redeem request.
       required:
-      - nav
-      - twapNav
-      - mintNav
-      - redeemNav
-      - vaultEquity
-      - netEquity
-      - tokenCirculatingSupply
+      - vaultId
       properties:
-        nav:
-          type: string
-          format: decimal
-          description: Current spot NAV per vault token.
-        twapNav:
-          type: string
-          format: decimal
-          description: Time-weighted average NAV per vault token.
-        mintNav:
-          type: string
-          format: decimal
-          description: 'NAV used for mints: max(nav, twap_nav).'
-        redeemNav:
-          type: string
-          format: decimal
-          description: 'NAV used for redeems: min(nav, twap_nav).'
-        vaultEquity:
-          type: string
-          format: decimal
-          description: Total vault account equity.
-        netEquity:
-          type: string
-          format: decimal
-          description: Net equity after haircuts applied.
-        tokenCirculatingSupply:
-          type: string
-          format: decimal
-          description: Total circulating supply of vault tokens.
-        lastCrankTimestamp:
+        vaultId:
           type: integer
-          format: int64
-          description: Timestamp (ms) of the last NAV crank, if any.
+          format: uint32
+          description: The vault ID to cancel the redeem request for.
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
 x-tagGroups:
 - name: Public Endpoints
   tags:

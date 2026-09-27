@@ -708,107 +708,155 @@ paths:
       operationId: get_borrow_lend_position_history
 components:
   schemas:
-    BorrowLendPositionWithMargin:
+    PositionImfFunction:
       type: object
-      title: BorrowLendPositionWithMargin
+      anyOf:
+      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
+      discriminator:
+        propertyName: type
+        mapping:
+          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
+    BorrowLendPositionRow:
+      type: object
+      title: BorrowLendPositionRow
       required:
-      - cumulativeInterest
-      - id
-      - imf
-      - imfFunction
-      - netQuantity
-      - markPrice
-      - mmf
-      - mmfFunction
-      - netExposureQuantity
-      - netExposureNotional
+      - positionId
+      - quantity
       - symbol
-      - estLiquidationPrice
+      - source
+      - cumulativeInterest
+      - avgInterestRate
+      - side
+      - createdAt
       properties:
+        positionId:
+          type: string
+          description: ID of the borrow lend position the event is associated with.
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity of the borrow lend event.
+        symbol:
+          type: string
+          description: Symbol of the asset the borrow lend is for.
+        source:
+          description: Initial source of position.
+          allOf:
+          - $ref: '#/components/schemas/BorrowLendSource'
+          - description: Initial source of position.
         cumulativeInterest:
           type: string
           format: decimal
           description: Cumulative interest payments quantity.
-        id:
-          type: string
-          description: Uniquely identifies the position.
-        imf:
+        avgInterestRate:
           type: string
           format: decimal
-          description: Initial margin fraction for this position.
-        imfFunction:
-          description: IMF function.
+          description: Average interest rate over the time this position was open.
+        side:
+          description: Borrow or lend.
           allOf:
-          - $ref: '#/components/schemas/PositionImfFunction'
-          - description: IMF function.
-        netQuantity:
+          - $ref: '#/components/schemas/BorrowLendSide'
+          - description: Borrow or lend.
+        createdAt:
           type: string
-          format: decimal
-          description: Net quantity of the position, positive if long, negative if short.
-        markPrice:
-          type: string
-          format: decimal
-          description: Mark price of the underlying asset.
-        mmf:
-          type: string
-          format: decimal
-          description: Maintenance margin fraction for this position.
-        mmfFunction:
-          description: MMF function.
-          allOf:
-          - $ref: '#/components/schemas/PositionImfFunction'
-          - description: MMF function.
-        netExposureQuantity:
-          type: string
-          format: decimal
-          description: 'Net exposure of the position, positive if long, negative if short. Lends
-
-            have no exposure.'
-        netExposureNotional:
-          type: string
-          format: decimal
-          description: Notional value of the position.
-        symbol:
-          description: Symbol of the underlying asset.
-          allOf:
-          - $ref: '#/components/schemas/CustodyAsset'
-          - description: Symbol of the underlying asset.
-        estLiquidationPrice:
-          type: string
-          format: decimal
-          description: Estimated liquidation price of the position.
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
-    PositionEstimatedLiquidationPrice:
-      type: object
-      title: PositionEstimatedLiquidationPrice
-      required:
-      - liquidationPrice
-      - markPrice
-      properties:
-        liquidationPrice:
-          type: string
-          format: decimal
-        markPrice:
-          type: string
-          format: decimal
-    PaymentType:
+          format: naive-date-time
+          description: The timestamp the borrow lend event was created at (UTC).
+    ApiErrorCode:
       type: string
       enum:
-      - EntryFee
-      - Borrow
-      - Lend
-      - UnrealizedPositivePnl
-      - UnrealizedNegativePnl
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
+    BorrowLendPositionState:
+      type: string
+      enum:
+      - Open
+      - Closed
+    InterestPayment:
+      type: object
+      title: InterestPayment
+      required:
+      - paymentType
+      - interestRate
+      - interval
+      - marketSymbol
+      - positionId
+      - quantity
+      - symbol
+      - timestamp
+      properties:
+        paymentType:
+          description: Type of payment.
+          allOf:
+          - $ref: '#/components/schemas/PaymentType'
+          - description: Type of payment.
+        interestRate:
+          type: string
+          format: decimal
+          description: The rate of interest.
+        interval:
+          type: integer
+          format: uint64
+          description: The interval duration of the payment.
+        marketSymbol:
+          type: string
+          description: 'The market symbol for which the interest payment can be attributed. For
+
+            interest payments corresponding to borrow lend positions, this is
+
+            the spot market symbol. For interest payments corresponding to
+
+            unrealized pnl on futures markets, this will be the futures market
+
+            symbol.'
+        positionId:
+          type: string
+          description: ID of the borrow lend position the interest payment is for.
+        quantity:
+          type: string
+          format: decimal
+          description: Amount of the payment.
+        symbol:
+          description: The symbol of the market asset the payment is associated with.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: The symbol of the market asset the payment is associated with.
+        timestamp:
+          type: string
+          format: naive-date-time
+          description: The timestamp for the borrow lending interest payment (UTC).
     CustodyAsset:
       type: string
       enum:
@@ -2413,28 +2461,32 @@ components:
       - EWH.US
       - NLR.US
       - FUTU.US
-    BorrowLendExecutePayload:
+    ApiErrorResponse:
       type: object
-      title: BorrowLendExecutePayload
+      title: ApiErrorResponse
       required:
-      - quantity
-      - side
-      - symbol
+      - code
+      - message
       properties:
-        quantity:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
           type: string
-          format: decimal
-          description: The quantity of the asset to repay.
-        side:
-          description: Side of the borrow lend.
-          allOf:
-          - $ref: '#/components/schemas/BorrowLendSide'
-          - description: Side of the borrow lend.
-        symbol:
-          description: The asset to repay.
-          allOf:
-          - $ref: '#/components/schemas/CustodyAsset'
-          - description: The asset to repay.
+    SortDirection:
+      type: string
+      enum:
+      - Asc
+      - Desc
+    BorrowLendSide:
+      type: string
+      enum:
+      - Borrow
+      - Lend
+    InterestPaymentSource:
+      type: string
+      enum:
+      - UnrealizedPnl
+      - BorrowLend
     BorrowLendSource:
       type: string
       enum:
@@ -2452,62 +2504,14 @@ components:
       - Rfq
       - SpotMargin
       - Withdrawal
-    ApiErrorCode:
+    PaymentType:
       type: string
       enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
-    SqrtFunction:
-      type: object
-      title: SqrtFunction
-      required:
-      - base
-      - factor
-      properties:
-        base:
-          type: string
-          format: decimal
-        factor:
-          type: string
-          format: decimal
-    BorrowLendPositionState:
-      type: string
-      enum:
-      - Open
-      - Closed
+      - EntryFee
+      - Borrow
+      - Lend
+      - UnrealizedPositivePnl
+      - UnrealizedNegativePnl
     BorrowLendMovement:
       type: object
       title: BorrowLendMovement
@@ -2552,11 +2556,110 @@ components:
           description: 'The order id associated with the borrow lend event created through spot
 
             margin.'
-    BorrowLendSide:
-      type: string
-      enum:
-      - Borrow
-      - Lend
+    BorrowLendExecutePayload:
+      type: object
+      title: BorrowLendExecutePayload
+      required:
+      - quantity
+      - side
+      - symbol
+      properties:
+        quantity:
+          type: string
+          format: decimal
+          description: The quantity of the asset to repay.
+        side:
+          description: Side of the borrow lend.
+          allOf:
+          - $ref: '#/components/schemas/BorrowLendSide'
+          - description: Side of the borrow lend.
+        symbol:
+          description: The asset to repay.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: The asset to repay.
+    BorrowLendPositionWithMargin:
+      type: object
+      title: BorrowLendPositionWithMargin
+      required:
+      - cumulativeInterest
+      - id
+      - imf
+      - imfFunction
+      - netQuantity
+      - markPrice
+      - mmf
+      - mmfFunction
+      - netExposureQuantity
+      - netExposureNotional
+      - symbol
+      - estLiquidationPrice
+      properties:
+        cumulativeInterest:
+          type: string
+          format: decimal
+          description: Cumulative interest payments quantity.
+        id:
+          type: string
+          description: Uniquely identifies the position.
+        imf:
+          type: string
+          format: decimal
+          description: Initial margin fraction for this position.
+        imfFunction:
+          description: IMF function.
+          allOf:
+          - $ref: '#/components/schemas/PositionImfFunction'
+          - description: IMF function.
+        netQuantity:
+          type: string
+          format: decimal
+          description: Net quantity of the position, positive if long, negative if short.
+        markPrice:
+          type: string
+          format: decimal
+          description: Mark price of the underlying asset.
+        mmf:
+          type: string
+          format: decimal
+          description: Maintenance margin fraction for this position.
+        mmfFunction:
+          description: MMF function.
+          allOf:
+          - $ref: '#/components/schemas/PositionImfFunction'
+          - description: MMF function.
+        netExposureQuantity:
+          type: string
+          format: decimal
+          description: 'Net exposure of the position, positive if long, negative if short. Lends
+
+            have no exposure.'
+        netExposureNotional:
+          type: string
+          format: decimal
+          description: Notional value of the position.
+        symbol:
+          description: Symbol of the underlying asset.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: Symbol of the underlying asset.
+        estLiquidationPrice:
+          type: string
+          format: decimal
+          description: Estimated liquidation price of the position.
+    SqrtFunction:
+      type: object
+      title: SqrtFunction
+      required:
+      - base
+      - factor
+      properties:
+        base:
+          type: string
+          format: decimal
+        factor:
+          type: string
+          format: decimal
     BorrowLendEventType:
       type: string
       enum:
@@ -2564,122 +2667,19 @@ components:
       - BorrowRepay
       - Lend
       - LendRedeem
-    SortDirection:
-      type: string
-      enum:
-      - Asc
-      - Desc
-    InterestPayment:
+    PositionEstimatedLiquidationPrice:
       type: object
-      title: InterestPayment
+      title: PositionEstimatedLiquidationPrice
       required:
-      - paymentType
-      - interestRate
-      - interval
-      - marketSymbol
-      - positionId
-      - quantity
-      - symbol
-      - timestamp
+      - liquidationPrice
+      - markPrice
       properties:
-        paymentType:
-          description: Type of payment.
-          allOf:
-          - $ref: '#/components/schemas/PaymentType'
-          - description: Type of payment.
-        interestRate:
+        liquidationPrice:
           type: string
           format: decimal
-          description: The rate of interest.
-        interval:
-          type: integer
-          format: uint64
-          description: The interval duration of the payment.
-        marketSymbol:
-          type: string
-          description: 'The market symbol for which the interest payment can be attributed. For
-
-            interest payments corresponding to borrow lend positions, this is
-
-            the spot market symbol. For interest payments corresponding to
-
-            unrealized pnl on futures markets, this will be the futures market
-
-            symbol.'
-        positionId:
-          type: string
-          description: ID of the borrow lend position the interest payment is for.
-        quantity:
+        markPrice:
           type: string
           format: decimal
-          description: Amount of the payment.
-        symbol:
-          description: The symbol of the market asset the payment is associated with.
-          allOf:
-          - $ref: '#/components/schemas/CustodyAsset'
-          - description: The symbol of the market asset the payment is associated with.
-        timestamp:
-          type: string
-          format: naive-date-time
-          description: The timestamp for the borrow lending interest payment (UTC).
-    PositionImfFunction:
-      type: object
-      anyOf:
-      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
-      discriminator:
-        propertyName: type
-        mapping:
-          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
-    BorrowLendPositionRow:
-      type: object
-      title: BorrowLendPositionRow
-      required:
-      - positionId
-      - quantity
-      - symbol
-      - source
-      - cumulativeInterest
-      - avgInterestRate
-      - side
-      - createdAt
-      properties:
-        positionId:
-          type: string
-          description: ID of the borrow lend position the event is associated with.
-        quantity:
-          type: string
-          format: decimal
-          description: Quantity of the borrow lend event.
-        symbol:
-          type: string
-          description: Symbol of the asset the borrow lend is for.
-        source:
-          description: Initial source of position.
-          allOf:
-          - $ref: '#/components/schemas/BorrowLendSource'
-          - description: Initial source of position.
-        cumulativeInterest:
-          type: string
-          format: decimal
-          description: Cumulative interest payments quantity.
-        avgInterestRate:
-          type: string
-          format: decimal
-          description: Average interest rate over the time this position was open.
-        side:
-          description: Borrow or lend.
-          allOf:
-          - $ref: '#/components/schemas/BorrowLendSide'
-          - description: Borrow or lend.
-        createdAt:
-          type: string
-          format: naive-date-time
-          description: The timestamp the borrow lend event was created at (UTC).
-    InterestPaymentSource:
-      type: string
-      enum:
-      - UnrealizedPnl
-      - BorrowLend
     PositionImfFunction_SqrtFunction:
       allOf:
       - type: object

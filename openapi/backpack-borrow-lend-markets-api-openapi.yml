@@ -122,6 +122,187 @@ paths:
       operationId: get_apy_rates
 components:
   schemas:
+    BorrowLendMarket:
+      type: object
+      title: BorrowLendMarket
+      description: Borrow Lending market summary.
+      required:
+      - state
+      - assetMarkPrice
+      - borrowInterestRate
+      - borrowedQuantity
+      - fee
+      - lendInterestRate
+      - lentQuantity
+      - maxUtilization
+      - openBorrowLendLimit
+      - optimalUtilization
+      - symbol
+      - timestamp
+      - throttleUtilizationThreshold
+      - throttleUtilizationBound
+      - throttleUpdateFraction
+      - utilization
+      - stepSize
+      properties:
+        state:
+          description: State of the borrow lend market.
+          allOf:
+          - $ref: '#/components/schemas/BorrowLendBookState'
+          - description: State of the borrow lend market.
+        assetMarkPrice:
+          type: string
+          format: decimal
+          description: Mark price of spot instrument.
+        borrowInterestRate:
+          type: string
+          format: decimal
+          description: The rate borrowers pay.
+        borrowedQuantity:
+          type: string
+          format: decimal
+          description: The amount of assets borrowed from the pool.
+        fee:
+          type: string
+          format: decimal
+          description: The fee that the exchange takes on borrow lend yield.
+        lendInterestRate:
+          type: string
+          format: decimal
+          description: The APY rate lenders receive.
+        lentQuantity:
+          type: string
+          format: decimal
+          description: The amount of assets lent to the pool.
+        maxUtilization:
+          type: string
+          format: decimal
+          description: 'The max amount of utilization that can be used by borrowing or redeeming
+
+            lend, irrespsective of the throttle.'
+        openBorrowLendLimit:
+          type: string
+          format: decimal
+          description: 'Can''t increase borrows or lends pass this threshold. It''s possible
+
+            this is less than the outstanding amount. If that''s the case, then
+
+            it simply prevents new borrow or lends from being created.'
+        optimalUtilization:
+          type: string
+          format: decimal
+          description: The optimal utilization rate for the interest rate model.
+        symbol:
+          description: Uniquely identifies the token.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: Uniquely identifies the token.
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the summary.
+        throttleUtilizationThreshold:
+          type: string
+          format: decimal
+          description: The threshold that triggers borrow throttling.
+        throttleUtilizationBound:
+          type: string
+          format: decimal
+          description: 'The max utilization threshold for any given timestep. Any borrow
+
+            or lend redemption should fail if it puts utilization above this
+
+            (with the exception of liquidations).'
+        throttleUpdateFraction:
+          type: string
+          format: decimal
+          description: 'Hyper-param determining the max utilization can increase during any
+
+            timestep.'
+        utilization:
+          type: string
+          format: decimal
+          description: Utilisation.
+        stepSize:
+          type: string
+          format: decimal
+          description: Step Size.
+    BorrowLendBookState:
+      type: string
+      description: Borrow lend book state
+      enum:
+      - Open
+      - Closed
+      - RepayOnly
+    ApiErrorCode:
+      type: string
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
+    StakingApyRate:
+      type: object
+      title: StakingApyRate
+      required:
+      - symbol
+      - dilutionFactor
+      - stakingRate
+      properties:
+        symbol:
+          type: string
+        dilutionFactor:
+          type: string
+          format: decimal
+        stakingRate:
+          type: string
+          format: decimal
+    ApyRates:
+      type: object
+      title: ApyRates
+      required:
+      - borrowLend
+      - staking
+      properties:
+        borrowLend:
+          type: array
+          items:
+            $ref: '#/components/schemas/BorrowLendApyRate'
+        staking:
+          type: array
+          items:
+            $ref: '#/components/schemas/StakingApyRate'
     BorrowLendMarketHistoryInterval:
       type: string
       enum:
@@ -129,6 +310,22 @@ components:
       - 1w
       - 1month
       - 1year
+    BorrowLendApyRate:
+      type: object
+      title: BorrowLendApyRate
+      required:
+      - symbol
+      - borrowRate
+      - lendRate
+      properties:
+        symbol:
+          $ref: '#/components/schemas/CustodyAsset'
+        borrowRate:
+          type: string
+          format: decimal
+        lendRate:
+          type: string
+          format: decimal
     CustodyAsset:
       type: string
       enum:
@@ -1733,32 +1930,6 @@ components:
       - EWH.US
       - NLR.US
       - FUTU.US
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
-    ApyRates:
-      type: object
-      title: ApyRates
-      required:
-      - borrowLend
-      - staking
-      properties:
-        borrowLend:
-          type: array
-          items:
-            $ref: '#/components/schemas/BorrowLendApyRate'
-        staking:
-          type: array
-          items:
-            $ref: '#/components/schemas/StakingApyRate'
     BorrowLendHistory:
       type: object
       title: BorrowLendHistory
@@ -1794,188 +1965,17 @@ components:
           type: string
           format: decimal
           description: Utilisation.
-    BorrowLendBookState:
-      type: string
-      description: Borrow lend book state
-      enum:
-      - Open
-      - Closed
-      - RepayOnly
-    BorrowLendApyRate:
+    ApiErrorResponse:
       type: object
-      title: BorrowLendApyRate
+      title: ApiErrorResponse
       required:
-      - symbol
-      - borrowRate
-      - lendRate
+      - code
+      - message
       properties:
-        symbol:
-          $ref: '#/components/schemas/CustodyAsset'
-        borrowRate:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
           type: string
-          format: decimal
-        lendRate:
-          type: string
-          format: decimal
-    BorrowLendMarket:
-      type: object
-      title: BorrowLendMarket
-      description: Borrow Lending market summary.
-      required:
-      - state
-      - assetMarkPrice
-      - borrowInterestRate
-      - borrowedQuantity
-      - fee
-      - lendInterestRate
-      - lentQuantity
-      - maxUtilization
-      - openBorrowLendLimit
-      - optimalUtilization
-      - symbol
-      - timestamp
-      - throttleUtilizationThreshold
-      - throttleUtilizationBound
-      - throttleUpdateFraction
-      - utilization
-      - stepSize
-      properties:
-        state:
-          description: State of the borrow lend market.
-          allOf:
-          - $ref: '#/components/schemas/BorrowLendBookState'
-          - description: State of the borrow lend market.
-        assetMarkPrice:
-          type: string
-          format: decimal
-          description: Mark price of spot instrument.
-        borrowInterestRate:
-          type: string
-          format: decimal
-          description: The rate borrowers pay.
-        borrowedQuantity:
-          type: string
-          format: decimal
-          description: The amount of assets borrowed from the pool.
-        fee:
-          type: string
-          format: decimal
-          description: The fee that the exchange takes on borrow lend yield.
-        lendInterestRate:
-          type: string
-          format: decimal
-          description: The APY rate lenders receive.
-        lentQuantity:
-          type: string
-          format: decimal
-          description: The amount of assets lent to the pool.
-        maxUtilization:
-          type: string
-          format: decimal
-          description: 'The max amount of utilization that can be used by borrowing or redeeming
-
-            lend, irrespsective of the throttle.'
-        openBorrowLendLimit:
-          type: string
-          format: decimal
-          description: 'Can''t increase borrows or lends pass this threshold. It''s possible
-
-            this is less than the outstanding amount. If that''s the case, then
-
-            it simply prevents new borrow or lends from being created.'
-        optimalUtilization:
-          type: string
-          format: decimal
-          description: The optimal utilization rate for the interest rate model.
-        symbol:
-          description: Uniquely identifies the token.
-          allOf:
-          - $ref: '#/components/schemas/CustodyAsset'
-          - description: Uniquely identifies the token.
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp of the summary.
-        throttleUtilizationThreshold:
-          type: string
-          format: decimal
-          description: The threshold that triggers borrow throttling.
-        throttleUtilizationBound:
-          type: string
-          format: decimal
-          description: 'The max utilization threshold for any given timestep. Any borrow
-
-            or lend redemption should fail if it puts utilization above this
-
-            (with the exception of liquidations).'
-        throttleUpdateFraction:
-          type: string
-          format: decimal
-          description: 'Hyper-param determining the max utilization can increase during any
-
-            timestep.'
-        utilization:
-          type: string
-          format: decimal
-          description: Utilisation.
-        stepSize:
-          type: string
-          format: decimal
-          description: Step Size.
-    ApiErrorCode:
-      type: string
-      enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
-    StakingApyRate:
-      type: object
-      title: StakingApyRate
-      required:
-      - symbol
-      - dilutionFactor
-      - stakingRate
-      properties:
-        symbol:
-          type: string
-        dilutionFactor:
-          type: string
-          format: decimal
-        stakingRate:
-          type: string
-          format: decimal
 x-tagGroups:
 - name: Public Endpoints
   tags:

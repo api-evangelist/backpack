@@ -140,17 +140,6 @@ paths:
       operationId: update_withdrawal_delay
 components:
   schemas:
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
     WithdrawalDelay:
       type: object
       title: WithdrawalDelay
@@ -237,6 +226,17 @@ components:
         twoFactorToken:
           type: string
           description: Issued two factor token.
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
 x-tagGroups:
 - name: Public Endpoints
   tags:

@@ -84,19 +84,6 @@ components:
       enum:
       - Ok
       - Maintenance
-    WalletResponse:
-      type: object
-      title: WalletResponse
-      required:
-      - blockchain
-      - address
-      properties:
-        blockchain:
-          type: string
-          description: The blockchain network.
-        address:
-          type: string
-          description: The wallet address.
     StatusAndMessage:
       type: object
       title: StatusAndMessage
@@ -111,6 +98,19 @@ components:
         message:
           type: string
           description: Status message, if any.
+    WalletResponse:
+      type: object
+      title: WalletResponse
+      required:
+      - blockchain
+      - address
+      properties:
+        blockchain:
+          type: string
+          description: The blockchain network.
+        address:
+          type: string
+          description: The wallet address.
 x-tagGroups:
 - name: Public Endpoints
   tags:

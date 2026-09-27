@@ -143,17 +143,39 @@ paths:
       operationId: get_historical_trades
 components:
   schemas:
-    ApiErrorResponse:
+    Trade:
       type: object
-      title: ApiErrorResponse
+      title: Trade
       required:
-      - code
-      - message
+      - price
+      - quantity
+      - quoteQuantity
+      - timestamp
+      - isBuyerMaker
       properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
+        id:
+          type: integer
+          format: int64
+          description: Id of the trade.
+        price:
           type: string
+          format: decimal
+          description: Price of the trade.
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity of the trade in the base asset.
+        quoteQuantity:
+          type: string
+          format: decimal
+          description: Quantity of the trade in the quote asset.
+        timestamp:
+          type: integer
+          format: int64
+          description: Timestamp of the trade (server time).
+        isBuyerMaker:
+          type: boolean
+          description: Whether the buyer was the maker order.
     ApiErrorCode:
       type: string
       enum:
@@ -192,39 +214,17 @@ components:
       - TOO_MANY_REQUESTS
       - TRADING_PAUSED
       - UNAUTHORIZED
-    Trade:
+    ApiErrorResponse:
       type: object
-      title: Trade
+      title: ApiErrorResponse
       required:
-      - price
-      - quantity
-      - quoteQuantity
-      - timestamp
-      - isBuyerMaker
+      - code
+      - message
       properties:
-        id:
-          type: integer
-          format: int64
-          description: Id of the trade.
-        price:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
           type: string
-          format: decimal
-          description: Price of the trade.
-        quantity:
-          type: string
-          format: decimal
-          description: Quantity of the trade in the base asset.
-        quoteQuantity:
-          type: string
-          format: decimal
-          description: Quantity of the trade in the quote asset.
-        timestamp:
-          type: integer
-          format: int64
-          description: Timestamp of the trade (server time).
-        isBuyerMaker:
-          type: boolean
-          description: Whether the buyer was the maker order.
 x-tagGroups:
 - name: Public Endpoints
   tags:
