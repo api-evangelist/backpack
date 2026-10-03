@@ -708,155 +708,28 @@ paths:
       operationId: get_borrow_lend_position_history
 components:
   schemas:
-    PositionImfFunction:
-      type: object
-      anyOf:
-      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
-      discriminator:
-        propertyName: type
-        mapping:
-          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
-    BorrowLendPositionRow:
-      type: object
-      title: BorrowLendPositionRow
-      required:
-      - positionId
-      - quantity
-      - symbol
-      - source
-      - cumulativeInterest
-      - avgInterestRate
-      - side
-      - createdAt
-      properties:
-        positionId:
-          type: string
-          description: ID of the borrow lend position the event is associated with.
-        quantity:
-          type: string
-          format: decimal
-          description: Quantity of the borrow lend event.
-        symbol:
-          type: string
-          description: Symbol of the asset the borrow lend is for.
-        source:
-          description: Initial source of position.
-          allOf:
-          - $ref: '#/components/schemas/BorrowLendSource'
-          - description: Initial source of position.
-        cumulativeInterest:
-          type: string
-          format: decimal
-          description: Cumulative interest payments quantity.
-        avgInterestRate:
-          type: string
-          format: decimal
-          description: Average interest rate over the time this position was open.
-        side:
-          description: Borrow or lend.
-          allOf:
-          - $ref: '#/components/schemas/BorrowLendSide'
-          - description: Borrow or lend.
-        createdAt:
-          type: string
-          format: naive-date-time
-          description: The timestamp the borrow lend event was created at (UTC).
-    ApiErrorCode:
+    BorrowLendSide:
       type: string
       enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
+      - Borrow
+      - Lend
+    PositionImfFunction_SqrtFunction:
+      allOf:
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum:
+            - sqrt
+            example: sqrt
+      - $ref: '#/components/schemas/SqrtFunction'
     BorrowLendPositionState:
       type: string
       enum:
       - Open
       - Closed
-    InterestPayment:
-      type: object
-      title: InterestPayment
-      required:
-      - paymentType
-      - interestRate
-      - interval
-      - marketSymbol
-      - positionId
-      - quantity
-      - symbol
-      - timestamp
-      properties:
-        paymentType:
-          description: Type of payment.
-          allOf:
-          - $ref: '#/components/schemas/PaymentType'
-          - description: Type of payment.
-        interestRate:
-          type: string
-          format: decimal
-          description: The rate of interest.
-        interval:
-          type: integer
-          format: uint64
-          description: The interval duration of the payment.
-        marketSymbol:
-          type: string
-          description: 'The market symbol for which the interest payment can be attributed. For
-
-            interest payments corresponding to borrow lend positions, this is
-
-            the spot market symbol. For interest payments corresponding to
-
-            unrealized pnl on futures markets, this will be the futures market
-
-            symbol.'
-        positionId:
-          type: string
-          description: ID of the borrow lend position the interest payment is for.
-        quantity:
-          type: string
-          format: decimal
-          description: Amount of the payment.
-        symbol:
-          description: The symbol of the market asset the payment is associated with.
-          allOf:
-          - $ref: '#/components/schemas/CustodyAsset'
-          - description: The symbol of the market asset the payment is associated with.
-        timestamp:
-          type: string
-          format: naive-date-time
-          description: The timestamp for the borrow lending interest payment (UTC).
     CustodyAsset:
       type: string
       enum:
@@ -2461,32 +2334,59 @@ components:
       - EWH.US
       - NLR.US
       - FUTU.US
-    ApiErrorResponse:
+    InterestPayment:
       type: object
-      title: ApiErrorResponse
+      title: InterestPayment
       required:
-      - code
-      - message
+      - paymentType
+      - interestRate
+      - interval
+      - marketSymbol
+      - positionId
+      - quantity
+      - symbol
+      - timestamp
       properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
+        paymentType:
+          description: Type of payment.
+          allOf:
+          - $ref: '#/components/schemas/PaymentType'
+          - description: Type of payment.
+        interestRate:
           type: string
-    SortDirection:
-      type: string
-      enum:
-      - Asc
-      - Desc
-    BorrowLendSide:
-      type: string
-      enum:
-      - Borrow
-      - Lend
-    InterestPaymentSource:
-      type: string
-      enum:
-      - UnrealizedPnl
-      - BorrowLend
+          format: decimal
+          description: The rate of interest.
+        interval:
+          type: integer
+          format: uint64
+          description: The interval duration of the payment.
+        marketSymbol:
+          type: string
+          description: 'The market symbol for which the interest payment can be attributed. For
+
+            interest payments corresponding to borrow lend positions, this is
+
+            the spot market symbol. For interest payments corresponding to
+
+            unrealized pnl on futures markets, this will be the futures market
+
+            symbol.'
+        positionId:
+          type: string
+          description: ID of the borrow lend position the interest payment is for.
+        quantity:
+          type: string
+          format: decimal
+          description: Amount of the payment.
+        symbol:
+          description: The symbol of the market asset the payment is associated with.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: The symbol of the market asset the payment is associated with.
+        timestamp:
+          type: string
+          format: naive-date-time
+          description: The timestamp for the borrow lending interest payment (UTC).
     BorrowLendSource:
       type: string
       enum:
@@ -2512,6 +2412,46 @@ components:
       - Lend
       - UnrealizedPositivePnl
       - UnrealizedNegativePnl
+    InterestPaymentSource:
+      type: string
+      enum:
+      - UnrealizedPnl
+      - BorrowLend
+    PositionImfFunction:
+      type: object
+      anyOf:
+      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
+      discriminator:
+        propertyName: type
+        mapping:
+          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
+    SortDirection:
+      type: string
+      enum:
+      - Asc
+      - Desc
+    BorrowLendExecutePayload:
+      type: object
+      title: BorrowLendExecutePayload
+      required:
+      - quantity
+      - side
+      - symbol
+      properties:
+        quantity:
+          type: string
+          format: decimal
+          description: The quantity of the asset to repay.
+        side:
+          description: Side of the borrow lend.
+          allOf:
+          - $ref: '#/components/schemas/BorrowLendSide'
+          - description: Side of the borrow lend.
+        symbol:
+          description: The asset to repay.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: The asset to repay.
     BorrowLendMovement:
       type: object
       title: BorrowLendMovement
@@ -2556,28 +2496,6 @@ components:
           description: 'The order id associated with the borrow lend event created through spot
 
             margin.'
-    BorrowLendExecutePayload:
-      type: object
-      title: BorrowLendExecutePayload
-      required:
-      - quantity
-      - side
-      - symbol
-      properties:
-        quantity:
-          type: string
-          format: decimal
-          description: The quantity of the asset to repay.
-        side:
-          description: Side of the borrow lend.
-          allOf:
-          - $ref: '#/components/schemas/BorrowLendSide'
-          - description: Side of the borrow lend.
-        symbol:
-          description: The asset to repay.
-          allOf:
-          - $ref: '#/components/schemas/CustodyAsset'
-          - description: The asset to repay.
     BorrowLendPositionWithMargin:
       type: object
       title: BorrowLendPositionWithMargin
@@ -2660,13 +2578,51 @@ components:
         factor:
           type: string
           format: decimal
-    BorrowLendEventType:
-      type: string
-      enum:
-      - Borrow
-      - BorrowRepay
-      - Lend
-      - LendRedeem
+    BorrowLendPositionRow:
+      type: object
+      title: BorrowLendPositionRow
+      required:
+      - positionId
+      - quantity
+      - symbol
+      - source
+      - cumulativeInterest
+      - avgInterestRate
+      - side
+      - createdAt
+      properties:
+        positionId:
+          type: string
+          description: ID of the borrow lend position the event is associated with.
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity of the borrow lend event.
+        symbol:
+          type: string
+          description: Symbol of the asset the borrow lend is for.
+        source:
+          description: Initial source of position.
+          allOf:
+          - $ref: '#/components/schemas/BorrowLendSource'
+          - description: Initial source of position.
+        cumulativeInterest:
+          type: string
+          format: decimal
+          description: Cumulative interest payments quantity.
+        avgInterestRate:
+          type: string
+          format: decimal
+          description: Average interest rate over the time this position was open.
+        side:
+          description: Borrow or lend.
+          allOf:
+          - $ref: '#/components/schemas/BorrowLendSide'
+          - description: Borrow or lend.
+        createdAt:
+          type: string
+          format: naive-date-time
+          description: The timestamp the borrow lend event was created at (UTC).
     PositionEstimatedLiquidationPrice:
       type: object
       title: PositionEstimatedLiquidationPrice
@@ -2680,18 +2636,62 @@ components:
         markPrice:
           type: string
           format: decimal
-    PositionImfFunction_SqrtFunction:
-      allOf:
-      - type: object
-        required:
-        - type
-        properties:
-          type:
-            type: string
-            enum:
-            - sqrt
-            example: sqrt
-      - $ref: '#/components/schemas/SqrtFunction'
+    BorrowLendEventType:
+      type: string
+      enum:
+      - Borrow
+      - BorrowRepay
+      - Lend
+      - LendRedeem
+    ApiErrorCode:
+      type: string
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
 x-tagGroups:
 - name: Public Endpoints
   tags:

@@ -160,20 +160,6 @@ components:
           description: 'The time when the update to the withdrawal delay setting will be
 
             applied.'
-    CreateWithdrawalDelayRequest:
-      type: object
-      title: CreateWithdrawalDelayRequest
-      required:
-      - withdrawalDelayHours
-      - twoFactorToken
-      properties:
-        withdrawalDelayHours:
-          type: integer
-          format: uint32
-          description: The delay applied to withdrawals being processed, in hours.
-        twoFactorToken:
-          type: string
-          description: Issued two factor token.
     ApiErrorCode:
       type: string
       enum:
@@ -212,6 +198,17 @@ components:
       - TOO_MANY_REQUESTS
       - TRADING_PAUSED
       - UNAUTHORIZED
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
     UpdateWithdrawalDelayRequest:
       type: object
       title: UpdateWithdrawalDelayRequest
@@ -226,17 +223,20 @@ components:
         twoFactorToken:
           type: string
           description: Issued two factor token.
-    ApiErrorResponse:
+    CreateWithdrawalDelayRequest:
       type: object
-      title: ApiErrorResponse
+      title: CreateWithdrawalDelayRequest
       required:
-      - code
-      - message
+      - withdrawalDelayHours
+      - twoFactorToken
       properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
+        withdrawalDelayHours:
+          type: integer
+          format: uint32
+          description: The delay applied to withdrawals being processed, in hours.
+        twoFactorToken:
           type: string
+          description: Issued two factor token.
 x-tagGroups:
 - name: Public Endpoints
   tags:

@@ -396,6 +396,19 @@ paths:
       operationId: get_position_history
 components:
   schemas:
+    SqrtFunction:
+      type: object
+      title: SqrtFunction
+      required:
+      - base
+      - factor
+      properties:
+        base:
+          type: string
+          format: decimal
+        factor:
+          type: string
+          format: decimal
     PositionImfFunction:
       type: object
       anyOf:
@@ -404,11 +417,6 @@ components:
         propertyName: type
         mapping:
           sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
-    SortDirection:
-      type: string
-      enum:
-      - Asc
-      - Desc
     MarketType:
       type: string
       enum:
@@ -418,82 +426,6 @@ components:
       - DATED
       - PREDICTION
       - RFQ
-    FundingPayment:
-      type: object
-      title: FundingPayment
-      required:
-      - userId
-      - symbol
-      - quantity
-      - intervalEndTimestamp
-      - fundingRate
-      properties:
-        userId:
-          type: integer
-          format: int32
-          description: User id of the account the payment is associated with.
-        subaccountId:
-          type: integer
-          format: uint16
-          description: Id of the subaccount the payment is associated with, if any.
-        symbol:
-          type: string
-          description: The symbol of the market the payment is associated with.
-        quantity:
-          type: string
-          format: decimal
-          description: Quantity of the payment. Positive if received, negative if paid.
-        intervalEndTimestamp:
-          type: string
-          format: naive-date-time
-          description: The end of the funding interval for the payment.
-        fundingRate:
-          type: string
-          format: decimal
-          description: The funding rate for the payment.
-    ApiErrorCode:
-      type: string
-      enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
-    PositionState:
-      type: string
-      enum:
-      - Open
-      - Closed
     PositionHistoryRow:
       type: object
       title: PositionHistoryRow
@@ -582,18 +514,93 @@ components:
         closedAt:
           type: string
           format: naive-date-time
-    PositionImfFunction_SqrtFunction:
-      allOf:
-      - type: object
-        required:
-        - type
-        properties:
-          type:
-            type: string
-            enum:
-            - sqrt
-            example: sqrt
-      - $ref: '#/components/schemas/SqrtFunction'
+    SortDirection:
+      type: string
+      enum:
+      - Asc
+      - Desc
+    ApiErrorCode:
+      type: string
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
+    FundingPayment:
+      type: object
+      title: FundingPayment
+      required:
+      - userId
+      - symbol
+      - quantity
+      - intervalEndTimestamp
+      - fundingRate
+      properties:
+        userId:
+          type: integer
+          format: int32
+          description: User id of the account the payment is associated with.
+        subaccountId:
+          type: integer
+          format: uint16
+          description: Id of the subaccount the payment is associated with, if any.
+        symbol:
+          type: string
+          description: The symbol of the market the payment is associated with.
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity of the payment. Positive if received, negative if paid.
+        intervalEndTimestamp:
+          type: string
+          format: naive-date-time
+          description: The end of the funding interval for the payment.
+        fundingRate:
+          type: string
+          format: decimal
+          description: The funding rate for the payment.
     FuturePositionWithMargin:
       type: object
       title: FuturePositionWithMargin
@@ -705,30 +712,23 @@ components:
           type: string
           format: decimal
           description: Cumulative interest paid for this position's unrealized pnl.
-    SqrtFunction:
-      type: object
-      title: SqrtFunction
-      required:
-      - base
-      - factor
-      properties:
-        base:
-          type: string
-          format: decimal
-        factor:
-          type: string
-          format: decimal
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
+    PositionImfFunction_SqrtFunction:
+      allOf:
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum:
+            - sqrt
+            example: sqrt
+      - $ref: '#/components/schemas/SqrtFunction'
+    PositionState:
+      type: string
+      enum:
+      - Open
+      - Closed
 x-tagGroups:
 - name: Public Endpoints
   tags:

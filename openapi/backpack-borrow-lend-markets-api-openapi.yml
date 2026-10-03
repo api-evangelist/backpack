@@ -122,6 +122,57 @@ paths:
       operationId: get_apy_rates
 components:
   schemas:
+    StakingApyRate:
+      type: object
+      title: StakingApyRate
+      required:
+      - symbol
+      - dilutionFactor
+      - stakingRate
+      properties:
+        symbol:
+          type: string
+        dilutionFactor:
+          type: string
+          format: decimal
+        stakingRate:
+          type: string
+          format: decimal
+    BorrowLendHistory:
+      type: object
+      title: BorrowLendHistory
+      required:
+      - borrowInterestRate
+      - borrowedQuantity
+      - lendInterestRate
+      - lentQuantity
+      - timestamp
+      - utilization
+      properties:
+        borrowInterestRate:
+          type: string
+          format: decimal
+          description: The rate borrowers pay.
+        borrowedQuantity:
+          type: string
+          format: decimal
+          description: The amount of assets borrowed from the pool.
+        lendInterestRate:
+          type: string
+          format: decimal
+          description: The APY rate lenders receive.
+        lentQuantity:
+          type: string
+          format: decimal
+          description: The amount of assets lent to the pool.
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the summary.
+        utilization:
+          type: string
+          format: decimal
+          description: Utilisation.
     BorrowLendMarket:
       type: object
       title: BorrowLendMarket
@@ -227,105 +278,6 @@ components:
           type: string
           format: decimal
           description: Step Size.
-    BorrowLendBookState:
-      type: string
-      description: Borrow lend book state
-      enum:
-      - Open
-      - Closed
-      - RepayOnly
-    ApiErrorCode:
-      type: string
-      enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
-    StakingApyRate:
-      type: object
-      title: StakingApyRate
-      required:
-      - symbol
-      - dilutionFactor
-      - stakingRate
-      properties:
-        symbol:
-          type: string
-        dilutionFactor:
-          type: string
-          format: decimal
-        stakingRate:
-          type: string
-          format: decimal
-    ApyRates:
-      type: object
-      title: ApyRates
-      required:
-      - borrowLend
-      - staking
-      properties:
-        borrowLend:
-          type: array
-          items:
-            $ref: '#/components/schemas/BorrowLendApyRate'
-        staking:
-          type: array
-          items:
-            $ref: '#/components/schemas/StakingApyRate'
-    BorrowLendMarketHistoryInterval:
-      type: string
-      enum:
-      - 1d
-      - 1w
-      - 1month
-      - 1year
-    BorrowLendApyRate:
-      type: object
-      title: BorrowLendApyRate
-      required:
-      - symbol
-      - borrowRate
-      - lendRate
-      properties:
-        symbol:
-          $ref: '#/components/schemas/CustodyAsset'
-        borrowRate:
-          type: string
-          format: decimal
-        lendRate:
-          type: string
-          format: decimal
     CustodyAsset:
       type: string
       enum:
@@ -1930,41 +1882,51 @@ components:
       - EWH.US
       - NLR.US
       - FUTU.US
-    BorrowLendHistory:
-      type: object
-      title: BorrowLendHistory
-      required:
-      - borrowInterestRate
-      - borrowedQuantity
-      - lendInterestRate
-      - lentQuantity
-      - timestamp
-      - utilization
-      properties:
-        borrowInterestRate:
-          type: string
-          format: decimal
-          description: The rate borrowers pay.
-        borrowedQuantity:
-          type: string
-          format: decimal
-          description: The amount of assets borrowed from the pool.
-        lendInterestRate:
-          type: string
-          format: decimal
-          description: The APY rate lenders receive.
-        lentQuantity:
-          type: string
-          format: decimal
-          description: The amount of assets lent to the pool.
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp of the summary.
-        utilization:
-          type: string
-          format: decimal
-          description: Utilisation.
+    BorrowLendBookState:
+      type: string
+      description: Borrow lend book state
+      enum:
+      - Open
+      - Closed
+      - RepayOnly
+    ApiErrorCode:
+      type: string
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
     ApiErrorResponse:
       type: object
       title: ApiErrorResponse
@@ -1976,6 +1938,44 @@ components:
           $ref: '#/components/schemas/ApiErrorCode'
         message:
           type: string
+    ApyRates:
+      type: object
+      title: ApyRates
+      required:
+      - borrowLend
+      - staking
+      properties:
+        borrowLend:
+          type: array
+          items:
+            $ref: '#/components/schemas/BorrowLendApyRate'
+        staking:
+          type: array
+          items:
+            $ref: '#/components/schemas/StakingApyRate'
+    BorrowLendMarketHistoryInterval:
+      type: string
+      enum:
+      - 1d
+      - 1w
+      - 1month
+      - 1year
+    BorrowLendApyRate:
+      type: object
+      title: BorrowLendApyRate
+      required:
+      - symbol
+      - borrowRate
+      - lendRate
+      properties:
+        symbol:
+          $ref: '#/components/schemas/CustodyAsset'
+        borrowRate:
+          type: string
+          format: decimal
+        lendRate:
+          type: string
+          format: decimal
 x-tagGroups:
 - name: Public Endpoints
   tags:

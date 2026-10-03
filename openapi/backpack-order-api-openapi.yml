@@ -921,77 +921,6 @@ paths:
       operationId: get_order_history
 components:
   schemas:
-    OrderStatus:
-      type: string
-      enum:
-      - Cancelled
-      - Expired
-      - Filled
-      - New
-      - PartiallyFilled
-      - TriggerPending
-      - TriggerFailed
-    SystemOrderType:
-      type: string
-      enum:
-      - CollateralConversion
-      - FutureExpiry
-      - LiquidatePositionOnAdl
-      - LiquidatePositionOnBook
-      - LiquidatePositionOnBackstop
-      - OrderBookClosed
-    ApiErrorCode:
-      type: string
-      enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
-    OrderCancelAllPayload:
-      type: object
-      title: OrderCancelAllPayload
-      required:
-      - symbol
-      properties:
-        symbol:
-          type: string
-          description: Market to cancel orders for.
-        orderType:
-          description: Type of orders to cancel.
-          allOf:
-          - $ref: '#/components/schemas/CancelOrderTypeEnum'
-          - description: Type of orders to cancel.
     OrderExecutePayload:
       type: object
       title: OrderExecutePayload
@@ -1123,6 +1052,33 @@ components:
           allOf:
           - $ref: '#/components/schemas/SlippageToleranceType'
           - description: Slippage tolerance type.
+    OrderExpiryReason:
+      type: string
+      enum:
+      - AccountTradingSuspended
+      - BorrowRequiresLendRedeem
+      - FillOrKill
+      - InsufficientBorrowableQuantity
+      - InsufficientFunds
+      - InsufficientLiquidity
+      - InvalidPrice
+      - InvalidQuantity
+      - ImmediateOrCancel
+      - InsufficientMargin
+      - Liquidation
+      - NegativeEquity
+      - PostOnlyMode
+      - PostOnlyTaker
+      - PriceOutOfBounds
+      - ReduceOnlyNotReduced
+      - SelfTradePrevention
+      - StopWithoutPosition
+      - PriceImpact
+      - Unknown
+      - UserPermissions
+      - MaxStopOrdersPerPosition
+      - PositionLimit
+      - SlippageToleranceExceeded
     BatchCommandOrderResult_OrderType:
       allOf:
       - type: object
@@ -1135,43 +1091,115 @@ components:
             - Ok
             example: Ok
       - $ref: '#/components/schemas/OrderType'
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
+    BatchCommandOrderResult_ApiErrorResponse:
+      allOf:
+      - type: object
+        required:
+        - operation
+        properties:
+          operation:
+            type: string
+            enum:
+            - Err
+            example: Err
+      - $ref: '#/components/schemas/ApiErrorResponse'
     Side:
       type: string
       enum:
       - Bid
       - Ask
-    SortDirection:
-      type: string
-      enum:
-      - Asc
-      - Desc
-    MarketType:
-      type: string
-      enum:
-      - SPOT
-      - PERP
-      - IPERP
-      - DATED
-      - PREDICTION
-      - RFQ
-    Order:
+    OrderFill:
       type: object
-      title: Order
+      title: OrderFill
+      required:
+      - fee
+      - feeSymbol
+      - isMaker
+      - orderId
+      - price
+      - quantity
+      - side
+      - symbol
+      - timestamp
+      properties:
+        clientId:
+          type: string
+          description: Client id of the order.
+        fee:
+          type: string
+          format: decimal
+          description: The fee charged on the fill.
+        feeSymbol:
+          type: string
+          description: The asset that is charged as a fee.
+        isMaker:
+          type: boolean
+          description: Whether the fill was made by the maker.
+        orderId:
+          type: string
+          description: The order ID of the fill.
+        price:
+          type: string
+          format: decimal
+          description: The price of the fill.
+        quantity:
+          type: string
+          format: decimal
+          description: The quantity of the fill.
+        side:
+          description: The side of the fill.
+          allOf:
+          - $ref: '#/components/schemas/Side'
+          - description: The side of the fill.
+        symbol:
+          type: string
+          description: The market symbol of the fill.
+        systemOrderType:
+          description: The type of system order that triggered the fill.
+          allOf:
+          - $ref: '#/components/schemas/SystemOrderType'
+          - description: The type of system order that triggered the fill.
+        timestamp:
+          type: string
+          format: naive-date-time
+          description: The timestamp of the fill (UTC).
+        tradeId:
+          type: integer
+          format: int64
+          description: The trade ID of the fill.
+    CancelOrderTypeEnum:
+      type: string
+      enum:
+      - RestingLimitOrder
+      - ConditionalOrder
+    OrderTypeEnum:
+      type: string
+      enum:
+      - Market
+      - Limit
+    OrderType_MarketOrder:
+      allOf:
+      - type: object
+        required:
+        - orderType
+        properties:
+          orderType:
+            type: string
+            enum:
+            - Market
+            example: Market
+      - $ref: '#/components/schemas/MarketOrder'
+    LimitOrder:
+      type: object
+      title: LimitOrder
       required:
       - id
       - createdAt
-      - orderType
+      - executedQuantity
+      - executedQuoteQuantity
+      - postOnly
+      - price
+      - quantity
       - selfTradePrevention
       - status
       - side
@@ -1180,59 +1208,53 @@ components:
       properties:
         id:
           type: string
-          description: Unique ID of the order.
+          description: ID of the order.
+        clientId:
+          type: integer
+          format: uint32
+          description: Custom order ID.
         createdAt:
-          type: string
-          format: naive-date-time
+          type: integer
+          format: int64
           description: Time the order was created.
         executedQuantity:
           type: string
           format: decimal
-          description: Quantity of the order that has been filled.
+          description: Quantity that has been filled.
         executedQuoteQuantity:
           type: string
           format: decimal
-          description: Quantity of the order that has been filled in the quote asset.
-        expiryReason:
-          description: Order expiry reason.
-          allOf:
-          - $ref: '#/components/schemas/OrderExpiryReason'
-          - description: Order expiry reason.
-        orderType:
-          description: Type of order.
-          allOf:
-          - $ref: '#/components/schemas/OrderTypeEnum'
-          - description: Type of order.
+          description: The quantity of the quote asset that has been filled.
         postOnly:
           type: boolean
-          description: Whether the order is post only or not.
+          description: Whether the order is post only or not
         price:
           type: string
           format: decimal
-          description: Price that the order was submitted at (if `orderType` is `Limit`)
+          description: 'The limit price. The order book will only match this order with
+
+            other orders at this price or better.'
         quantity:
           type: string
           format: decimal
-          description: Quantity of the order.
-        quoteQuantity:
-          type: string
-          format: decimal
-          description: Quantity of the order in quote the quote asset.
+          description: Quantity to fill.
+        reduceOnly:
+          type: boolean
+          description: True if reducing a futures position.
         selfTradePrevention:
-          description: Self trade prevention setting of the order. Default is `RejectTaker`.
+          description: 'Action to take in the event the user crosses themselves in the
+
+            order book. Default is `RejectTaker`.'
           allOf:
           - $ref: '#/components/schemas/SelfTradePrevention'
-          - description: Self trade prevention setting of the order. Default is `RejectTaker`.
+          - description: 'Action to take in the event the user crosses themselves in the
+
+              order book. Default is `RejectTaker`.'
         status:
           description: Status of the order.
           allOf:
           - $ref: '#/components/schemas/OrderStatus'
           - description: Status of the order.
-        side:
-          description: Side of the order.
-          allOf:
-          - $ref: '#/components/schemas/Side'
-          - description: Side of the order.
         stopLossTriggerPrice:
           type: string
           description: Stop loss price (price the stop loss order will be triggered at).
@@ -1249,9 +1271,18 @@ components:
           - MarkPrice
           - LastPrice
           - IndexPrice
+        side:
+          description: 'The order side. It will be matched against the resting orders on the
+
+            other side of the order book.'
+          allOf:
+          - $ref: '#/components/schemas/Side'
+          - description: 'The order side. It will be matched against the resting orders on the
+
+              other side of the order book.'
         symbol:
           type: string
-          description: Market symbol of the order.
+          description: Market symbol.
         takeProfitTriggerPrice:
           type: string
           description: Take profit price (price the take profit order will be triggered at).
@@ -1269,10 +1300,10 @@ components:
           - LastPrice
           - IndexPrice
         timeInForce:
-          description: Time in force of the order.
+          description: How long the order is good for.
           allOf:
           - $ref: '#/components/schemas/TimeInForce'
-          - description: Time in force of the order.
+          - description: How long the order is good for.
         triggerBy:
           type: string
           description: Reference price that should trigger the order.
@@ -1282,37 +1313,42 @@ components:
           - IndexPrice
         triggerPrice:
           type: string
-          description: Price the order was set to trigger at.
+          description: Price the order should trigger at, if any.
         triggerQuantity:
           type: string
-          description: Trigger quantity.
-        clientId:
+          description: Quantity for trigger orders.
+        triggeredAt:
           type: integer
-          format: uint32
-          description: Custom order ID.
-        systemOrderType:
-          description: The type of system order, if applicable.
-          allOf:
-          - $ref: '#/components/schemas/SystemOrderType'
-          - description: The type of system order, if applicable.
+          format: int64
+        relatedOrderId:
+          type: string
+          description: 'The ID of the related order. This may refer to a parent order or,
+
+            for a trigger order, the order this trigger is for.'
         strategyId:
           type: string
           description: Strategy ID of the order, if any.
-        slippageTolerance:
-          type: string
-          format: decimal
-          description: Slippage tolerance allowed for the order.
-        slippageToleranceType:
-          description: Slippage tolerance type
-          allOf:
-          - $ref: '#/components/schemas/SlippageToleranceType'
-          - description: Slippage tolerance type
+    MarketType:
+      type: string
+      enum:
+      - SPOT
+      - PERP
+      - IPERP
+      - DATED
+      - PREDICTION
+      - RFQ
     SelfTradePrevention:
       type: string
       enum:
       - RejectTaker
       - RejectMaker
       - RejectBoth
+    TimeInForce:
+      type: string
+      enum:
+      - GTC
+      - IOC
+      - FOK
     MarketOrder:
       type: object
       title: MarketOrder
@@ -1484,65 +1520,11 @@ components:
         symbol:
           type: string
           description: Market the order exists on.
-    OrderFill:
-      type: object
-      title: OrderFill
-      required:
-      - fee
-      - feeSymbol
-      - isMaker
-      - orderId
-      - price
-      - quantity
-      - side
-      - symbol
-      - timestamp
-      properties:
-        clientId:
-          type: string
-          description: Client id of the order.
-        fee:
-          type: string
-          format: decimal
-          description: The fee charged on the fill.
-        feeSymbol:
-          type: string
-          description: The asset that is charged as a fee.
-        isMaker:
-          type: boolean
-          description: Whether the fill was made by the maker.
-        orderId:
-          type: string
-          description: The order ID of the fill.
-        price:
-          type: string
-          format: decimal
-          description: The price of the fill.
-        quantity:
-          type: string
-          format: decimal
-          description: The quantity of the fill.
-        side:
-          description: The side of the fill.
-          allOf:
-          - $ref: '#/components/schemas/Side'
-          - description: The side of the fill.
-        symbol:
-          type: string
-          description: The market symbol of the fill.
-        systemOrderType:
-          description: The type of system order that triggered the fill.
-          allOf:
-          - $ref: '#/components/schemas/SystemOrderType'
-          - description: The type of system order that triggered the fill.
-        timestamp:
-          type: string
-          format: naive-date-time
-          description: The timestamp of the fill (UTC).
-        tradeId:
-          type: integer
-          format: int64
-          description: The trade ID of the fill.
+    SortDirection:
+      type: string
+      enum:
+      - Asc
+      - Desc
     FillType:
       type: string
       enum:
@@ -1554,45 +1536,15 @@ components:
       - AllLiquidation
       - CollateralConversion
       - CollateralConversionAndSpotLiquidation
-    OrderType_MarketOrder:
-      allOf:
-      - type: object
-        required:
-        - orderType
-        properties:
-          orderType:
-            type: string
-            enum:
-            - Market
-            example: Market
-      - $ref: '#/components/schemas/MarketOrder'
-    OrderExpiryReason:
+    SystemOrderType:
       type: string
       enum:
-      - AccountTradingSuspended
-      - BorrowRequiresLendRedeem
-      - FillOrKill
-      - InsufficientBorrowableQuantity
-      - InsufficientFunds
-      - InsufficientLiquidity
-      - InvalidPrice
-      - InvalidQuantity
-      - ImmediateOrCancel
-      - InsufficientMargin
-      - Liquidation
-      - NegativeEquity
-      - PostOnlyMode
-      - PostOnlyTaker
-      - PriceOutOfBounds
-      - ReduceOnlyNotReduced
-      - SelfTradePrevention
-      - StopWithoutPosition
-      - PriceImpact
-      - Unknown
-      - UserPermissions
-      - MaxStopOrdersPerPosition
-      - PositionLimit
-      - SlippageToleranceExceeded
+      - CollateralConversion
+      - FutureExpiry
+      - LiquidatePositionOnAdl
+      - LiquidatePositionOnBook
+      - LiquidatePositionOnBackstop
+      - OrderBookClosed
     OrderType_LimitOrder:
       allOf:
       - type: object
@@ -1605,6 +1557,69 @@ components:
             - Limit
             example: Limit
       - $ref: '#/components/schemas/LimitOrder'
+    OrderCancelAllPayload:
+      type: object
+      title: OrderCancelAllPayload
+      required:
+      - symbol
+      properties:
+        symbol:
+          type: string
+          description: Market to cancel orders for.
+        orderType:
+          description: Type of orders to cancel.
+          allOf:
+          - $ref: '#/components/schemas/CancelOrderTypeEnum'
+          - description: Type of orders to cancel.
+    ApiErrorCode:
+      type: string
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
     BatchCommandOrderResult:
       type: object
       oneOf:
@@ -1615,17 +1630,23 @@ components:
         mapping:
           Ok: '#/components/schemas/BatchCommandOrderResult_OrderType'
           Err: '#/components/schemas/BatchCommandOrderResult_ApiErrorResponse'
-    LimitOrder:
+    OrderStatus:
+      type: string
+      enum:
+      - Cancelled
+      - Expired
+      - Filled
+      - New
+      - PartiallyFilled
+      - TriggerPending
+      - TriggerFailed
+    Order:
       type: object
-      title: LimitOrder
+      title: Order
       required:
       - id
       - createdAt
-      - executedQuantity
-      - executedQuoteQuantity
-      - postOnly
-      - price
-      - quantity
+      - orderType
       - selfTradePrevention
       - status
       - side
@@ -1634,53 +1655,59 @@ components:
       properties:
         id:
           type: string
-          description: ID of the order.
-        clientId:
-          type: integer
-          format: uint32
-          description: Custom order ID.
+          description: Unique ID of the order.
         createdAt:
-          type: integer
-          format: int64
+          type: string
+          format: naive-date-time
           description: Time the order was created.
         executedQuantity:
           type: string
           format: decimal
-          description: Quantity that has been filled.
+          description: Quantity of the order that has been filled.
         executedQuoteQuantity:
           type: string
           format: decimal
-          description: The quantity of the quote asset that has been filled.
+          description: Quantity of the order that has been filled in the quote asset.
+        expiryReason:
+          description: Order expiry reason.
+          allOf:
+          - $ref: '#/components/schemas/OrderExpiryReason'
+          - description: Order expiry reason.
+        orderType:
+          description: Type of order.
+          allOf:
+          - $ref: '#/components/schemas/OrderTypeEnum'
+          - description: Type of order.
         postOnly:
           type: boolean
-          description: Whether the order is post only or not
+          description: Whether the order is post only or not.
         price:
           type: string
           format: decimal
-          description: 'The limit price. The order book will only match this order with
-
-            other orders at this price or better.'
+          description: Price that the order was submitted at (if `orderType` is `Limit`)
         quantity:
           type: string
           format: decimal
-          description: Quantity to fill.
-        reduceOnly:
-          type: boolean
-          description: True if reducing a futures position.
+          description: Quantity of the order.
+        quoteQuantity:
+          type: string
+          format: decimal
+          description: Quantity of the order in quote the quote asset.
         selfTradePrevention:
-          description: 'Action to take in the event the user crosses themselves in the
-
-            order book. Default is `RejectTaker`.'
+          description: Self trade prevention setting of the order. Default is `RejectTaker`.
           allOf:
           - $ref: '#/components/schemas/SelfTradePrevention'
-          - description: 'Action to take in the event the user crosses themselves in the
-
-              order book. Default is `RejectTaker`.'
+          - description: Self trade prevention setting of the order. Default is `RejectTaker`.
         status:
           description: Status of the order.
           allOf:
           - $ref: '#/components/schemas/OrderStatus'
           - description: Status of the order.
+        side:
+          description: Side of the order.
+          allOf:
+          - $ref: '#/components/schemas/Side'
+          - description: Side of the order.
         stopLossTriggerPrice:
           type: string
           description: Stop loss price (price the stop loss order will be triggered at).
@@ -1697,18 +1724,9 @@ components:
           - MarkPrice
           - LastPrice
           - IndexPrice
-        side:
-          description: 'The order side. It will be matched against the resting orders on the
-
-            other side of the order book.'
-          allOf:
-          - $ref: '#/components/schemas/Side'
-          - description: 'The order side. It will be matched against the resting orders on the
-
-              other side of the order book.'
         symbol:
           type: string
-          description: Market symbol.
+          description: Market symbol of the order.
         takeProfitTriggerPrice:
           type: string
           description: Take profit price (price the take profit order will be triggered at).
@@ -1726,10 +1744,10 @@ components:
           - LastPrice
           - IndexPrice
         timeInForce:
-          description: How long the order is good for.
+          description: Time in force of the order.
           allOf:
           - $ref: '#/components/schemas/TimeInForce'
-          - description: How long the order is good for.
+          - description: Time in force of the order.
         triggerBy:
           type: string
           description: Reference price that should trigger the order.
@@ -1739,49 +1757,31 @@ components:
           - IndexPrice
         triggerPrice:
           type: string
-          description: Price the order should trigger at, if any.
+          description: Price the order was set to trigger at.
         triggerQuantity:
           type: string
-          description: Quantity for trigger orders.
-        triggeredAt:
+          description: Trigger quantity.
+        clientId:
           type: integer
-          format: int64
-        relatedOrderId:
-          type: string
-          description: 'The ID of the related order. This may refer to a parent order or,
-
-            for a trigger order, the order this trigger is for.'
+          format: uint32
+          description: Custom order ID.
+        systemOrderType:
+          description: The type of system order, if applicable.
+          allOf:
+          - $ref: '#/components/schemas/SystemOrderType'
+          - description: The type of system order, if applicable.
         strategyId:
           type: string
           description: Strategy ID of the order, if any.
-    OrderTypeEnum:
-      type: string
-      enum:
-      - Market
-      - Limit
-    TimeInForce:
-      type: string
-      enum:
-      - GTC
-      - IOC
-      - FOK
-    BatchCommandOrderResult_ApiErrorResponse:
-      allOf:
-      - type: object
-        required:
-        - operation
-        properties:
-          operation:
-            type: string
-            enum:
-            - Err
-            example: Err
-      - $ref: '#/components/schemas/ApiErrorResponse'
-    CancelOrderTypeEnum:
-      type: string
-      enum:
-      - RestingLimitOrder
-      - ConditionalOrder
+        slippageTolerance:
+          type: string
+          format: decimal
+          description: Slippage tolerance allowed for the order.
+        slippageToleranceType:
+          description: Slippage tolerance type
+          allOf:
+          - $ref: '#/components/schemas/SlippageToleranceType'
+          - description: Slippage tolerance type
 x-tagGroups:
 - name: Public Endpoints
   tags:

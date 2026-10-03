@@ -632,237 +632,11 @@ paths:
       operationId: get_strategies_history
 components:
   schemas:
-    Side:
+    SlippageToleranceType:
       type: string
       enum:
-      - Bid
-      - Ask
-    StrategyStatus:
-      type: string
-      enum:
-      - Running
-      - Completed
-      - Cancelled
-      - Terminated
-    Strategy:
-      type: object
-      title: Strategy
-      required:
-      - id
-      - createdAt
-      - strategyType
-      - selfTradePrevention
-      - status
-      - side
-      - symbol
-      - timeInForce
-      - duration
-      - interval
-      - randomizedIntervalQuantity
-      properties:
-        id:
-          type: string
-          description: Unique ID of the strategy.
-        createdAt:
-          type: string
-          format: naive-date-time
-          description: Time the strategy was created.
-        executedQuantity:
-          type: string
-          format: decimal
-          description: Quantity of the strategy that has been filled.
-        executedQuoteQuantity:
-          type: string
-          format: decimal
-          description: Quote quantity of the strategy that has been filled.
-        cancelReason:
-          description: Strategy cancel reason.
-          allOf:
-          - $ref: '#/components/schemas/StrategyCrankCancelReason'
-          - description: Strategy cancel reason.
-        strategyType:
-          description: Type of strategy.
-          allOf:
-          - $ref: '#/components/schemas/StrategyTypeEnum'
-          - description: Type of strategy.
-        quantity:
-          type: string
-          format: decimal
-          description: Quantity of the strategy.
-        selfTradePrevention:
-          description: Self trade prevention setting of the strategy's orders.
-          allOf:
-          - $ref: '#/components/schemas/SelfTradePrevention'
-          - description: Self trade prevention setting of the strategy's orders.
-        status:
-          description: Status of the strategy.
-          allOf:
-          - $ref: '#/components/schemas/StrategyStatus'
-          - description: Status of the strategy.
-        side:
-          description: Side of the strategy.
-          allOf:
-          - $ref: '#/components/schemas/Side'
-          - description: Side of the strategy.
-        symbol:
-          type: string
-          description: Market symbol of the strategy.
-        timeInForce:
-          description: Time in force of the strategy.
-          allOf:
-          - $ref: '#/components/schemas/TimeInForce'
-          - description: Time in force of the strategy.
-        clientStrategyId:
-          type: integer
-          format: uint32
-          description: Custom order strategy ID.
-        duration:
-          type: integer
-          format: uint64
-          description: Duration of the strategy in milliseconds.
-        interval:
-          type: integer
-          format: uint64
-          description: Interval of the strategy in milliseconds.
-        randomizedIntervalQuantity:
-          type: boolean
-          description: 'Determines whether the strategy will execute a randomized interval
-
-            quantity.'
-        slippageTolerance:
-          type: string
-          format: decimal
-          description: Slippage tolerance allowed for the order.
-        slippageToleranceType:
-          description: Slippage tolerance type
-          allOf:
-          - $ref: '#/components/schemas/SlippageToleranceType'
-          - description: Slippage tolerance type
-    MarketType:
-      type: string
-      enum:
-      - SPOT
-      - PERP
-      - IPERP
-      - DATED
-      - PREDICTION
-      - RFQ
-    StrategyCrankCancelReason:
-      type: string
-      enum:
-      - Expired
-      - FillOrKill
-      - InsufficientBorrowableQuantity
-      - InsufficientFunds
-      - InsufficientLiquidity
-      - InvalidPrice
-      - InvalidQuantity
-      - InsufficientMargin
-      - Liquidation
-      - PriceOutOfBounds
-      - ReduceOnlyNotReduced
-      - SelfTradePrevention
-      - Unknown
-      - UserPermissions
-    SortDirection:
-      type: string
-      enum:
-      - Asc
-      - Desc
-    ApiErrorCode:
-      type: string
-      enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
-    StrategyType:
-      type: object
-      anyOf:
-      - $ref: '#/components/schemas/StrategyType_ScheduledStrategy'
-      discriminator:
-        propertyName: strategyType
-        mapping:
-          Scheduled: '#/components/schemas/StrategyType_ScheduledStrategy'
-    StrategyCancelAllPayload:
-      type: object
-      title: StrategyCancelAllPayload
-      required:
-      - symbol
-      properties:
-        symbol:
-          type: string
-          description: Market to cancel strategies for.
-        strategyType:
-          description: Type of strategies to cancel.
-          allOf:
-          - $ref: '#/components/schemas/StrategyTypeEnum'
-          - description: Type of strategies to cancel.
-    SelfTradePrevention:
-      type: string
-      enum:
-      - RejectTaker
-      - RejectMaker
-      - RejectBoth
-    StrategyCancelPayload:
-      type: object
-      title: StrategyCancelPayload
-      required:
-      - symbol
-      properties:
-        clientStrategyId:
-          type: integer
-          format: uint32
-          description: Client ID of the strategy.
-        strategyId:
-          type: string
-          description: ID of the strategy.
-        symbol:
-          type: string
-          description: Market the strategy exists on.
-    StrategyType_ScheduledStrategy:
-      allOf:
-      - type: object
-        required:
-        - strategyType
-        properties:
-          strategyType:
-            type: string
-            enum:
-            - Scheduled
-            example: Scheduled
-      - $ref: '#/components/schemas/ScheduledStrategy'
+      - TickSize
+      - Percent
     ScheduledStrategy:
       type: object
       title: ScheduledStrategy
@@ -959,21 +733,252 @@ components:
           allOf:
           - $ref: '#/components/schemas/SlippageToleranceType'
           - description: Slippage tolerance type
-    SlippageToleranceType:
+    StrategyCancelAllPayload:
+      type: object
+      title: StrategyCancelAllPayload
+      required:
+      - symbol
+      properties:
+        symbol:
+          type: string
+          description: Market to cancel strategies for.
+        strategyType:
+          description: Type of strategies to cancel.
+          allOf:
+          - $ref: '#/components/schemas/StrategyTypeEnum'
+          - description: Type of strategies to cancel.
+    StrategyStatus:
       type: string
       enum:
-      - TickSize
-      - Percent
+      - Running
+      - Completed
+      - Cancelled
+      - Terminated
+    MarketType:
+      type: string
+      enum:
+      - SPOT
+      - PERP
+      - IPERP
+      - DATED
+      - PREDICTION
+      - RFQ
     StrategyTypeEnum:
       type: string
       enum:
       - Scheduled
-    TimeInForce:
+    StrategyCancelPayload:
+      type: object
+      title: StrategyCancelPayload
+      required:
+      - symbol
+      properties:
+        clientStrategyId:
+          type: integer
+          format: uint32
+          description: Client ID of the strategy.
+        strategyId:
+          type: string
+          description: ID of the strategy.
+        symbol:
+          type: string
+          description: Market the strategy exists on.
+    StrategyType_ScheduledStrategy:
+      allOf:
+      - type: object
+        required:
+        - strategyType
+        properties:
+          strategyType:
+            type: string
+            enum:
+            - Scheduled
+            example: Scheduled
+      - $ref: '#/components/schemas/ScheduledStrategy'
+    SelfTradePrevention:
       type: string
       enum:
-      - GTC
-      - IOC
-      - FOK
+      - RejectTaker
+      - RejectMaker
+      - RejectBoth
+    ApiErrorCode:
+      type: string
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
+    StrategyCrankCancelReason:
+      type: string
+      enum:
+      - Expired
+      - FillOrKill
+      - InsufficientBorrowableQuantity
+      - InsufficientFunds
+      - InsufficientLiquidity
+      - InvalidPrice
+      - InvalidQuantity
+      - InsufficientMargin
+      - Liquidation
+      - PriceOutOfBounds
+      - ReduceOnlyNotReduced
+      - SelfTradePrevention
+      - Unknown
+      - UserPermissions
+    Strategy:
+      type: object
+      title: Strategy
+      required:
+      - id
+      - createdAt
+      - strategyType
+      - selfTradePrevention
+      - status
+      - side
+      - symbol
+      - timeInForce
+      - duration
+      - interval
+      - randomizedIntervalQuantity
+      properties:
+        id:
+          type: string
+          description: Unique ID of the strategy.
+        createdAt:
+          type: string
+          format: naive-date-time
+          description: Time the strategy was created.
+        executedQuantity:
+          type: string
+          format: decimal
+          description: Quantity of the strategy that has been filled.
+        executedQuoteQuantity:
+          type: string
+          format: decimal
+          description: Quote quantity of the strategy that has been filled.
+        cancelReason:
+          description: Strategy cancel reason.
+          allOf:
+          - $ref: '#/components/schemas/StrategyCrankCancelReason'
+          - description: Strategy cancel reason.
+        strategyType:
+          description: Type of strategy.
+          allOf:
+          - $ref: '#/components/schemas/StrategyTypeEnum'
+          - description: Type of strategy.
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity of the strategy.
+        selfTradePrevention:
+          description: Self trade prevention setting of the strategy's orders.
+          allOf:
+          - $ref: '#/components/schemas/SelfTradePrevention'
+          - description: Self trade prevention setting of the strategy's orders.
+        status:
+          description: Status of the strategy.
+          allOf:
+          - $ref: '#/components/schemas/StrategyStatus'
+          - description: Status of the strategy.
+        side:
+          description: Side of the strategy.
+          allOf:
+          - $ref: '#/components/schemas/Side'
+          - description: Side of the strategy.
+        symbol:
+          type: string
+          description: Market symbol of the strategy.
+        timeInForce:
+          description: Time in force of the strategy.
+          allOf:
+          - $ref: '#/components/schemas/TimeInForce'
+          - description: Time in force of the strategy.
+        clientStrategyId:
+          type: integer
+          format: uint32
+          description: Custom order strategy ID.
+        duration:
+          type: integer
+          format: uint64
+          description: Duration of the strategy in milliseconds.
+        interval:
+          type: integer
+          format: uint64
+          description: Interval of the strategy in milliseconds.
+        randomizedIntervalQuantity:
+          type: boolean
+          description: 'Determines whether the strategy will execute a randomized interval
+
+            quantity.'
+        slippageTolerance:
+          type: string
+          format: decimal
+          description: Slippage tolerance allowed for the order.
+        slippageToleranceType:
+          description: Slippage tolerance type
+          allOf:
+          - $ref: '#/components/schemas/SlippageToleranceType'
+          - description: Slippage tolerance type
+    StrategyType:
+      type: object
+      anyOf:
+      - $ref: '#/components/schemas/StrategyType_ScheduledStrategy'
+      discriminator:
+        propertyName: strategyType
+        mapping:
+          Scheduled: '#/components/schemas/StrategyType_ScheduledStrategy'
+    SortDirection:
+      type: string
+      enum:
+      - Asc
+      - Desc
+    Side:
+      type: string
+      enum:
+      - Bid
+      - Ask
     StrategyCreatePayload:
       type: object
       title: StrategyCreatePayload
@@ -1063,17 +1068,12 @@ components:
           allOf:
           - $ref: '#/components/schemas/SlippageToleranceType'
           - description: Slippage tolerance type.
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
+    TimeInForce:
+      type: string
+      enum:
+      - GTC
+      - IOC
+      - FOK
 x-tagGroups:
 - name: Public Endpoints
   tags:

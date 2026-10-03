@@ -963,179 +963,114 @@ paths:
       operationId: get_settlement_history
 components:
   schemas:
-    SettlementSource:
-      type: string
-      enum:
-      - TradingFees
-      - TradingFeesSystem
-      - FundingPayment
-      - CulledBorrowInterest
-      - CulledRealizePnlAuto
-      - CulledRealizePnlBookUtilisation
-      - CulledRealizePnlAccountThreshold
-      - CulledRealizePnlSystemThreshold
-      - RealizePnl
-      - BackstopProviderLiquidation
-      - BackstopAdlLiquidation
-      - BackstopLiquidityFundProceeds
-      - SystemLiabilityTransfer
-    Deposit:
+    MarginAccountSummary:
       type: object
-      title: Deposit
+      title: MarginAccountSummary
       required:
-      - id
-      - source
-      - status
-      - symbol
-      - quantity
-      - createdAt
+      - assetsValue
+      - borrowLiability
+      - collateral
+      - imf
+      - unsettledEquity
+      - liabilitiesValue
+      - mmf
+      - netEquity
+      - netEquityAvailable
+      - netEquityLocked
+      - netExposureFutures
+      - pnlUnrealized
       properties:
-        id:
-          type: integer
-          format: int32
-          description: Unique id of the deposit.
-        toAddress:
-          type: string
-          description: Deposit address.
-        fromAddress:
-          type: string
-          description: Source address.
-        source:
-          description: Source of the deposit, blockchain or a payment processor.
-          allOf:
-          - $ref: '#/components/schemas/DepositSource'
-          - description: Source of the deposit, blockchain or a payment processor.
-        status:
-          description: Status of the deposit.
-          allOf:
-          - $ref: '#/components/schemas/DepositStatus'
-          - description: Status of the deposit.
-        transactionHash:
-          type: string
-          description: Transaction hash of the blockchain transfer.
-        symbol:
-          description: Symbol of the asset to be deposited.
-          allOf:
-          - $ref: '#/components/schemas/CustodyAsset'
-          - description: Symbol of the asset to be deposited.
-        quantity:
+        assetsValue:
           type: string
           format: decimal
-          description: Quantity to be deposited.
-        createdAt:
+          description: Notional value of assets
+        borrowLiability:
           type: string
-          format: naive-date-time
-          description: When the deposit was created.
-        fiatAmount:
-          type: number
-          format: double
-          description: Amount in fiat currency.
-        fiatCurrency:
-          description: Currency of the fiat amount.
-          allOf:
-          - $ref: '#/components/schemas/FiatAsset'
-          - description: Currency of the fiat amount.
-        institutionBic:
+          format: decimal
+          description: Total borrow notional.
+        collateral:
+          type: array
+          description: Collateral held for a given spot asset.
+          items:
+            $ref: '#/components/schemas/Collateral'
+        imf:
           type: string
-          description: Institution BIC.
-        platformMemo:
+          format: decimal
+          description: Initial margin fraction.
+        unsettledEquity:
           type: string
-          description: An optional memo that may be provided by the platform.
-    ApiErrorCode:
+          format: decimal
+          description: Unsettled claim on the liquidity fund.
+        liabilitiesValue:
+          type: string
+          format: decimal
+          description: Notional value of liabilities
+        marginFraction:
+          type: string
+          format: decimal
+          description: Margin fraction.
+        mmf:
+          type: string
+          format: decimal
+          description: Maintenance margin fraction.
+        netEquity:
+          type: string
+          format: decimal
+          description: Net equity.
+        netEquityAvailable:
+          type: string
+          format: decimal
+          description: Net equity available.
+        netEquityLocked:
+          type: string
+          format: decimal
+          description: Net equity Locked.
+        netExposureFutures:
+          type: string
+          format: decimal
+          description: Total exposure of positions as well potential open positions.
+        pnlUnrealized:
+          type: string
+          format: decimal
+          description: Unrealised PnL.
+    DepositSource:
       type: string
       enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
-    Blockchain:
-      type: string
-      enum:
+      - administrator
       - 0G
-      - Aptos
-      - Arbitrum
-      - Avalanche
-      - Base
-      - Berachain
-      - Bitcoin
-      - BitcoinCash
-      - Bsc
-      - Cardano
-      - Dogecoin
-      - Eclipse
-      - EqualsMoney
-      - Ethereum
-      - Fogo
-      - HyperEVM
-      - Hyperliquid
-      - Linea
-      - Litecoin
-      - Monad
-      - Near
-      - Optimism
-      - Plasma
-      - Polygon
-      - Sei
-      - Sui
-      - Solana
-      - Stable
-      - Story
-      - Tron
-      - XRP
-      - Zcash
-    Balance:
-      type: object
-      title: Balance
-      required:
-      - available
-      - locked
-      - staked
-      properties:
-        available:
-          type: string
-          format: decimal
-          description: Funds available for use.
-        locked:
-          type: string
-          format: decimal
-          description: 'Funds that are locked because they are in an order that has not been
-
-            executed.'
-        staked:
-          type: string
-          format: decimal
-          description: Funds that are staked.
+      - aptos
+      - arbitrum
+      - avalanche
+      - base
+      - berachain
+      - bitcoin
+      - bitcoinCash
+      - bsc
+      - cardano
+      - dogecoin
+      - eclipse
+      - ethereum
+      - fogo
+      - hyperEVM
+      - hyperliquid
+      - linea
+      - litecoin
+      - monad
+      - near
+      - polygon
+      - optimism
+      - plasma
+      - sei
+      - stable
+      - sui
+      - solana
+      - story
+      - tron
+      - xRP
+      - zcash
+      - equalsMoney
+      - banxa
+      - internal
     CustodyAsset:
       type: string
       enum:
@@ -2740,118 +2675,6 @@ components:
       - EWH.US
       - NLR.US
       - FUTU.US
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
-    WithdrawalRecipientInformation:
-      type: object
-      title: WithdrawalRecipientInformation
-      required:
-      - withdrawal_address_id
-      properties:
-        withdrawal_address_id:
-          type: integer
-          format: int32
-        withdrawal_purpose:
-          type: string
-        sanctions_representation:
-          type: boolean
-    MarginAccountSummary:
-      type: object
-      title: MarginAccountSummary
-      required:
-      - assetsValue
-      - borrowLiability
-      - collateral
-      - imf
-      - unsettledEquity
-      - liabilitiesValue
-      - mmf
-      - netEquity
-      - netEquityAvailable
-      - netEquityLocked
-      - netExposureFutures
-      - pnlUnrealized
-      properties:
-        assetsValue:
-          type: string
-          format: decimal
-          description: Notional value of assets
-        borrowLiability:
-          type: string
-          format: decimal
-          description: Total borrow notional.
-        collateral:
-          type: array
-          description: Collateral held for a given spot asset.
-          items:
-            $ref: '#/components/schemas/Collateral'
-        imf:
-          type: string
-          format: decimal
-          description: Initial margin fraction.
-        unsettledEquity:
-          type: string
-          format: decimal
-          description: Unsettled claim on the liquidity fund.
-        liabilitiesValue:
-          type: string
-          format: decimal
-          description: Notional value of liabilities
-        marginFraction:
-          type: string
-          format: decimal
-          description: Margin fraction.
-        mmf:
-          type: string
-          format: decimal
-          description: Maintenance margin fraction.
-        netEquity:
-          type: string
-          format: decimal
-          description: Net equity.
-        netEquityAvailable:
-          type: string
-          format: decimal
-          description: Net equity available.
-        netEquityLocked:
-          type: string
-          format: decimal
-          description: Net equity Locked.
-        netExposureFutures:
-          type: string
-          format: decimal
-          description: Total exposure of positions as well potential open positions.
-        pnlUnrealized:
-          type: string
-          format: decimal
-          description: Unrealised PnL.
-    SortDirection:
-      type: string
-      enum:
-      - Asc
-      - Desc
-    DepositStatus:
-      type: string
-      enum:
-      - cancelled
-      - confirmed
-      - declined
-      - expired
-      - initiated
-      - ownershipVerificationRequired
-      - pending
-      - refunded
-      - senderVerificationCompleted
-      - senderVerificationRequired
     Withdrawal:
       type: object
       title: Withdrawal
@@ -2946,6 +2769,220 @@ components:
           type: string
           format: naive-date-time
           description: When the withdrawal is to be triggered.
+    Deposit:
+      type: object
+      title: Deposit
+      required:
+      - id
+      - source
+      - status
+      - symbol
+      - quantity
+      - createdAt
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Unique id of the deposit.
+        toAddress:
+          type: string
+          description: Deposit address.
+        fromAddress:
+          type: string
+          description: Source address.
+        source:
+          description: Source of the deposit, blockchain or a payment processor.
+          allOf:
+          - $ref: '#/components/schemas/DepositSource'
+          - description: Source of the deposit, blockchain or a payment processor.
+        status:
+          description: Status of the deposit.
+          allOf:
+          - $ref: '#/components/schemas/DepositStatus'
+          - description: Status of the deposit.
+        transactionHash:
+          type: string
+          description: Transaction hash of the blockchain transfer.
+        symbol:
+          description: Symbol of the asset to be deposited.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: Symbol of the asset to be deposited.
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity to be deposited.
+        createdAt:
+          type: string
+          format: naive-date-time
+          description: When the deposit was created.
+        fiatAmount:
+          type: number
+          format: double
+          description: Amount in fiat currency.
+        fiatCurrency:
+          description: Currency of the fiat amount.
+          allOf:
+          - $ref: '#/components/schemas/FiatAsset'
+          - description: Currency of the fiat amount.
+        institutionBic:
+          type: string
+          description: Institution BIC.
+        platformMemo:
+          type: string
+          description: An optional memo that may be provided by the platform.
+    SettlementSource:
+      type: string
+      enum:
+      - TradingFees
+      - TradingFeesSystem
+      - FundingPayment
+      - CulledBorrowInterest
+      - CulledRealizePnlAuto
+      - CulledRealizePnlBookUtilisation
+      - CulledRealizePnlAccountThreshold
+      - CulledRealizePnlSystemThreshold
+      - RealizePnl
+      - BackstopProviderLiquidation
+      - BackstopAdlLiquidation
+      - BackstopLiquidityFundProceeds
+      - SystemLiabilityTransfer
+    FiatAsset:
+      type: string
+      enum:
+      - AED
+      - AUD
+      - BGN
+      - BHD
+      - CAD
+      - CHF
+      - CNH
+      - CNY
+      - CZK
+      - DKK
+      - EUR
+      - GBP
+      - HKD
+      - HUF
+      - ILS
+      - JOD
+      - JPY
+      - KES
+      - KWD
+      - MUR
+      - MXN
+      - NOK
+      - NZD
+      - OMR
+      - PLN
+      - QAR
+      - RON
+      - SAR
+      - SEK
+      - SGD
+      - THB
+      - TND
+      - TRY
+      - USD
+      - ZAR
+      - ZMW
+    Blockchain:
+      type: string
+      enum:
+      - 0G
+      - Aptos
+      - Arbitrum
+      - Avalanche
+      - Base
+      - Berachain
+      - Bitcoin
+      - BitcoinCash
+      - Bsc
+      - Cardano
+      - Dogecoin
+      - Eclipse
+      - EqualsMoney
+      - Ethereum
+      - Fogo
+      - HyperEVM
+      - Hyperliquid
+      - Linea
+      - Litecoin
+      - Monad
+      - Near
+      - Optimism
+      - Plasma
+      - Polygon
+      - Sei
+      - Sui
+      - Solana
+      - Stable
+      - Story
+      - Tron
+      - XRP
+      - Zcash
+    SortDirection:
+      type: string
+      enum:
+      - Asc
+      - Desc
+    EqualsMoneyWithdrawalState:
+      type: string
+      enum:
+      - initialized
+      - pending
+      - fulfilling
+      - processing
+      - complete
+      - declined
+      - cancelled
+      - review
+      - awaitingDocuments
+      - awaitingComplianceQuestions
+      - refundedInternal
+      - refundedExternal
+    AccountConvertDustPayload:
+      type: object
+      title: AccountConvertDustPayload
+      properties:
+        symbol:
+          description: 'The asset symbol to convert dust for.
+
+            If omitted, all dust balances will be converted.'
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: 'The asset symbol to convert dust for.
+
+              If omitted, all dust balances will be converted.'
+    DustConversion:
+      type: object
+      title: DustConversion
+      required:
+      - id
+      - quantity
+      - symbol
+      - usdcReceived
+      - timestamp
+      properties:
+        id:
+          type: integer
+          format: uint64
+          description: The ID of the dust conversion.
+        quantity:
+          type: string
+          format: decimal
+          description: Dust quantity.
+        symbol:
+          type: string
+          description: Symbol.
+        usdcReceived:
+          type: string
+          format: decimal
+          description: USDC received.
+        timestamp:
+          type: string
+          format: naive-date-time
+          description: Timestamp.
     SettlementSourceFilter:
       type: string
       enum:
@@ -2957,6 +2994,162 @@ components:
       - RealizePnl
       - TradingFees
       - TradingFeesSystem
+    AccountWithdrawalPayload:
+      type: object
+      title: AccountWithdrawalPayload
+      required:
+      - address
+      - blockchain
+      - quantity
+      - symbol
+      properties:
+        address:
+          type: string
+          description: Address to withdraw to.
+        blockchain:
+          description: Blockchain to withdraw on.
+          allOf:
+          - $ref: '#/components/schemas/Blockchain'
+          - description: Blockchain to withdraw on.
+        clientId:
+          type: string
+          description: Custom client id.
+          maxLength: 255
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity to withdraw.
+        symbol:
+          description: Symbol of the asset to withdraw.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: Symbol of the asset to withdraw.
+        twoFactorToken:
+          type: string
+          description: Issued two factor token.
+        autoBorrow:
+          type: boolean
+          description: Auto borrow to withdraw if required.
+        autoLendRedeem:
+          type: boolean
+          description: Auto redeem a lend if required.
+        recipientInformation:
+          default: null
+          allOf:
+          - $ref: '#/components/schemas/WithdrawalRecipientInformation'
+          - default: null
+    DepositStatus:
+      type: string
+      enum:
+      - cancelled
+      - confirmed
+      - declined
+      - expired
+      - initiated
+      - ownershipVerificationRequired
+      - pending
+      - refunded
+      - senderVerificationCompleted
+      - senderVerificationRequired
+    Balance:
+      type: object
+      title: Balance
+      required:
+      - available
+      - locked
+      - staked
+      properties:
+        available:
+          type: string
+          format: decimal
+          description: Funds available for use.
+        locked:
+          type: string
+          format: decimal
+          description: 'Funds that are locked because they are in an order that has not been
+
+            executed.'
+        staked:
+          type: string
+          format: decimal
+          description: Funds that are staked.
+    ApiErrorCode:
+      type: string
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
+    Settlement:
+      type: object
+      title: Settlement
+      required:
+      - quantity
+      - source
+      - timestamp
+      - userId
+      properties:
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity of the settlement.
+        source:
+          description: Source of the settlement.
+          allOf:
+          - $ref: '#/components/schemas/SettlementSource'
+          - description: Source of the settlement.
+        subaccountId:
+          type: integer
+          format: int32
+          description: ID of the subaccount the event is associated with, if any.
+        timestamp:
+          type: string
+          format: naive-date-time
+          description: The timestamp of the settlement (UTC).
+        userId:
+          type: integer
+          format: int32
+          description: User ID of the account the movement is associated with.
+        positionId:
+          type: string
+          description: 'Position ID of the position the settlement is associated with, if any.
+
+            Applies to funding payments and realized PnL settlements.'
+        engineSequence:
+          type: integer
+          format: uint64
+          description: Engine sequence number of the settlement event.
     WithdrawalStatus:
       type: string
       enum:
@@ -2965,6 +3158,30 @@ components:
       - pending
       - recipientInformationProvided
       - recipientInformationRequired
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
+    WithdrawalRecipientInformation:
+      type: object
+      title: WithdrawalRecipientInformation
+      required:
+      - withdrawal_address_id
+      properties:
+        withdrawal_address_id:
+          type: integer
+          format: int32
+        withdrawal_purpose:
+          type: string
+        sanctions_representation:
+          type: boolean
     Collateral:
       type: object
       title: Collateral
@@ -3018,74 +3235,6 @@ components:
           type: string
           format: decimal
           description: The amount of freely available assets.
-    Settlement:
-      type: object
-      title: Settlement
-      required:
-      - quantity
-      - source
-      - timestamp
-      - userId
-      properties:
-        quantity:
-          type: string
-          format: decimal
-          description: Quantity of the settlement.
-        source:
-          description: Source of the settlement.
-          allOf:
-          - $ref: '#/components/schemas/SettlementSource'
-          - description: Source of the settlement.
-        subaccountId:
-          type: integer
-          format: int32
-          description: ID of the subaccount the event is associated with, if any.
-        timestamp:
-          type: string
-          format: naive-date-time
-          description: The timestamp of the settlement (UTC).
-        userId:
-          type: integer
-          format: int32
-          description: User ID of the account the movement is associated with.
-        positionId:
-          type: string
-          description: 'Position ID of the position the settlement is associated with, if any.
-
-            Applies to funding payments and realized PnL settlements.'
-        engineSequence:
-          type: integer
-          format: uint64
-          description: Engine sequence number of the settlement event.
-    DustConversion:
-      type: object
-      title: DustConversion
-      required:
-      - id
-      - quantity
-      - symbol
-      - usdcReceived
-      - timestamp
-      properties:
-        id:
-          type: integer
-          format: uint64
-          description: The ID of the dust conversion.
-        quantity:
-          type: string
-          format: decimal
-          description: Dust quantity.
-        symbol:
-          type: string
-          description: Symbol.
-        usdcReceived:
-          type: string
-          format: decimal
-          description: USDC received.
-        timestamp:
-          type: string
-          format: naive-date-time
-          description: Timestamp.
     DepositAddress:
       type: object
       title: DepositAddress
@@ -3095,155 +3244,6 @@ components:
         address:
           type: string
           description: Address.
-    AccountWithdrawalPayload:
-      type: object
-      title: AccountWithdrawalPayload
-      required:
-      - address
-      - blockchain
-      - quantity
-      - symbol
-      properties:
-        address:
-          type: string
-          description: Address to withdraw to.
-        blockchain:
-          description: Blockchain to withdraw on.
-          allOf:
-          - $ref: '#/components/schemas/Blockchain'
-          - description: Blockchain to withdraw on.
-        clientId:
-          type: string
-          description: Custom client id.
-          maxLength: 255
-        quantity:
-          type: string
-          format: decimal
-          description: Quantity to withdraw.
-        symbol:
-          description: Symbol of the asset to withdraw.
-          allOf:
-          - $ref: '#/components/schemas/CustodyAsset'
-          - description: Symbol of the asset to withdraw.
-        twoFactorToken:
-          type: string
-          description: Issued two factor token.
-        autoBorrow:
-          type: boolean
-          description: Auto borrow to withdraw if required.
-        autoLendRedeem:
-          type: boolean
-          description: Auto redeem a lend if required.
-        recipientInformation:
-          default: null
-          allOf:
-          - $ref: '#/components/schemas/WithdrawalRecipientInformation'
-          - default: null
-    EqualsMoneyWithdrawalState:
-      type: string
-      enum:
-      - initialized
-      - pending
-      - fulfilling
-      - processing
-      - complete
-      - declined
-      - cancelled
-      - review
-      - awaitingDocuments
-      - awaitingComplianceQuestions
-      - refundedInternal
-      - refundedExternal
-    AccountConvertDustPayload:
-      type: object
-      title: AccountConvertDustPayload
-      properties:
-        symbol:
-          description: 'The asset symbol to convert dust for.
-
-            If omitted, all dust balances will be converted.'
-          allOf:
-          - $ref: '#/components/schemas/CustodyAsset'
-          - description: 'The asset symbol to convert dust for.
-
-              If omitted, all dust balances will be converted.'
-    FiatAsset:
-      type: string
-      enum:
-      - AED
-      - AUD
-      - BGN
-      - BHD
-      - CAD
-      - CHF
-      - CNH
-      - CNY
-      - CZK
-      - DKK
-      - EUR
-      - GBP
-      - HKD
-      - HUF
-      - ILS
-      - JOD
-      - JPY
-      - KES
-      - KWD
-      - MUR
-      - MXN
-      - NOK
-      - NZD
-      - OMR
-      - PLN
-      - QAR
-      - RON
-      - SAR
-      - SEK
-      - SGD
-      - THB
-      - TND
-      - TRY
-      - USD
-      - ZAR
-      - ZMW
-    DepositSource:
-      type: string
-      enum:
-      - administrator
-      - 0G
-      - aptos
-      - arbitrum
-      - avalanche
-      - base
-      - berachain
-      - bitcoin
-      - bitcoinCash
-      - bsc
-      - cardano
-      - dogecoin
-      - eclipse
-      - ethereum
-      - fogo
-      - hyperEVM
-      - hyperliquid
-      - linea
-      - litecoin
-      - monad
-      - near
-      - polygon
-      - optimism
-      - plasma
-      - sei
-      - stable
-      - sui
-      - solana
-      - story
-      - tron
-      - xRP
-      - zcash
-      - equalsMoney
-      - banxa
-      - internal
 x-tagGroups:
 - name: Public Endpoints
   tags:
