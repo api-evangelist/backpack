@@ -465,6 +465,60 @@ paths:
       operationId: get_max_withdrawal_quantity
 components:
   schemas:
+    MaxWithdrawalQuantity:
+      type: object
+      title: MaxWithdrawalQuantity
+      required:
+      - maxWithdrawalQuantity
+      - symbol
+      properties:
+        autoBorrow:
+          type: boolean
+        autoLendRedeem:
+          type: boolean
+        maxWithdrawalQuantity:
+          type: string
+          format: decimal
+        symbol:
+          type: string
+    MaxOrderQuantity:
+      type: object
+      title: MaxOrderQuantity
+      required:
+      - maxOrderQuantity
+      - side
+      - symbol
+      properties:
+        autoBorrow:
+          type: boolean
+        autoBorrowRepay:
+          type: boolean
+        autoLendRedeem:
+          type: boolean
+        maxOrderQuantity:
+          type: string
+          format: decimal
+        price:
+          type: string
+          format: decimal
+        side:
+          type: string
+        symbol:
+          type: string
+        reduceOnly:
+          type: boolean
+    MaxBorrowQuantity:
+      type: object
+      title: MaxBorrowQuantity
+      required:
+      - maxBorrowQuantity
+      - symbol
+      properties:
+        maxBorrowQuantity:
+          type: string
+          format: decimal
+        symbol:
+          type: string
     AccountSummary:
       type: object
       title: AccountSummary
@@ -537,57 +591,11 @@ components:
           type: integer
           format: uint64
           description: Number of open trigger orders.
-    UpdateAccountSettingsRequest:
-      type: object
-      title: UpdateAccountSettingsRequest
-      properties:
-        autoBorrowSettlements:
-          type: boolean
-          description: 'If true, then tries to borrow during collateral reconciliation.
-
-            Collateral reconciliation is a process in which the system reconciles
-
-            the negative account debt or positive account equity.'
-        autoLend:
-          type: boolean
-          description: Determines if the account should automatically lend.
-        autoRepayBorrows:
-          type: boolean
-          description: 'Determines if the account should automatically repay borrows with
-
-            available balance.'
-        leverageLimit:
-          type: string
-          format: decimal
-          description: 'Determines the maximum leverage allowed for the main account or
-
-            subaccount.'
-    MaxOrderQuantity:
-      type: object
-      title: MaxOrderQuantity
-      required:
-      - maxOrderQuantity
-      - side
-      - symbol
-      properties:
-        autoBorrow:
-          type: boolean
-        autoBorrowRepay:
-          type: boolean
-        autoLendRedeem:
-          type: boolean
-        maxOrderQuantity:
-          type: string
-          format: decimal
-        price:
-          type: string
-          format: decimal
-        side:
-          type: string
-        symbol:
-          type: string
-        reduceOnly:
-          type: boolean
+    Side:
+      type: string
+      enum:
+      - Bid
+      - Ask
     ApiErrorCode:
       type: string
       enum:
@@ -626,18 +634,6 @@ components:
       - TOO_MANY_REQUESTS
       - TRADING_PAUSED
       - UNAUTHORIZED
-    MaxBorrowQuantity:
-      type: object
-      title: MaxBorrowQuantity
-      required:
-      - maxBorrowQuantity
-      - symbol
-      properties:
-        maxBorrowQuantity:
-          type: string
-          format: decimal
-        symbol:
-          type: string
     ApiErrorResponse:
       type: object
       title: ApiErrorResponse
@@ -649,27 +645,31 @@ components:
           $ref: '#/components/schemas/ApiErrorCode'
         message:
           type: string
-    Side:
-      type: string
-      enum:
-      - Bid
-      - Ask
-    MaxWithdrawalQuantity:
+    UpdateAccountSettingsRequest:
       type: object
-      title: MaxWithdrawalQuantity
-      required:
-      - maxWithdrawalQuantity
-      - symbol
+      title: UpdateAccountSettingsRequest
       properties:
-        autoBorrow:
+        autoBorrowSettlements:
           type: boolean
-        autoLendRedeem:
+          description: 'If true, then tries to borrow during collateral reconciliation.
+
+            Collateral reconciliation is a process in which the system reconciles
+
+            the negative account debt or positive account equity.'
+        autoLend:
           type: boolean
-        maxWithdrawalQuantity:
+          description: Determines if the account should automatically lend.
+        autoRepayBorrows:
+          type: boolean
+          description: 'Determines if the account should automatically repay borrows with
+
+            available balance.'
+        leverageLimit:
           type: string
           format: decimal
-        symbol:
-          type: string
+          description: 'Determines the maximum leverage allowed for the main account or
+
+            subaccount.'
 x-tagGroups:
 - name: Public Endpoints
   tags:

@@ -660,76 +660,99 @@ paths:
       - Markets
 components:
   schemas:
-    Event:
+    MarkPrice:
       type: object
-      title: Event
+      title: MarkPrice
       required:
-      - slug
-      - title
-      - predictionMarkets
-      - tags
-      - series
-      - description
-      - quoteVolume
-      - resolution
-      - resolved
-      - resolutionDelaySecs
+      - markPrice
+      - symbol
       properties:
-        slug:
-          type: string
-          description: 'The identifier for the event that the prediction markets are based on.
-
-            Multiple markets for the same event (e.g. `2026-fifa-world-cup-winner-mens`) will have the same identifier.'
-        title:
-          type: string
-          description: 'The title for the prediction event that the prediction markets are based on.
-
-            Multiple prediction markets may have the same title
-
-            E.g. a set of prediction markets of the winner of the world cup would have title `2026 FIFA World Cup Winner`'
-        predictionMarkets:
-          type: array
-          description: The prediction markets associated with this event.
-          items:
-            $ref: '#/components/schemas/PredictionMarket'
-        tags:
-          type: array
-          description: Tags associated with the prediction event e.g. `["SPORTS", "FOOTBALL", "WORLD CUP"]`
-          items:
-            $ref: '#/components/schemas/Tag'
-        series:
-          type: array
-          description: 'The series of the prediction event.
-
-            Every world cup winner market will have the same series.'
-          items:
-            $ref: '#/components/schemas/Series'
-        description:
-          type: string
-          description: A description of the event.
-        imgUrl:
-          type: string
-          description: An image URL associated with the event.
-        quoteVolume:
+        fundingRate:
           type: string
           format: decimal
-          description: The total 24hr quote volume of the prediction event.
-        resolution:
-          description: Resolution data for the prediction event.
-          allOf:
-          - $ref: '#/components/schemas/Resolution'
-          - description: Resolution data for the prediction event.
-        resolved:
-          type: boolean
-          description: Whether the event has been resolved.
-        resolutionDelaySecs:
-          type: integer
-          format: int32
-          description: 'Seconds to wait after a market''s proposed resolution before resolving it.
+          description: 'The funding rate for the current interval.
 
-            Applied to every market in the event. Bounded server-side to [0, 604800] (7 days).'
-    ResolutionCondition_QuantityRangeResolutionCondition:
-      description: Condition that determines how a prediction market resolves.
+            Only returned for perpetual markets.'
+        indexPrice:
+          type: string
+          format: decimal
+          description: 'The index price for the market.
+
+            Only returned for perpetual markets.'
+        markPrice:
+          type: string
+          format: decimal
+          description: The mark price for the market.
+        nextFundingTimestamp:
+          type: integer
+          format: int64
+          description: 'The end time of the current interval and start time of next interval.
+
+            Funding payments will be distributed at this time.
+
+            Only returned for perpetual markets.'
+        symbol:
+          type: string
+          description: The symbol of the market.
+    PriceBandMarkPrice:
+      type: object
+      title: PriceBandMarkPrice
+      required:
+      - maxMultiplier
+      - minMultiplier
+      properties:
+        maxMultiplier:
+          type: string
+          format: decimal
+          description: Maximum allowed multiplier move from mean price.
+        minMultiplier:
+          type: string
+          format: decimal
+          description: Minimum allowed multiplier move from mean price.
+    Kline:
+      type: object
+      title: Kline
+      description: 'Public K-line response shape.
+
+
+        Lives in `bpx_api_types` so that both `api` and `api-klines` can return
+
+        the same JSON shape to clients.'
+      required:
+      - start
+      - end
+      - volume
+      - quoteVolume
+      - trades
+      properties:
+        start:
+          type: string
+          description: Start time.
+        end:
+          type: string
+          description: End time.
+        open:
+          type: string
+          description: Open price.
+        high:
+          type: string
+          description: High price.
+        low:
+          type: string
+          description: Low price.
+        close:
+          type: string
+          description: Close price.
+        volume:
+          type: string
+          description: Volume in base asset.
+        quoteVolume:
+          type: string
+          description: Volume in quote asset.
+        trades:
+          type: string
+          description: Number of trades during the K-line.
+    PositionImfFunction_SqrtFunction:
       allOf:
       - type: object
         required:
@@ -738,122 +761,33 @@ components:
           type:
             type: string
             enum:
-            - QuantityRange
-            example: QuantityRange
-      - $ref: '#/components/schemas/QuantityRangeResolutionCondition'
-    Tag:
+            - sqrt
+            example: sqrt
+      - $ref: '#/components/schemas/SqrtFunction'
+    Security:
       type: object
-      title: Tag
+      title: Security
       required:
-      - slug
-      - title
-      properties:
-        slug:
-          type: string
-          description: Tag associated with the prediction event.
-        title:
-          type: string
-          description: The tag title of the prediction market.
-    OrderBookFilters:
-      type: object
-      title: OrderBookFilters
-      required:
-      - price
-      - quantity
-      properties:
-        price:
-          description: Defines the price rules for the order book.
-          allOf:
-          - $ref: '#/components/schemas/PriceFilter'
-          - description: Defines the price rules for the order book.
-        quantity:
-          description: Defines the quantity rules for the order book.
-          allOf:
-          - $ref: '#/components/schemas/QuantityFilter'
-          - description: Defines the quantity rules for the order book.
-    QuantityRangeResolutionCondition:
-      type: object
-      title: QuantityRangeResolutionCondition
-      description: Resolution condition based on quantity range.
-      properties:
-        greaterThanOrEqual:
-          type: string
-          format: decimal
-          description: Lower bound (inclusive) for the quantity.
-        lessThan:
-          type: string
-          format: decimal
-          description: Upper bound (exclusive) for the quantity.
-    MarketSession:
-      type: object
-      title: MarketSession
-      required:
+      - asset
       - name
-      - startTime
-      - endTime
-      - timezone
-      - startWeekday
-      - endWeekday
+      - sessions
       properties:
+        asset:
+          description: Asset symbol.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: Asset symbol.
         name:
           type: string
-          description: Session name (e.g. "US_MARKET_HOURS").
-        description:
+          description: Name.
+        cusip:
           type: string
-          description: Session description.
-        startTime:
-          type: string
-          format: naive-time
-          description: Session start time (local to the timezone).
-        endTime:
-          type: string
-          format: naive-time
-          description: Session end time (local to the timezone).
-        timezone:
-          type: string
-          description: Timezone identifier (e.g. "America/New_York").
-        startWeekday:
-          type: integer
-          format: int32
-          description: ISO 8601 weekday on which the session opens (1 = Monday, 7 = Sunday).
-        endWeekday:
-          type: integer
-          format: int32
-          description: 'ISO 8601 weekday on which the session last opens. If `endWeekday <
-
-            startWeekday` the range wraps the week (e.g. `7..4` = Sun-Thu).'
-    OpenInterest:
-      type: object
-      title: OpenInterest
-      required:
-      - symbol
-      - timestamp
-      properties:
-        symbol:
-          type: string
-          description: The symbol of the market.
-        openInterest:
-          type: string
-          format: decimal
-          description: The open interest.
-        timestamp:
-          type: integer
-          format: int64
-          description: Timestamp.
-    PriceBandMeanPremium:
-      type: object
-      title: PriceBandMeanPremium
-      required:
-      - tolerancePct
-      properties:
-        tolerancePct:
-          type: string
-          format: decimal
-          description: 'Maximum allowed deviation from the mean premium. E.g. if
-
-            `tolerance_pct` is 0.05 (5%), and the mean premium is 5%, then
-
-            orders will be prevented from being placed if the premium exceeds 10%.'
+          description: CUSIP identifier for the security.
+        sessions:
+          type: array
+          description: Trading sessions with their active hours and quantity filters.
+          items:
+            $ref: '#/components/schemas/SecuritySession'
     SecuritySession:
       type: object
       title: SecuritySession
@@ -877,177 +811,6 @@ components:
           type: string
           format: decimal
           description: Minimum quantity increment during this session.
-    PositionImfFunction_SqrtFunction:
-      allOf:
-      - type: object
-        required:
-        - type
-        properties:
-          type:
-            type: string
-            enum:
-            - sqrt
-            example: sqrt
-      - $ref: '#/components/schemas/SqrtFunction'
-    KlineInterval:
-      type: string
-      enum:
-      - 1s
-      - 1m
-      - 3m
-      - 5m
-      - 15m
-      - 30m
-      - 1h
-      - 2h
-      - 4h
-      - 6h
-      - 8h
-      - 12h
-      - 1d
-      - 3d
-      - 1w
-      - 1month
-    SeriesRecurrence:
-      type: string
-      enum:
-      - minutely
-      - fiveMinutely
-      - fifteenMinutely
-      - hourly
-      - daily
-      - weekly
-      - monthly
-    Depth:
-      type: object
-      title: Depth
-      required:
-      - asks
-      - bids
-      - lastUpdateId
-      - timestamp
-      properties:
-        asks:
-          type: array
-          description: Asks on the order book.
-          items:
-            type: array
-            items:
-              type: string
-              format: decimal
-            maxLength: 2
-            minLength: 2
-        bids:
-          type: array
-          description: Bids on the order book.
-          items:
-            type: array
-            items:
-              type: string
-              format: decimal
-            maxLength: 2
-            minLength: 2
-        lastUpdateId:
-          type: string
-          description: Update ID that caused the last change to the order book depth.
-        timestamp:
-          type: integer
-          format: int64
-          description: Matching engine timestamp in microseconds.
-      example:
-        asks:
-        - - '21.9'
-          - '500.123'
-        - - '22.1'
-          - '2321.11'
-        bids:
-        - - '20.12'
-          - '255.123'
-        - - '20.5'
-          - '499.555'
-        lastUpdateId: '1684026955123'
-        timestamp: 1684026955123
-    PredictionMarket:
-      type: object
-      title: PredictionMarket
-      required:
-      - marketSymbol
-      - question
-      - yesOutcomeLabel
-      - noOutcomeLabel
-      - rules
-      - activePrice
-      - quoteVolume
-      - quoteVolumeLifetime
-      - resolutionDelaySecs
-      properties:
-        marketSymbol:
-          type: string
-        question:
-          type: string
-          description: The question that the prediction market will resolve e.g. `'Will England win the 2026 FIFA World Cup?'`
-        groupLabel:
-          type: string
-          description: The short textual label summarising the different market outcomes composing an event.
-        yesOutcomeLabel:
-          type: string
-          description: The yes outcome of the prediction market e.g. "England" for the football match England vs Brazil.
-        noOutcomeLabel:
-          type: string
-          description: The no outcome of the prediction market e.g. "Brazil" for the football match England vs Brazil.
-        rules:
-          type: string
-          description: The rules of the prediction market e.g. "The team that wins the 2025 men's world cup."
-        resolvedAt:
-          type: string
-          format: naive-date-time
-          description: Time at which the prediction market was resolved.
-        resolutionPrice:
-          type: string
-          format: decimal
-          description: The price at which the prediction market was resolved.
-        activePrice:
-          type: string
-          format: decimal
-          description: The active traded price of the prediction market.
-        quoteVolume:
-          type: string
-          format: decimal
-          description: The 24hr quote volume of the prediction market.
-        quoteVolumeLifetime:
-          type: string
-          format: decimal
-          description: The lifetime quote volume of the prediction market.
-        imgUrl:
-          type: string
-          description: An image URL associated with the market.
-        resolutionCondition:
-          description: The condition that determines how the prediction market resolves.
-          allOf:
-          - $ref: '#/components/schemas/ResolutionCondition'
-          - description: The condition that determines how the prediction market resolves.
-        proposedResolution:
-          type: boolean
-          description: The proposed resolution for the market (true = yes, false = no).
-        proposedResolutionAt:
-          type: string
-          format: naive-date-time
-          description: Time at which the proposed resolution was set.
-        resolutionDelaySecs:
-          type: integer
-          format: int32
-          description: 'Seconds to wait after `proposed_resolution_at` before this market is resolved.
-
-            Bounded server-side to [0, 604800] (7 days).'
-    MarketType:
-      type: string
-      enum:
-      - SPOT
-      - PERP
-      - IPERP
-      - DATED
-      - PREDICTION
-      - RFQ
     CustodyAsset:
       type: string
       enum:
@@ -2652,121 +2415,119 @@ components:
       - EWH.US
       - NLR.US
       - FUTU.US
-    Series:
+    FundingIntervalRate:
       type: object
-      title: Series
+      title: FundingIntervalRate
       required:
-      - slug
-      - title
+      - symbol
+      - intervalEndTimestamp
+      - fundingRate
       properties:
-        slug:
+        symbol:
           type: string
-          description: 'The series id of the prediction event e.g. `world-cup-winner-mens`.
-
-            Every world cup winner market will have the same series id.'
-        title:
+          description: The symbol of the market associated to the funding interval.
+        intervalEndTimestamp:
           type: string
-          description: The series title of the prediction event e.g. `World Cup winner (mens)`
-        recurrence:
-          description: The recurrence of the series e.g. `Weekly`.
-          allOf:
-          - $ref: '#/components/schemas/SeriesRecurrence'
-          - description: The recurrence of the series e.g. `Weekly`.
-    OutcomeResolutionCondition:
+          format: naive-date-time
+          description: The end of the funding interval.
+        fundingRate:
+          type: string
+          format: decimal
+          description: The funding rate for the interval.
+    MarketSession:
       type: object
-      title: OutcomeResolutionCondition
-      description: Outcome resolution condition wrapper.
+      title: MarketSession
       required:
-      - outcome
-      properties:
-        outcome:
-          type: string
-    ResolutionSource:
-      type: string
-      description: Source for event resolution prices.
-      enum:
-      - binance
-    OrderBookState:
-      type: string
-      enum:
-      - Open
-      - Closed
-      - CancelOnly
-      - LimitOnly
-      - PostOnly
-    Security:
-      type: object
-      title: Security
-      required:
-      - asset
       - name
-      - sessions
+      - startTime
+      - endTime
+      - timezone
+      - startWeekday
+      - endWeekday
       properties:
-        asset:
-          description: Asset symbol.
-          allOf:
-          - $ref: '#/components/schemas/CustodyAsset'
-          - description: Asset symbol.
         name:
           type: string
-          description: Name.
-        cusip:
+          description: Session name (e.g. "US_MARKET_HOURS").
+        description:
           type: string
-          description: CUSIP identifier for the security.
-        sessions:
-          type: array
-          description: Trading sessions with their active hours and quantity filters.
-          items:
-            $ref: '#/components/schemas/SecuritySession'
-    Kline:
-      type: object
-      title: Kline
-      description: 'Public K-line response shape.
+          description: Session description.
+        startTime:
+          type: string
+          format: naive-time
+          description: Session start time (local to the timezone).
+        endTime:
+          type: string
+          format: naive-time
+          description: Session end time (local to the timezone).
+        timezone:
+          type: string
+          description: Timezone identifier (e.g. "America/New_York").
+        startWeekday:
+          type: integer
+          format: int32
+          description: ISO 8601 weekday on which the session opens (1 = Monday, 7 = Sunday).
+        endWeekday:
+          type: integer
+          format: int32
+          description: 'ISO 8601 weekday on which the session last opens. If `endWeekday <
 
-
-        Lives in `bpx_api_types` so that both `api` and `api-klines` can return
-
-        the same JSON shape to clients.'
-      required:
-      - start
-      - end
-      - volume
-      - quoteVolume
-      - trades
-      properties:
-        start:
-          type: string
-          description: Start time.
-        end:
-          type: string
-          description: End time.
-        open:
-          type: string
-          description: Open price.
-        high:
-          type: string
-          description: High price.
-        low:
-          type: string
-          description: Low price.
-        close:
-          type: string
-          description: Close price.
-        volume:
-          type: string
-          description: Volume in base asset.
-        quoteVolume:
-          type: string
-          description: Volume in quote asset.
-        trades:
-          type: string
-          description: Number of trades during the K-line.
+            startWeekday` the range wraps the week (e.g. `7..4` = Sun-Thu).'
     StrikePriceCondition:
       type: string
       description: Strike price condition values.
       enum:
       - above
       - below
+    ResolutionCondition:
+      type: object
+      description: Condition that determines how a prediction market resolves.
+      anyOf:
+      - $ref: '#/components/schemas/ResolutionCondition_QuantityRangeResolutionCondition'
+      - $ref: '#/components/schemas/ResolutionCondition_StrikePriceResolutionCondition'
+      - $ref: '#/components/schemas/ResolutionCondition_OutcomeResolutionCondition'
+      discriminator:
+        propertyName: type
+        mapping:
+          QuantityRange: '#/components/schemas/ResolutionCondition_QuantityRangeResolutionCondition'
+          StrikePrice: '#/components/schemas/ResolutionCondition_StrikePriceResolutionCondition'
+          Outcome: '#/components/schemas/ResolutionCondition_OutcomeResolutionCondition'
+    ResolutionCondition_QuantityRangeResolutionCondition:
+      description: Condition that determines how a prediction market resolves.
+      allOf:
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum:
+            - QuantityRange
+            example: QuantityRange
+      - $ref: '#/components/schemas/QuantityRangeResolutionCondition'
+    SeriesRecurrence:
+      type: string
+      enum:
+      - minutely
+      - fiveMinutely
+      - fifteenMinutely
+      - hourly
+      - daily
+      - weekly
+      - monthly
+    PriceBandMeanPremium:
+      type: object
+      title: PriceBandMeanPremium
+      required:
+      - tolerancePct
+      properties:
+        tolerancePct:
+          type: string
+          format: decimal
+          description: 'Maximum allowed deviation from the mean premium. E.g. if
+
+            `tolerance_pct` is 0.05 (5%), and the mean premium is 5%, then
+
+            orders will be prevented from being placed if the premium exceeds 10%.'
     Resolution:
       type: object
       title: Resolution
@@ -2805,49 +2566,83 @@ components:
         outcome:
           type: string
           description: The outcome for outcome-based resolution, e.g. an election winner.
-    PositionImfFunction:
+    Ticker:
       type: object
-      anyOf:
-      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
-      discriminator:
-        propertyName: type
-        mapping:
-          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
-    FundingIntervalRate:
-      type: object
-      title: FundingIntervalRate
+      title: Ticker
+      description: 'Public ticker response shape.
+
+
+        Lives in `bpx_api_types` so that both `api` and `api-klines` can return
+
+        the same JSON shape to clients.'
       required:
       - symbol
-      - intervalEndTimestamp
-      - fundingRate
+      - firstPrice
+      - lastPrice
+      - priceChange
+      - priceChangePercent
+      - high
+      - low
+      - volume
+      - quoteVolume
+      - trades
       properties:
         symbol:
           type: string
-          description: The symbol of the market associated to the funding interval.
-        intervalEndTimestamp:
-          type: string
-          format: naive-date-time
-          description: The end of the funding interval.
-        fundingRate:
+          description: The symbol of the market.
+        firstPrice:
           type: string
           format: decimal
-          description: The funding rate for the interval.
-    PriceBandMarkPrice:
+          description: First price for the interval.
+        lastPrice:
+          type: string
+          format: decimal
+          description: Last price for the interval.
+        priceChange:
+          type: string
+          format: decimal
+          description: Price change for the interval.
+        priceChangePercent:
+          type: string
+          format: decimal
+          description: Percentage price change for the interval.
+        high:
+          type: string
+          format: decimal
+          description: Highest price for the interval.
+        low:
+          type: string
+          format: decimal
+          description: Lowest price for the interval.
+        volume:
+          type: string
+          format: decimal
+          description: Base volume for the interval.
+        quoteVolume:
+          type: string
+          format: decimal
+          description: Quote volume for the interval.
+        trades:
+          type: string
+          description: Trades for the interval.
+    OrderBookFilters:
       type: object
-      title: PriceBandMarkPrice
+      title: OrderBookFilters
       required:
-      - maxMultiplier
-      - minMultiplier
+      - price
+      - quantity
       properties:
-        maxMultiplier:
-          type: string
-          format: decimal
-          description: Maximum allowed multiplier move from mean price.
-        minMultiplier:
-          type: string
-          format: decimal
-          description: Minimum allowed multiplier move from mean price.
-    ResolutionCondition_OutcomeResolutionCondition:
+        price:
+          description: Defines the price rules for the order book.
+          allOf:
+          - $ref: '#/components/schemas/PriceFilter'
+          - description: Defines the price rules for the order book.
+        quantity:
+          description: Defines the quantity rules for the order book.
+          allOf:
+          - $ref: '#/components/schemas/QuantityFilter'
+          - description: Defines the quantity rules for the order book.
+    ResolutionCondition_StrikePriceResolutionCondition:
       description: Condition that determines how a prediction market resolves.
       allOf:
       - type: object
@@ -2857,14 +2652,106 @@ components:
           type:
             type: string
             enum:
-            - Outcome
-            example: Outcome
-      - $ref: '#/components/schemas/OutcomeResolutionCondition'
-    TickerInterval:
+            - StrikePrice
+            example: StrikePrice
+      - $ref: '#/components/schemas/StrikePriceResolutionCondition'
+    QuantityFilter:
+      type: object
+      title: QuantityFilter
+      required:
+      - minQuantity
+      - stepSize
+      properties:
+        minQuantity:
+          type: string
+          format: decimal
+          description: 'Minimum quantity the order book will allow.
+
+
+            For futures, this will be the threshold at which a position gets closed
+
+            and so it should be as close as possible, preferably equal, to the
+
+            `step_size`.'
+        maxQuantity:
+          type: string
+          format: decimal
+          description: Maximum quantity the order book will allow.
+        stepSize:
+          type: string
+          format: decimal
+          description: Quantity increment.
+    Tag:
+      type: object
+      title: Tag
+      required:
+      - slug
+      - title
+      properties:
+        slug:
+          type: string
+          description: Tag associated with the prediction event.
+        title:
+          type: string
+          description: The tag title of the prediction market.
+    OrderBookState:
       type: string
       enum:
-      - 1d
-      - 1w
+      - Open
+      - Closed
+      - CancelOnly
+      - LimitOnly
+      - PostOnly
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
+    Series:
+      type: object
+      title: Series
+      required:
+      - slug
+      - title
+      properties:
+        slug:
+          type: string
+          description: 'The series id of the prediction event e.g. `world-cup-winner-mens`.
+
+            Every world cup winner market will have the same series id.'
+        title:
+          type: string
+          description: The series title of the prediction event e.g. `World Cup winner (mens)`
+        recurrence:
+          description: The recurrence of the series e.g. `Weekly`.
+          allOf:
+          - $ref: '#/components/schemas/SeriesRecurrence'
+          - description: The recurrence of the series e.g. `Weekly`.
+    DepthLimit:
+      type: string
+      enum:
+      - '5'
+      - '10'
+      - '20'
+      - '50'
+      - '100'
+      - '500'
+      - '1000'
+    OutcomeResolutionCondition:
+      type: object
+      title: OutcomeResolutionCondition
+      description: Outcome resolution condition wrapper.
+      required:
+      - outcome
+      properties:
+        outcome:
+          type: string
     Market:
       type: object
       title: Market
@@ -2945,65 +2832,95 @@ components:
           description: 'Position limit weight coefficient.
 
             Used to calculate position limits when clearing a trade.'
-    Ticker:
+    KlineInterval:
+      type: string
+      enum:
+      - 1s
+      - 1m
+      - 3m
+      - 5m
+      - 15m
+      - 30m
+      - 1h
+      - 2h
+      - 4h
+      - 6h
+      - 8h
+      - 12h
+      - 1d
+      - 3d
+      - 1w
+      - 1month
+    ResolutionCondition_OutcomeResolutionCondition:
+      description: Condition that determines how a prediction market resolves.
+      allOf:
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum:
+            - Outcome
+            example: Outcome
+      - $ref: '#/components/schemas/OutcomeResolutionCondition'
+    Depth:
       type: object
-      title: Ticker
-      description: 'Public ticker response shape.
-
-
-        Lives in `bpx_api_types` so that both `api` and `api-klines` can return
-
-        the same JSON shape to clients.'
+      title: Depth
       required:
-      - symbol
-      - firstPrice
-      - lastPrice
-      - priceChange
-      - priceChangePercent
-      - high
-      - low
-      - volume
-      - quoteVolume
-      - trades
+      - asks
+      - bids
+      - lastUpdateId
+      - timestamp
       properties:
-        symbol:
+        asks:
+          type: array
+          description: Asks on the order book.
+          items:
+            type: array
+            items:
+              type: string
+              format: decimal
+            maxLength: 2
+            minLength: 2
+        bids:
+          type: array
+          description: Bids on the order book.
+          items:
+            type: array
+            items:
+              type: string
+              format: decimal
+            maxLength: 2
+            minLength: 2
+        lastUpdateId:
           type: string
-          description: The symbol of the market.
-        firstPrice:
-          type: string
-          format: decimal
-          description: First price for the interval.
-        lastPrice:
-          type: string
-          format: decimal
-          description: Last price for the interval.
-        priceChange:
-          type: string
-          format: decimal
-          description: Price change for the interval.
-        priceChangePercent:
-          type: string
-          format: decimal
-          description: Percentage price change for the interval.
-        high:
-          type: string
-          format: decimal
-          description: Highest price for the interval.
-        low:
-          type: string
-          format: decimal
-          description: Lowest price for the interval.
-        volume:
-          type: string
-          format: decimal
-          description: Base volume for the interval.
-        quoteVolume:
-          type: string
-          format: decimal
-          description: Quote volume for the interval.
-        trades:
-          type: string
-          description: Trades for the interval.
+          description: Update ID that caused the last change to the order book depth.
+        timestamp:
+          type: integer
+          format: int64
+          description: Matching engine timestamp in microseconds.
+      example:
+        asks:
+        - - '21.9'
+          - '500.123'
+        - - '22.1'
+          - '2321.11'
+        bids:
+        - - '20.12'
+          - '255.123'
+        - - '20.5'
+          - '499.555'
+        lastUpdateId: '1684026955123'
+        timestamp: 1684026955123
+    PositionImfFunction:
+      type: object
+      anyOf:
+      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
+      discriminator:
+        propertyName: type
+        mapping:
+          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
     PriceFilter:
       type: object
       title: PriceFilter
@@ -3089,19 +3006,17 @@ components:
             the previous mark/index price. When set, an update is floored at
 
             `prev * min_price_update_multiplier`.'
-    ResolutionCondition:
-      type: object
-      description: Condition that determines how a prediction market resolves.
-      anyOf:
-      - $ref: '#/components/schemas/ResolutionCondition_QuantityRangeResolutionCondition'
-      - $ref: '#/components/schemas/ResolutionCondition_StrikePriceResolutionCondition'
-      - $ref: '#/components/schemas/ResolutionCondition_OutcomeResolutionCondition'
-      discriminator:
-        propertyName: type
-        mapping:
-          QuantityRange: '#/components/schemas/ResolutionCondition_QuantityRangeResolutionCondition'
-          StrikePrice: '#/components/schemas/ResolutionCondition_StrikePriceResolutionCondition'
-          Outcome: '#/components/schemas/ResolutionCondition_OutcomeResolutionCondition'
+    KlinePriceType:
+      type: string
+      enum:
+      - Last
+      - Index
+      - Mark
+    ResolutionSource:
+      type: string
+      description: Source for event resolution prices.
+      enum:
+      - binance
     SqrtFunction:
       type: object
       title: SqrtFunction
@@ -3115,89 +3030,88 @@ components:
         factor:
           type: string
           format: decimal
-    QuantityFilter:
+    Event:
       type: object
-      title: QuantityFilter
+      title: Event
       required:
-      - minQuantity
-      - stepSize
+      - slug
+      - title
+      - predictionMarkets
+      - tags
+      - series
+      - description
+      - quoteVolume
+      - resolution
+      - resolved
+      - resolutionDelaySecs
       properties:
-        minQuantity:
+        slug:
+          type: string
+          description: 'The identifier for the event that the prediction markets are based on.
+
+            Multiple markets for the same event (e.g. `2026-fifa-world-cup-winner-mens`) will have the same identifier.'
+        title:
+          type: string
+          description: 'The title for the prediction event that the prediction markets are based on.
+
+            Multiple prediction markets may have the same title
+
+            E.g. a set of prediction markets of the winner of the world cup would have title `2026 FIFA World Cup Winner`'
+        predictionMarkets:
+          type: array
+          description: The prediction markets associated with this event.
+          items:
+            $ref: '#/components/schemas/PredictionMarket'
+        tags:
+          type: array
+          description: Tags associated with the prediction event e.g. `["SPORTS", "FOOTBALL", "WORLD CUP"]`
+          items:
+            $ref: '#/components/schemas/Tag'
+        series:
+          type: array
+          description: 'The series of the prediction event.
+
+            Every world cup winner market will have the same series.'
+          items:
+            $ref: '#/components/schemas/Series'
+        description:
+          type: string
+          description: A description of the event.
+        imgUrl:
+          type: string
+          description: An image URL associated with the event.
+        quoteVolume:
           type: string
           format: decimal
-          description: 'Minimum quantity the order book will allow.
-
-
-            For futures, this will be the threshold at which a position gets closed
-
-            and so it should be as close as possible, preferably equal, to the
-
-            `step_size`.'
-        maxQuantity:
-          type: string
-          format: decimal
-          description: Maximum quantity the order book will allow.
-        stepSize:
-          type: string
-          format: decimal
-          description: Quantity increment.
-    MarkPrice:
-      type: object
-      title: MarkPrice
-      required:
-      - markPrice
-      - symbol
-      properties:
-        fundingRate:
-          type: string
-          format: decimal
-          description: 'The funding rate for the current interval.
-
-            Only returned for perpetual markets.'
-        indexPrice:
-          type: string
-          format: decimal
-          description: 'The index price for the market.
-
-            Only returned for perpetual markets.'
-        markPrice:
-          type: string
-          format: decimal
-          description: The mark price for the market.
-        nextFundingTimestamp:
+          description: The total 24hr quote volume of the prediction event.
+        resolution:
+          description: Resolution data for the prediction event.
+          allOf:
+          - $ref: '#/components/schemas/Resolution'
+          - description: Resolution data for the prediction event.
+        resolved:
+          type: boolean
+          description: Whether the event has been resolved.
+        resolutionDelaySecs:
           type: integer
-          format: int64
-          description: 'The end time of the current interval and start time of next interval.
+          format: int32
+          description: 'Seconds to wait after a market''s proposed resolution before resolving it.
 
-            Funding payments will be distributed at this time.
-
-            Only returned for perpetual markets.'
-        symbol:
-          type: string
-          description: The symbol of the market.
-    DepthLimit:
+            Applied to every market in the event. Bounded server-side to [0, 604800] (7 days).'
+    StrikePriceResolutionCondition:
+      type: object
+      title: StrikePriceResolutionCondition
+      description: Strike price resolution condition wrapper.
+      required:
+      - condition
+      properties:
+        condition:
+          $ref: '#/components/schemas/StrikePriceCondition'
+    TickerInterval:
       type: string
       enum:
-      - '5'
-      - '10'
-      - '20'
-      - '50'
-      - '100'
-      - '500'
-      - '1000'
-    ResolutionCondition_StrikePriceResolutionCondition:
-      description: Condition that determines how a prediction market resolves.
-      allOf:
-      - type: object
-        required:
-        - type
-        properties:
-          type:
-            type: string
-            enum:
-            - StrikePrice
-            example: StrikePrice
-      - $ref: '#/components/schemas/StrikePriceResolutionCondition'
+      - 1d
+      - 1w
     ApiErrorCode:
       type: string
       enum:
@@ -3236,32 +3150,118 @@ components:
       - TOO_MANY_REQUESTS
       - TRADING_PAUSED
       - UNAUTHORIZED
-    ApiErrorResponse:
+    PredictionMarket:
       type: object
-      title: ApiErrorResponse
+      title: PredictionMarket
       required:
-      - code
-      - message
+      - marketSymbol
+      - question
+      - yesOutcomeLabel
+      - noOutcomeLabel
+      - rules
+      - activePrice
+      - quoteVolume
+      - quoteVolumeLifetime
+      - resolutionDelaySecs
       properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
+        marketSymbol:
           type: string
-    StrikePriceResolutionCondition:
-      type: object
-      title: StrikePriceResolutionCondition
-      description: Strike price resolution condition wrapper.
-      required:
-      - condition
-      properties:
-        condition:
-          $ref: '#/components/schemas/StrikePriceCondition'
-    KlinePriceType:
+        question:
+          type: string
+          description: The question that the prediction market will resolve e.g. `'Will England win the 2026 FIFA World Cup?'`
+        groupLabel:
+          type: string
+          description: The short textual label summarising the different market outcomes composing an event.
+        yesOutcomeLabel:
+          type: string
+          description: The yes outcome of the prediction market e.g. "England" for the football match England vs Brazil.
+        noOutcomeLabel:
+          type: string
+          description: The no outcome of the prediction market e.g. "Brazil" for the football match England vs Brazil.
+        rules:
+          type: string
+          description: The rules of the prediction market e.g. "The team that wins the 2025 men's world cup."
+        resolvedAt:
+          type: string
+          format: naive-date-time
+          description: Time at which the prediction market was resolved.
+        resolutionPrice:
+          type: string
+          format: decimal
+          description: The price at which the prediction market was resolved.
+        activePrice:
+          type: string
+          format: decimal
+          description: The active traded price of the prediction market.
+        quoteVolume:
+          type: string
+          format: decimal
+          description: The 24hr quote volume of the prediction market.
+        quoteVolumeLifetime:
+          type: string
+          format: decimal
+          description: The lifetime quote volume of the prediction market.
+        imgUrl:
+          type: string
+          description: An image URL associated with the market.
+        resolutionCondition:
+          description: The condition that determines how the prediction market resolves.
+          allOf:
+          - $ref: '#/components/schemas/ResolutionCondition'
+          - description: The condition that determines how the prediction market resolves.
+        proposedResolution:
+          type: boolean
+          description: The proposed resolution for the market (true = yes, false = no).
+        proposedResolutionAt:
+          type: string
+          format: naive-date-time
+          description: Time at which the proposed resolution was set.
+        resolutionDelaySecs:
+          type: integer
+          format: int32
+          description: 'Seconds to wait after `proposed_resolution_at` before this market is resolved.
+
+            Bounded server-side to [0, 604800] (7 days).'
+    MarketType:
       type: string
       enum:
-      - Last
-      - Index
-      - Mark
+      - SPOT
+      - PERP
+      - IPERP
+      - DATED
+      - PREDICTION
+      - RFQ
+    OpenInterest:
+      type: object
+      title: OpenInterest
+      required:
+      - symbol
+      - timestamp
+      properties:
+        symbol:
+          type: string
+          description: The symbol of the market.
+        openInterest:
+          type: string
+          format: decimal
+          description: The open interest.
+        timestamp:
+          type: integer
+          format: int64
+          description: Timestamp.
+    QuantityRangeResolutionCondition:
+      type: object
+      title: QuantityRangeResolutionCondition
+      description: Resolution condition based on quantity range.
+      properties:
+        greaterThanOrEqual:
+          type: string
+          format: decimal
+          description: Lower bound (inclusive) for the quantity.
+        lessThan:
+          type: string
+          format: decimal
+          description: Upper bound (exclusive) for the quantity.
 x-tagGroups:
 - name: Public Endpoints
   tags:

@@ -330,6 +330,99 @@ paths:
       operationId: get_vault_history
 components:
   schemas:
+    VaultRedeem:
+      type: object
+      title: VaultRedeem
+      description: Vault redeem event from history.
+      required:
+      - status
+      - id
+      - vaultId
+      - vaultTokenQuantity
+      - timestamp
+      properties:
+        status:
+          description: Status.
+          allOf:
+          - $ref: '#/components/schemas/VaultRedeemStatus'
+          - description: Status.
+        id:
+          type: string
+          description: Unique identifier for the redeem request.
+        vaultId:
+          type: integer
+          format: uint32
+          description: Vault ID.
+        vaultTokenQuantity:
+          type: string
+          format: decimal
+          description: Amount of vault tokens being redeemed.
+        vaultToken:
+          type: string
+          description: The vault token asset (only present for redeemed events).
+        symbol:
+          type: string
+          description: The symbol used for redeeming (only present for redeemed events).
+        quantity:
+          type: string
+          format: decimal
+          description: Amount returned (only present for redeemed events).
+        nav:
+          type: string
+          format: decimal
+          description: NAV at time of redeem (only present for redeemed events).
+        reason:
+          type: string
+          description: Cancellation reason (only present for cancelled events).
+        timestamp:
+          type: integer
+          format: int64
+          description: Timestamp of the event in milliseconds.
+    VaultNav:
+      type: object
+      title: VaultNav
+      description: Live vault NAV data.
+      required:
+      - nav
+      - twapNav
+      - mintNav
+      - redeemNav
+      - vaultEquity
+      - netEquity
+      - tokenCirculatingSupply
+      properties:
+        nav:
+          type: string
+          format: decimal
+          description: Current spot NAV per vault token.
+        twapNav:
+          type: string
+          format: decimal
+          description: Time-weighted average NAV per vault token.
+        mintNav:
+          type: string
+          format: decimal
+          description: 'NAV used for mints: max(nav, twap_nav).'
+        redeemNav:
+          type: string
+          format: decimal
+          description: 'NAV used for redeems: min(nav, twap_nav).'
+        vaultEquity:
+          type: string
+          format: decimal
+          description: Total vault account equity.
+        netEquity:
+          type: string
+          format: decimal
+          description: Net equity after haircuts applied.
+        tokenCirculatingSupply:
+          type: string
+          format: decimal
+          description: Total circulating supply of vault tokens.
+        lastCrankTimestamp:
+          type: integer
+          format: int64
+          description: Timestamp (ms) of the last NAV crank, if any.
     VaultMintRequest:
       type: object
       title: VaultMintRequest
@@ -356,13 +449,30 @@ components:
         autoLendRedeem:
           type: boolean
           description: Whether to allow auto redeem lent assets when depositing into vault.
-    VaultRedeemStatus:
+    VaultRedeemRequest:
+      type: object
+      title: VaultRedeemRequest
+      description: Request payload for redeeming vault tokens.
+      required:
+      - vaultId
+      properties:
+        vaultId:
+          type: integer
+          format: uint32
+          description: The vault ID to redeem from.
+        vaultTokenQuantity:
+          type: string
+          format: decimal
+          description: 'Amount of vault tokens to deposit to redeem USDC.
+
+            If not specified, uses all available vault tokens for the redemptions.'
+    VaultHistoryInterval:
       type: string
-      description: Vault redeem status.
       enum:
-      - Requested
-      - Redeemed
-      - Cancelled
+      - 1d
+      - 1w
+      - 1month
+      - 1year
     Vault:
       type: object
       title: Vault
@@ -415,89 +525,13 @@ components:
           format: decimal
           description: Remaining vault tokens available to mint.
           default: '0'
-    VaultHistoryInterval:
+    VaultRedeemStatus:
       type: string
+      description: Vault redeem status.
       enum:
-      - 1d
-      - 1w
-      - 1month
-      - 1year
-    VaultHistory:
-      type: object
-      title: VaultHistory
-      description: Historical vault data.
-      required:
-      - vaultId
-      - timestamp
-      properties:
-        vaultId:
-          type: integer
-          format: uint32
-          description: The vault ID.
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp of the snapshot.
-        nav:
-          type: string
-          format: decimal
-          description: Net asset value per token.
-        vaultEquity:
-          type: string
-          format: decimal
-          description: Total vault equity in USDC.
-        tokenCirculatingSupply:
-          type: string
-          format: decimal
-          description: Total circulating vault tokens.
-    VaultRedeem:
-      type: object
-      title: VaultRedeem
-      description: Vault redeem event from history.
-      required:
-      - status
-      - id
-      - vaultId
-      - vaultTokenQuantity
-      - timestamp
-      properties:
-        status:
-          description: Status.
-          allOf:
-          - $ref: '#/components/schemas/VaultRedeemStatus'
-          - description: Status.
-        id:
-          type: string
-          description: Unique identifier for the redeem request.
-        vaultId:
-          type: integer
-          format: uint32
-          description: Vault ID.
-        vaultTokenQuantity:
-          type: string
-          format: decimal
-          description: Amount of vault tokens being redeemed.
-        vaultToken:
-          type: string
-          description: The vault token asset (only present for redeemed events).
-        symbol:
-          type: string
-          description: The symbol used for redeeming (only present for redeemed events).
-        quantity:
-          type: string
-          format: decimal
-          description: Amount returned (only present for redeemed events).
-        nav:
-          type: string
-          format: decimal
-          description: NAV at time of redeem (only present for redeemed events).
-        reason:
-          type: string
-          description: Cancellation reason (only present for cancelled events).
-        timestamp:
-          type: integer
-          format: int64
-          description: Timestamp of the event in milliseconds.
+      - Requested
+      - Redeemed
+      - Cancelled
     ApiErrorCode:
       type: string
       enum:
@@ -547,68 +581,6 @@ components:
           $ref: '#/components/schemas/ApiErrorCode'
         message:
           type: string
-    VaultNav:
-      type: object
-      title: VaultNav
-      description: Live vault NAV data.
-      required:
-      - nav
-      - twapNav
-      - mintNav
-      - redeemNav
-      - vaultEquity
-      - netEquity
-      - tokenCirculatingSupply
-      properties:
-        nav:
-          type: string
-          format: decimal
-          description: Current spot NAV per vault token.
-        twapNav:
-          type: string
-          format: decimal
-          description: Time-weighted average NAV per vault token.
-        mintNav:
-          type: string
-          format: decimal
-          description: 'NAV used for mints: max(nav, twap_nav).'
-        redeemNav:
-          type: string
-          format: decimal
-          description: 'NAV used for redeems: min(nav, twap_nav).'
-        vaultEquity:
-          type: string
-          format: decimal
-          description: Total vault account equity.
-        netEquity:
-          type: string
-          format: decimal
-          description: Net equity after haircuts applied.
-        tokenCirculatingSupply:
-          type: string
-          format: decimal
-          description: Total circulating supply of vault tokens.
-        lastCrankTimestamp:
-          type: integer
-          format: int64
-          description: Timestamp (ms) of the last NAV crank, if any.
-    VaultRedeemRequest:
-      type: object
-      title: VaultRedeemRequest
-      description: Request payload for redeeming vault tokens.
-      required:
-      - vaultId
-      properties:
-        vaultId:
-          type: integer
-          format: uint32
-          description: The vault ID to redeem from.
-        vaultTokenQuantity:
-          type: string
-          format: decimal
-          description: 'Amount of vault tokens to deposit to redeem USDC.
-
-            If not specified, uses all available vault tokens for the redemptions.'
     VaultRedeemCancelRequest:
       type: object
       title: VaultRedeemCancelRequest
@@ -620,6 +592,34 @@ components:
           type: integer
           format: uint32
           description: The vault ID to cancel the redeem request for.
+    VaultHistory:
+      type: object
+      title: VaultHistory
+      description: Historical vault data.
+      required:
+      - vaultId
+      - timestamp
+      properties:
+        vaultId:
+          type: integer
+          format: uint32
+          description: The vault ID.
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the snapshot.
+        nav:
+          type: string
+          format: decimal
+          description: Net asset value per token.
+        vaultEquity:
+          type: string
+          format: decimal
+          description: Total vault equity in USDC.
+        tokenCirculatingSupply:
+          type: string
+          format: decimal
+          description: Total circulating vault tokens.
 x-tagGroups:
 - name: Public Endpoints
   tags:

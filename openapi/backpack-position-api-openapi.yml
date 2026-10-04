@@ -396,211 +396,11 @@ paths:
       operationId: get_position_history
 components:
   schemas:
-    SqrtFunction:
-      type: object
-      title: SqrtFunction
-      required:
-      - base
-      - factor
-      properties:
-        base:
-          type: string
-          format: decimal
-        factor:
-          type: string
-          format: decimal
-    PositionImfFunction:
-      type: object
-      anyOf:
-      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
-      discriminator:
-        propertyName: type
-        mapping:
-          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
-    MarketType:
-      type: string
-      enum:
-      - SPOT
-      - PERP
-      - IPERP
-      - DATED
-      - PREDICTION
-      - RFQ
-    PositionHistoryRow:
-      type: object
-      title: PositionHistoryRow
-      required:
-      - id
-      - symbol
-      - netQuantity
-      - netExposureQuantity
-      - netExposureNotional
-      - netCost
-      - markPrice
-      - entryPrice
-      - cumulativePnlRealized
-      - unrealizedPnl
-      - fundingQuantity
-      - interest
-      - liquidated
-      - imf
-      - fees
-      - state
-      - closedVolume
-      - liquidationFees
-      properties:
-        id:
-          type: string
-        symbol:
-          type: string
-        netQuantity:
-          type: string
-          format: decimal
-        netExposureQuantity:
-          type: string
-          format: decimal
-        netExposureNotional:
-          type: string
-          format: decimal
-        netCost:
-          type: string
-          format: decimal
-        markPrice:
-          type: string
-          format: decimal
-        entryPrice:
-          type: string
-          format: decimal
-        cumulativePnlRealized:
-          type: string
-          format: decimal
-        unrealizedPnl:
-          type: string
-          format: decimal
-        fundingQuantity:
-          type: string
-          format: decimal
-        interest:
-          type: string
-          format: decimal
-        liquidated:
-          type: string
-          format: decimal
-        imf:
-          type: string
-          format: decimal
-        fees:
-          type: string
-          format: decimal
-          description: Total trading fees paid for this position.
-        state:
-          $ref: '#/components/schemas/PositionState'
-        closedVolume:
-          type: string
-          format: decimal
-        liquidationFees:
-          type: string
-          format: decimal
-          description: Total liquidation fees paid for this position.
-        closingPrice:
-          type: string
-          format: decimal
-        accountLeverage:
-          type: string
-          format: decimal
-        openedAt:
-          type: string
-          format: naive-date-time
-        closedAt:
-          type: string
-          format: naive-date-time
     SortDirection:
       type: string
       enum:
       - Asc
       - Desc
-    ApiErrorCode:
-      type: string
-      enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
-    FundingPayment:
-      type: object
-      title: FundingPayment
-      required:
-      - userId
-      - symbol
-      - quantity
-      - intervalEndTimestamp
-      - fundingRate
-      properties:
-        userId:
-          type: integer
-          format: int32
-          description: User id of the account the payment is associated with.
-        subaccountId:
-          type: integer
-          format: uint16
-          description: Id of the subaccount the payment is associated with, if any.
-        symbol:
-          type: string
-          description: The symbol of the market the payment is associated with.
-        quantity:
-          type: string
-          format: decimal
-          description: Quantity of the payment. Positive if received, negative if paid.
-        intervalEndTimestamp:
-          type: string
-          format: naive-date-time
-          description: The end of the funding interval for the payment.
-        fundingRate:
-          type: string
-          format: decimal
-          description: The funding rate for the payment.
     FuturePositionWithMargin:
       type: object
       title: FuturePositionWithMargin
@@ -712,6 +512,132 @@ components:
           type: string
           format: decimal
           description: Cumulative interest paid for this position's unrealized pnl.
+    PositionHistoryRow:
+      type: object
+      title: PositionHistoryRow
+      required:
+      - id
+      - symbol
+      - netQuantity
+      - netExposureQuantity
+      - netExposureNotional
+      - netCost
+      - markPrice
+      - entryPrice
+      - cumulativePnlRealized
+      - unrealizedPnl
+      - fundingQuantity
+      - interest
+      - liquidated
+      - imf
+      - fees
+      - state
+      - closedVolume
+      - liquidationFees
+      properties:
+        id:
+          type: string
+        symbol:
+          type: string
+        netQuantity:
+          type: string
+          format: decimal
+        netExposureQuantity:
+          type: string
+          format: decimal
+        netExposureNotional:
+          type: string
+          format: decimal
+        netCost:
+          type: string
+          format: decimal
+        markPrice:
+          type: string
+          format: decimal
+        entryPrice:
+          type: string
+          format: decimal
+        cumulativePnlRealized:
+          type: string
+          format: decimal
+        unrealizedPnl:
+          type: string
+          format: decimal
+        fundingQuantity:
+          type: string
+          format: decimal
+        interest:
+          type: string
+          format: decimal
+        liquidated:
+          type: string
+          format: decimal
+        imf:
+          type: string
+          format: decimal
+        fees:
+          type: string
+          format: decimal
+          description: Total trading fees paid for this position.
+        state:
+          $ref: '#/components/schemas/PositionState'
+        closedVolume:
+          type: string
+          format: decimal
+        liquidationFees:
+          type: string
+          format: decimal
+          description: Total liquidation fees paid for this position.
+        closingPrice:
+          type: string
+          format: decimal
+        accountLeverage:
+          type: string
+          format: decimal
+        openedAt:
+          type: string
+          format: naive-date-time
+        closedAt:
+          type: string
+          format: naive-date-time
+    PositionState:
+      type: string
+      enum:
+      - Open
+      - Closed
+    FundingPayment:
+      type: object
+      title: FundingPayment
+      required:
+      - userId
+      - symbol
+      - quantity
+      - intervalEndTimestamp
+      - fundingRate
+      properties:
+        userId:
+          type: integer
+          format: int32
+          description: User id of the account the payment is associated with.
+        subaccountId:
+          type: integer
+          format: uint16
+          description: Id of the subaccount the payment is associated with, if any.
+        symbol:
+          type: string
+          description: The symbol of the market the payment is associated with.
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity of the payment. Positive if received, negative if paid.
+        intervalEndTimestamp:
+          type: string
+          format: naive-date-time
+          description: The end of the funding interval for the payment.
+        fundingRate:
+          type: string
+          format: decimal
+          description: The funding rate for the payment.
     PositionImfFunction_SqrtFunction:
       allOf:
       - type: object
@@ -724,11 +650,85 @@ components:
             - sqrt
             example: sqrt
       - $ref: '#/components/schemas/SqrtFunction'
-    PositionState:
+    SqrtFunction:
+      type: object
+      title: SqrtFunction
+      required:
+      - base
+      - factor
+      properties:
+        base:
+          type: string
+          format: decimal
+        factor:
+          type: string
+          format: decimal
+    PositionImfFunction:
+      type: object
+      anyOf:
+      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
+      discriminator:
+        propertyName: type
+        mapping:
+          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
+    ApiErrorCode:
       type: string
       enum:
-      - Open
-      - Closed
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
+    MarketType:
+      type: string
+      enum:
+      - SPOT
+      - PERP
+      - IPERP
+      - DATED
+      - PREDICTION
+      - RFQ
 x-tagGroups:
 - name: Public Endpoints
   tags:

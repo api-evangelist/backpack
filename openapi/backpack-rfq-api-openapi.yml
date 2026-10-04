@@ -1185,11 +1185,182 @@ paths:
       operationId: get_quote_fill_history
 components:
   schemas:
+    QuoteHistorical:
+      type: object
+      title: QuoteHistorical
+      required:
+      - rfqId
+      - quoteId
+      - bidPrice
+      - askPrice
+      - status
+      - createdAt
+      - deferredSettlement
+      properties:
+        rfqId:
+          type: string
+          description: Unique RFQ order ID, assigned by the matching engine.
+        quoteId:
+          type: string
+          description: Unique RFQ quote ID, assigned by the matching engine.
+        clientId:
+          type: integer
+          format: uint32
+          description: Custom RFQ quote ID, assigned by the maker (optionally).
+        bidPrice:
+          type: string
+          format: decimal
+          description: Quote bid price.
+        askPrice:
+          type: string
+          format: decimal
+          description: Quote ask price.
+        status:
+          description: Status.
+          allOf:
+          - $ref: '#/components/schemas/OrderStatus'
+          - description: Status.
+        createdAt:
+          type: string
+          format: naive-date-time
+          description: Time the quote was created.
+        deferredSettlement:
+          type: boolean
+          description: Whether this quote uses deferred settlement.
+    QuoteAcceptPayload:
+      type: object
+      title: QuoteAcceptPayload
+      required:
+      - quoteId
+      properties:
+        rfqId:
+          type: string
+          description: RFQ ID.
+        clientId:
+          type: integer
+          format: uint32
+          description: Custom RFQ ID.
+        quoteId:
+          type: string
+          description: RFQ quote ID.
     Side:
       type: string
       enum:
       - Bid
       - Ask
+    QuotePayload:
+      type: object
+      title: QuotePayload
+      required:
+      - rfqId
+      - bidPrice
+      - askPrice
+      properties:
+        rfqId:
+          type: string
+          description: RFQ ID.
+        clientId:
+          type: integer
+          format: uint32
+          description: Custom RFQ quote ID.
+        bidPrice:
+          type: string
+          format: decimal
+          description: Bid price.
+        askPrice:
+          type: string
+          format: decimal
+          description: Ask price.
+        autoLend:
+          type: boolean
+          description: Whether to lend proceeds.
+        autoLendRedeem:
+          type: boolean
+          description: Whether to redeem lends if required to fulfill the Quote.
+        autoBorrow:
+          type: boolean
+          description: Whether to borrow assets if required to fulfill the Quote.
+        autoBorrowRepay:
+          type: boolean
+          description: Whether to use proceeds to repay borrows.
+    RequestForQuotePayload:
+      type: object
+      title: RequestForQuotePayload
+      required:
+      - symbol
+      - side
+      properties:
+        clientId:
+          type: integer
+          format: uint32
+          description: Custom RFQ ID.
+        quantity:
+          type: string
+          format: decimal
+          description: RFQ quantity (in base asset).
+        quoteQuantity:
+          type: string
+          format: decimal
+          description: RFQ quote quantity (in quote asset).
+        price:
+          type: string
+          format: decimal
+          description: RFQ price. Only when execution mode is `Immediate`.
+        symbol:
+          type: string
+          description: RFQ symbol.
+        side:
+          description: Side of the order.
+          allOf:
+          - $ref: '#/components/schemas/Side'
+          - description: Side of the order.
+        executionMode:
+          description: 'Execution mode. Defaults to `AwaitAccept` when not provided.
+
+            If `Immediate`, the RFQ must have a price and the first quote within the given price
+
+            will be automatically accepted.
+
+            If `AwaitAccept`, the RFQ will wait for the user to accept a specific quote.'
+          allOf:
+          - $ref: '#/components/schemas/RfqExecutionMode'
+          - description: 'Execution mode. Defaults to `AwaitAccept` when not provided.
+
+              If `Immediate`, the RFQ must have a price and the first quote within the given price
+
+              will be automatically accepted.
+
+              If `AwaitAccept`, the RFQ will wait for the user to accept a specific quote.'
+        autoLend:
+          type: boolean
+          description: Whether to lend proceeds.
+        autoLendRedeem:
+          type: boolean
+          description: Whether to redeem lends if required to fulfill the RFQ.
+        autoBorrow:
+          type: boolean
+          description: Whether to borrow assets if required to fulfill the RFQ.
+        autoBorrowRepay:
+          type: boolean
+          description: Whether to use proceeds to repay borrows.
+    SystemOrderType:
+      type: string
+      enum:
+      - CollateralConversion
+      - FutureExpiry
+      - LiquidatePositionOnAdl
+      - LiquidatePositionOnBook
+      - LiquidatePositionOnBackstop
+      - OrderBookClosed
+    RequestForQuoteRefreshPayload:
+      type: object
+      title: RequestForQuoteRefreshPayload
+      required:
+      - rfqId
+      properties:
+        rfqId:
+          type: string
+          description: RFQ ID. An RFQ can only be refreshed using the RFQ ID.
     RequestForQuote:
       type: object
       title: RequestForQuote
@@ -1261,242 +1432,28 @@ components:
           type: integer
           format: int64
           description: Time the RFQ was created.
-    RequestForQuoteCancelPayload:
+    RfqFillType:
+      type: string
+      description: Filter for RFQ fills by system order type.
+      enum:
+      - User
+      - CollateralConversion
+    ApiErrorResponse:
       type: object
-      title: RequestForQuoteCancelPayload
-      properties:
-        rfqId:
-          type: string
-          description: RFQ ID.
-        clientId:
-          type: integer
-          format: uint32
-          description: Custom RFQ ID.
-    RequestForQuotePayload:
-      type: object
-      title: RequestForQuotePayload
+      title: ApiErrorResponse
       required:
-      - symbol
-      - side
+      - code
+      - message
       properties:
-        clientId:
-          type: integer
-          format: uint32
-          description: Custom RFQ ID.
-        quantity:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
           type: string
-          format: decimal
-          description: RFQ quantity (in base asset).
-        quoteQuantity:
-          type: string
-          format: decimal
-          description: RFQ quote quantity (in quote asset).
-        price:
-          type: string
-          format: decimal
-          description: RFQ price. Only when execution mode is `Immediate`.
-        symbol:
-          type: string
-          description: RFQ symbol.
-        side:
-          description: Side of the order.
-          allOf:
-          - $ref: '#/components/schemas/Side'
-          - description: Side of the order.
-        executionMode:
-          description: 'Execution mode. Defaults to `AwaitAccept` when not provided.
-
-            If `Immediate`, the RFQ must have a price and the first quote within the given price
-
-            will be automatically accepted.
-
-            If `AwaitAccept`, the RFQ will wait for the user to accept a specific quote.'
-          allOf:
-          - $ref: '#/components/schemas/RfqExecutionMode'
-          - description: 'Execution mode. Defaults to `AwaitAccept` when not provided.
-
-              If `Immediate`, the RFQ must have a price and the first quote within the given price
-
-              will be automatically accepted.
-
-              If `AwaitAccept`, the RFQ will wait for the user to accept a specific quote.'
-        autoLend:
-          type: boolean
-          description: Whether to lend proceeds.
-        autoLendRedeem:
-          type: boolean
-          description: Whether to redeem lends if required to fulfill the RFQ.
-        autoBorrow:
-          type: boolean
-          description: Whether to borrow assets if required to fulfill the RFQ.
-        autoBorrowRepay:
-          type: boolean
-          description: Whether to use proceeds to repay borrows.
-    RequestForQuoteFillHistorical:
-      type: object
-      title: RequestForQuoteFillHistorical
-      required:
-      - rfqId
-      - quoteId
-      - symbol
-      - side
-      - fillPrice
-      - createdAt
-      - filledAt
-      properties:
-        rfqId:
-          type: string
-          description: Unique RFQ order ID, assigned by the matching engine.
-        clientId:
-          type: integer
-          format: uint32
-          description: Custom RFQ order ID, assigned by the user (optionally).
-        quoteId:
-          type: string
-          description: Quote ID of the quote the RFQ was filled with.
-        symbol:
-          type: string
-          description: Market symbol.
-        side:
-          description: Side.
-          allOf:
-          - $ref: '#/components/schemas/Side'
-          - description: Side.
-        quantity:
-          type: string
-          format: decimal
-          description: Quantity to fill (in base asset).
-        quoteQuantity:
-          type: string
-          format: decimal
-          description: Quantity to fill (in quote asset).
-        fillPrice:
-          type: string
-          format: decimal
-          description: Fill price.
-        createdAt:
-          type: string
-          format: naive-date-time
-          description: Time the RFQ was created.
-        filledAt:
-          type: string
-          format: naive-date-time
-          description: Time the RFQ was filled.
-        systemOrderType:
-          description: System order type, if this was a system-initiated fill.
-          allOf:
-          - $ref: '#/components/schemas/SystemOrderType'
-          - description: System order type, if this was a system-initiated fill.
-    QuoteAcceptPayload:
-      type: object
-      title: QuoteAcceptPayload
-      required:
-      - quoteId
-      properties:
-        rfqId:
-          type: string
-          description: RFQ ID.
-        clientId:
-          type: integer
-          format: uint32
-          description: Custom RFQ ID.
-        quoteId:
-          type: string
-          description: RFQ quote ID.
-    QuoteFillHistorical:
-      type: object
-      title: QuoteFillHistorical
-      required:
-      - quoteId
-      - rfqId
-      - symbol
-      - side
-      - quantity
-      - fillPrice
-      - fee
-      - feeSymbol
-      - createdAt
-      - filledAt
-      properties:
-        clientId:
-          type: integer
-          format: uint32
-          description: Custom RFQ quote ID, assigned by the maker (optionally).
-        quoteId:
-          type: string
-          description: Quote ID.
-        rfqId:
-          type: string
-          description: ID of the RFQ the quote was filled with.
-        symbol:
-          type: string
-          description: Market symbol.
-        side:
-          description: Side.
-          allOf:
-          - $ref: '#/components/schemas/Side'
-          - description: Side.
-        quantity:
-          type: string
-          format: decimal
-          description: Quantity (in base asset).
-        fillPrice:
-          type: string
-          format: decimal
-          description: Fill price.
-        fee:
-          type: string
-          format: decimal
-          description: Fee charged on the fill.
-        feeSymbol:
-          type: string
-          description: Fee symbol.
-        createdAt:
-          type: string
-          format: naive-date-time
-          description: Time the quote was created.
-        filledAt:
-          type: string
-          format: naive-date-time
-          description: Time the RFQ was filled.
-    Quote:
-      type: object
-      title: Quote
-      required:
-      - rfqId
-      - quoteId
-      - bidPrice
-      - askPrice
-      - status
-      - createdAt
-      properties:
-        rfqId:
-          type: string
-          description: Unique RFQ order ID, assigned by the matching engine.
-        quoteId:
-          type: string
-          description: Unique RFQ quote ID, assigned by the matching engine.
-        clientId:
-          type: integer
-          format: uint32
-          description: Custom RFQ quote ID, assigned by the maker (optionally).
-        bidPrice:
-          type: string
-          format: decimal
-          description: Quote bid price.
-        askPrice:
-          type: string
-          format: decimal
-          description: Quote ask price.
-        status:
-          description: Status.
-          allOf:
-          - $ref: '#/components/schemas/OrderStatus'
-          - description: Status.
-        createdAt:
-          type: integer
-          format: int64
-          description: Time the quote was created.
+    RfqExecutionMode:
+      type: string
+      enum:
+      - AwaitAccept
+      - Immediate
     RfqWithQuotes:
       type: object
       title: RfqWithQuotes
@@ -1515,166 +1472,6 @@ components:
           description: Quotes submitted for this RFQ.
           items:
             $ref: '#/components/schemas/Quote'
-    RfqExecutionMode:
-      type: string
-      enum:
-      - AwaitAccept
-      - Immediate
-    SortDirection:
-      type: string
-      enum:
-      - Asc
-      - Desc
-    RfqFillType:
-      type: string
-      description: Filter for RFQ fills by system order type.
-      enum:
-      - User
-      - CollateralConversion
-    RequestForQuoteRefreshPayload:
-      type: object
-      title: RequestForQuoteRefreshPayload
-      required:
-      - rfqId
-      properties:
-        rfqId:
-          type: string
-          description: RFQ ID. An RFQ can only be refreshed using the RFQ ID.
-    QuoteHistorical:
-      type: object
-      title: QuoteHistorical
-      required:
-      - rfqId
-      - quoteId
-      - bidPrice
-      - askPrice
-      - status
-      - createdAt
-      - deferredSettlement
-      properties:
-        rfqId:
-          type: string
-          description: Unique RFQ order ID, assigned by the matching engine.
-        quoteId:
-          type: string
-          description: Unique RFQ quote ID, assigned by the matching engine.
-        clientId:
-          type: integer
-          format: uint32
-          description: Custom RFQ quote ID, assigned by the maker (optionally).
-        bidPrice:
-          type: string
-          format: decimal
-          description: Quote bid price.
-        askPrice:
-          type: string
-          format: decimal
-          description: Quote ask price.
-        status:
-          description: Status.
-          allOf:
-          - $ref: '#/components/schemas/OrderStatus'
-          - description: Status.
-        createdAt:
-          type: string
-          format: naive-date-time
-          description: Time the quote was created.
-        deferredSettlement:
-          type: boolean
-          description: Whether this quote uses deferred settlement.
-    SystemOrderType:
-      type: string
-      enum:
-      - CollateralConversion
-      - FutureExpiry
-      - LiquidatePositionOnAdl
-      - LiquidatePositionOnBook
-      - LiquidatePositionOnBackstop
-      - OrderBookClosed
-    ApiErrorCode:
-      type: string
-      enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
-    QuotePayload:
-      type: object
-      title: QuotePayload
-      required:
-      - rfqId
-      - bidPrice
-      - askPrice
-      properties:
-        rfqId:
-          type: string
-          description: RFQ ID.
-        clientId:
-          type: integer
-          format: uint32
-          description: Custom RFQ quote ID.
-        bidPrice:
-          type: string
-          format: decimal
-          description: Bid price.
-        askPrice:
-          type: string
-          format: decimal
-          description: Ask price.
-        autoLend:
-          type: boolean
-          description: Whether to lend proceeds.
-        autoLendRedeem:
-          type: boolean
-          description: Whether to redeem lends if required to fulfill the Quote.
-        autoBorrow:
-          type: boolean
-          description: Whether to borrow assets if required to fulfill the Quote.
-        autoBorrowRepay:
-          type: boolean
-          description: Whether to use proceeds to repay borrows.
     RequestForQuoteHistorical:
       type: object
       title: RequestForQuoteHistorical
@@ -1744,6 +1541,160 @@ components:
         deferredSettlementQuoteId:
           type: string
           description: Quote ID of the accepted deferred settlement quote, if any.
+    RequestForQuoteFillHistorical:
+      type: object
+      title: RequestForQuoteFillHistorical
+      required:
+      - rfqId
+      - quoteId
+      - symbol
+      - side
+      - fillPrice
+      - createdAt
+      - filledAt
+      properties:
+        rfqId:
+          type: string
+          description: Unique RFQ order ID, assigned by the matching engine.
+        clientId:
+          type: integer
+          format: uint32
+          description: Custom RFQ order ID, assigned by the user (optionally).
+        quoteId:
+          type: string
+          description: Quote ID of the quote the RFQ was filled with.
+        symbol:
+          type: string
+          description: Market symbol.
+        side:
+          description: Side.
+          allOf:
+          - $ref: '#/components/schemas/Side'
+          - description: Side.
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity to fill (in base asset).
+        quoteQuantity:
+          type: string
+          format: decimal
+          description: Quantity to fill (in quote asset).
+        fillPrice:
+          type: string
+          format: decimal
+          description: Fill price.
+        createdAt:
+          type: string
+          format: naive-date-time
+          description: Time the RFQ was created.
+        filledAt:
+          type: string
+          format: naive-date-time
+          description: Time the RFQ was filled.
+        systemOrderType:
+          description: System order type, if this was a system-initiated fill.
+          allOf:
+          - $ref: '#/components/schemas/SystemOrderType'
+          - description: System order type, if this was a system-initiated fill.
+    QuoteFillHistorical:
+      type: object
+      title: QuoteFillHistorical
+      required:
+      - quoteId
+      - rfqId
+      - symbol
+      - side
+      - quantity
+      - fillPrice
+      - fee
+      - feeSymbol
+      - createdAt
+      - filledAt
+      properties:
+        clientId:
+          type: integer
+          format: uint32
+          description: Custom RFQ quote ID, assigned by the maker (optionally).
+        quoteId:
+          type: string
+          description: Quote ID.
+        rfqId:
+          type: string
+          description: ID of the RFQ the quote was filled with.
+        symbol:
+          type: string
+          description: Market symbol.
+        side:
+          description: Side.
+          allOf:
+          - $ref: '#/components/schemas/Side'
+          - description: Side.
+        quantity:
+          type: string
+          format: decimal
+          description: Quantity (in base asset).
+        fillPrice:
+          type: string
+          format: decimal
+          description: Fill price.
+        fee:
+          type: string
+          format: decimal
+          description: Fee charged on the fill.
+        feeSymbol:
+          type: string
+          description: Fee symbol.
+        createdAt:
+          type: string
+          format: naive-date-time
+          description: Time the quote was created.
+        filledAt:
+          type: string
+          format: naive-date-time
+          description: Time the RFQ was filled.
+    SortDirection:
+      type: string
+      enum:
+      - Asc
+      - Desc
+    Quote:
+      type: object
+      title: Quote
+      required:
+      - rfqId
+      - quoteId
+      - bidPrice
+      - askPrice
+      - status
+      - createdAt
+      properties:
+        rfqId:
+          type: string
+          description: Unique RFQ order ID, assigned by the matching engine.
+        quoteId:
+          type: string
+          description: Unique RFQ quote ID, assigned by the matching engine.
+        clientId:
+          type: integer
+          format: uint32
+          description: Custom RFQ quote ID, assigned by the maker (optionally).
+        bidPrice:
+          type: string
+          format: decimal
+          description: Quote bid price.
+        askPrice:
+          type: string
+          format: decimal
+          description: Quote ask price.
+        status:
+          description: Status.
+          allOf:
+          - $ref: '#/components/schemas/OrderStatus'
+          - description: Status.
+        createdAt:
+          type: integer
+          format: int64
+          description: Time the quote was created.
     OrderStatus:
       type: string
       enum:
@@ -1754,6 +1705,55 @@ components:
       - PartiallyFilled
       - TriggerPending
       - TriggerFailed
+    ApiErrorCode:
+      type: string
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
+    RequestForQuoteCancelPayload:
+      type: object
+      title: RequestForQuoteCancelPayload
+      properties:
+        rfqId:
+          type: string
+          description: RFQ ID.
+        clientId:
+          type: integer
+          format: uint32
+          description: Custom RFQ ID.
 x-tagGroups:
 - name: Public Endpoints
   tags:

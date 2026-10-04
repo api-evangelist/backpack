@@ -921,6 +921,21 @@ paths:
       operationId: get_order_history
 components:
   schemas:
+    OrderTypeEnum:
+      type: string
+      enum:
+      - Market
+      - Limit
+    CancelOrderTypeEnum:
+      type: string
+      enum:
+      - RestingLimitOrder
+      - ConditionalOrder
+    Side:
+      type: string
+      enum:
+      - Bid
+      - Ask
     OrderExecutePayload:
       type: object
       title: OrderExecutePayload
@@ -1052,62 +1067,6 @@ components:
           allOf:
           - $ref: '#/components/schemas/SlippageToleranceType'
           - description: Slippage tolerance type.
-    OrderExpiryReason:
-      type: string
-      enum:
-      - AccountTradingSuspended
-      - BorrowRequiresLendRedeem
-      - FillOrKill
-      - InsufficientBorrowableQuantity
-      - InsufficientFunds
-      - InsufficientLiquidity
-      - InvalidPrice
-      - InvalidQuantity
-      - ImmediateOrCancel
-      - InsufficientMargin
-      - Liquidation
-      - NegativeEquity
-      - PostOnlyMode
-      - PostOnlyTaker
-      - PriceOutOfBounds
-      - ReduceOnlyNotReduced
-      - SelfTradePrevention
-      - StopWithoutPosition
-      - PriceImpact
-      - Unknown
-      - UserPermissions
-      - MaxStopOrdersPerPosition
-      - PositionLimit
-      - SlippageToleranceExceeded
-    BatchCommandOrderResult_OrderType:
-      allOf:
-      - type: object
-        required:
-        - operation
-        properties:
-          operation:
-            type: string
-            enum:
-            - Ok
-            example: Ok
-      - $ref: '#/components/schemas/OrderType'
-    BatchCommandOrderResult_ApiErrorResponse:
-      allOf:
-      - type: object
-        required:
-        - operation
-        properties:
-          operation:
-            type: string
-            enum:
-            - Err
-            example: Err
-      - $ref: '#/components/schemas/ApiErrorResponse'
-    Side:
-      type: string
-      enum:
-      - Bid
-      - Ask
     OrderFill:
       type: object
       title: OrderFill
@@ -1167,28 +1126,33 @@ components:
           type: integer
           format: int64
           description: The trade ID of the fill.
-    CancelOrderTypeEnum:
+    OrderType:
+      type: object
+      anyOf:
+      - $ref: '#/components/schemas/OrderType_MarketOrder'
+      - $ref: '#/components/schemas/OrderType_LimitOrder'
+      discriminator:
+        propertyName: orderType
+        mapping:
+          Market: '#/components/schemas/OrderType_MarketOrder'
+          Limit: '#/components/schemas/OrderType_LimitOrder'
+    SlippageToleranceType:
       type: string
       enum:
-      - RestingLimitOrder
-      - ConditionalOrder
-    OrderTypeEnum:
-      type: string
-      enum:
-      - Market
-      - Limit
-    OrderType_MarketOrder:
+      - TickSize
+      - Percent
+    BatchCommandOrderResult_ApiErrorResponse:
       allOf:
       - type: object
         required:
-        - orderType
+        - operation
         properties:
-          orderType:
+          operation:
             type: string
             enum:
-            - Market
-            example: Market
-      - $ref: '#/components/schemas/MarketOrder'
+            - Err
+            example: Err
+      - $ref: '#/components/schemas/ApiErrorResponse'
     LimitOrder:
       type: object
       title: LimitOrder
@@ -1328,21 +1292,112 @@ components:
         strategyId:
           type: string
           description: Strategy ID of the order, if any.
-    MarketType:
+    SystemOrderType:
       type: string
       enum:
-      - SPOT
-      - PERP
-      - IPERP
-      - DATED
-      - PREDICTION
-      - RFQ
+      - CollateralConversion
+      - FutureExpiry
+      - LiquidatePositionOnAdl
+      - LiquidatePositionOnBook
+      - LiquidatePositionOnBackstop
+      - OrderBookClosed
     SelfTradePrevention:
       type: string
       enum:
       - RejectTaker
       - RejectMaker
       - RejectBoth
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
+    BatchCommandOrderResult:
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/BatchCommandOrderResult_OrderType'
+      - $ref: '#/components/schemas/BatchCommandOrderResult_ApiErrorResponse'
+      discriminator:
+        propertyName: operation
+        mapping:
+          Ok: '#/components/schemas/BatchCommandOrderResult_OrderType'
+          Err: '#/components/schemas/BatchCommandOrderResult_ApiErrorResponse'
+    OrderCancelAllPayload:
+      type: object
+      title: OrderCancelAllPayload
+      required:
+      - symbol
+      properties:
+        symbol:
+          type: string
+          description: Market to cancel orders for.
+        orderType:
+          description: Type of orders to cancel.
+          allOf:
+          - $ref: '#/components/schemas/CancelOrderTypeEnum'
+          - description: Type of orders to cancel.
+    OrderType_MarketOrder:
+      allOf:
+      - type: object
+        required:
+        - orderType
+        properties:
+          orderType:
+            type: string
+            enum:
+            - Market
+            example: Market
+      - $ref: '#/components/schemas/MarketOrder'
+    OrderCancelPayload:
+      type: object
+      title: OrderCancelPayload
+      required:
+      - symbol
+      properties:
+        clientId:
+          type: integer
+          format: uint32
+          description: Client ID of the order.
+        orderId:
+          type: string
+          description: ID of the order.
+        symbol:
+          type: string
+          description: Market the order exists on.
+    SortDirection:
+      type: string
+      enum:
+      - Asc
+      - Desc
+    BatchCommandOrderResult_OrderType:
+      allOf:
+      - type: object
+        required:
+        - operation
+        properties:
+          operation:
+            type: string
+            enum:
+            - Ok
+            example: Ok
+      - $ref: '#/components/schemas/OrderType'
+    FillType:
+      type: string
+      enum:
+      - User
+      - BookLiquidation
+      - Adl
+      - Backstop
+      - Liquidation
+      - AllLiquidation
+      - CollateralConversion
+      - CollateralConversionAndSpotLiquidation
     TimeInForce:
       type: string
       enum:
@@ -1489,157 +1544,33 @@ components:
           allOf:
           - $ref: '#/components/schemas/SlippageToleranceType'
           - description: Slippage tolerance type
-    SlippageToleranceType:
+    OrderExpiryReason:
       type: string
       enum:
-      - TickSize
-      - Percent
-    OrderType:
-      type: object
-      anyOf:
-      - $ref: '#/components/schemas/OrderType_MarketOrder'
-      - $ref: '#/components/schemas/OrderType_LimitOrder'
-      discriminator:
-        propertyName: orderType
-        mapping:
-          Market: '#/components/schemas/OrderType_MarketOrder'
-          Limit: '#/components/schemas/OrderType_LimitOrder'
-    OrderCancelPayload:
-      type: object
-      title: OrderCancelPayload
-      required:
-      - symbol
-      properties:
-        clientId:
-          type: integer
-          format: uint32
-          description: Client ID of the order.
-        orderId:
-          type: string
-          description: ID of the order.
-        symbol:
-          type: string
-          description: Market the order exists on.
-    SortDirection:
-      type: string
-      enum:
-      - Asc
-      - Desc
-    FillType:
-      type: string
-      enum:
-      - User
-      - BookLiquidation
-      - Adl
-      - Backstop
+      - AccountTradingSuspended
+      - BorrowRequiresLendRedeem
+      - FillOrKill
+      - InsufficientBorrowableQuantity
+      - InsufficientFunds
+      - InsufficientLiquidity
+      - InvalidPrice
+      - InvalidQuantity
+      - ImmediateOrCancel
+      - InsufficientMargin
       - Liquidation
-      - AllLiquidation
-      - CollateralConversion
-      - CollateralConversionAndSpotLiquidation
-    SystemOrderType:
-      type: string
-      enum:
-      - CollateralConversion
-      - FutureExpiry
-      - LiquidatePositionOnAdl
-      - LiquidatePositionOnBook
-      - LiquidatePositionOnBackstop
-      - OrderBookClosed
-    OrderType_LimitOrder:
-      allOf:
-      - type: object
-        required:
-        - orderType
-        properties:
-          orderType:
-            type: string
-            enum:
-            - Limit
-            example: Limit
-      - $ref: '#/components/schemas/LimitOrder'
-    OrderCancelAllPayload:
-      type: object
-      title: OrderCancelAllPayload
-      required:
-      - symbol
-      properties:
-        symbol:
-          type: string
-          description: Market to cancel orders for.
-        orderType:
-          description: Type of orders to cancel.
-          allOf:
-          - $ref: '#/components/schemas/CancelOrderTypeEnum'
-          - description: Type of orders to cancel.
-    ApiErrorCode:
-      type: string
-      enum:
-      - ACCOUNT_DEACTIVATED
-      - ACCOUNT_LIQUIDATING
-      - BORROW_LIMIT
-      - BORROW_REQUIRES_LEND_REDEEM
-      - FORBIDDEN
-      - INSUFFICIENT_FUNDS
-      - INSUFFICIENT_MARGIN
-      - INSUFFICIENT_SUPPLY
-      - INVALID_ASSET
-      - INVALID_CLIENT_REQUEST
-      - INVALID_MARKET
-      - INVALID_ORDER
-      - INVALID_PRICE
-      - INVALID_POSITION_ID
-      - INVALID_QUANTITY
-      - INVALID_RANGE
-      - INVALID_SIGNATURE
-      - INVALID_SOURCE
-      - INVALID_SYMBOL
-      - INVALID_TWO_FACTOR_CODE
-      - LEND_LIMIT
-      - LEND_REQUIRES_BORROW_REPAY
-      - MAINTENANCE
-      - MAX_LEVERAGE_REACHED
-      - NOT_IMPLEMENTED
-      - ORDER_LIMIT
-      - POSITION_LIMIT
-      - PRECONDITION_FAILED
-      - RESOURCE_NOT_FOUND
-      - SERVER_ERROR
-      - TIMEOUT
-      - TOO_EARLY
-      - TOO_MANY_REQUESTS
-      - TRADING_PAUSED
-      - UNAUTHORIZED
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
-    BatchCommandOrderResult:
-      type: object
-      oneOf:
-      - $ref: '#/components/schemas/BatchCommandOrderResult_OrderType'
-      - $ref: '#/components/schemas/BatchCommandOrderResult_ApiErrorResponse'
-      discriminator:
-        propertyName: operation
-        mapping:
-          Ok: '#/components/schemas/BatchCommandOrderResult_OrderType'
-          Err: '#/components/schemas/BatchCommandOrderResult_ApiErrorResponse'
-    OrderStatus:
-      type: string
-      enum:
-      - Cancelled
-      - Expired
-      - Filled
-      - New
-      - PartiallyFilled
-      - TriggerPending
-      - TriggerFailed
+      - NegativeEquity
+      - PostOnlyMode
+      - PostOnlyTaker
+      - PriceOutOfBounds
+      - ReduceOnlyNotReduced
+      - SelfTradePrevention
+      - StopWithoutPosition
+      - PriceImpact
+      - Unknown
+      - UserPermissions
+      - MaxStopOrdersPerPosition
+      - PositionLimit
+      - SlippageToleranceExceeded
     Order:
       type: object
       title: Order
@@ -1782,6 +1713,75 @@ components:
           allOf:
           - $ref: '#/components/schemas/SlippageToleranceType'
           - description: Slippage tolerance type
+    OrderStatus:
+      type: string
+      enum:
+      - Cancelled
+      - Expired
+      - Filled
+      - New
+      - PartiallyFilled
+      - TriggerPending
+      - TriggerFailed
+    ApiErrorCode:
+      type: string
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_LIQUIDATING
+      - BORROW_LIMIT
+      - BORROW_REQUIRES_LEND_REDEEM
+      - FORBIDDEN
+      - INSUFFICIENT_FUNDS
+      - INSUFFICIENT_MARGIN
+      - INSUFFICIENT_SUPPLY
+      - INVALID_ASSET
+      - INVALID_CLIENT_REQUEST
+      - INVALID_MARKET
+      - INVALID_ORDER
+      - INVALID_PRICE
+      - INVALID_POSITION_ID
+      - INVALID_QUANTITY
+      - INVALID_RANGE
+      - INVALID_SIGNATURE
+      - INVALID_SOURCE
+      - INVALID_SYMBOL
+      - INVALID_TWO_FACTOR_CODE
+      - LEND_LIMIT
+      - LEND_REQUIRES_BORROW_REPAY
+      - MAINTENANCE
+      - MAX_LEVERAGE_REACHED
+      - NOT_IMPLEMENTED
+      - ORDER_LIMIT
+      - POSITION_LIMIT
+      - PRECONDITION_FAILED
+      - RESOURCE_NOT_FOUND
+      - SERVER_ERROR
+      - TIMEOUT
+      - TOO_EARLY
+      - TOO_MANY_REQUESTS
+      - TRADING_PAUSED
+      - UNAUTHORIZED
+    MarketType:
+      type: string
+      enum:
+      - SPOT
+      - PERP
+      - IPERP
+      - DATED
+      - PREDICTION
+      - RFQ
+    OrderType_LimitOrder:
+      allOf:
+      - type: object
+        required:
+        - orderType
+        properties:
+          orderType:
+            type: string
+            enum:
+            - Limit
+            example: Limit
+      - $ref: '#/components/schemas/LimitOrder'
 x-tagGroups:
 - name: Public Endpoints
   tags:

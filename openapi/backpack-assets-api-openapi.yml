@@ -82,44 +82,6 @@ paths:
       operationId: get_collateral_parameters
 components:
   schemas:
-    Token:
-      type: object
-      title: Token
-      required:
-      - displayName
-      - blockchain
-      - depositEnabled
-      - minimumDeposit
-      - withdrawEnabled
-      - minimumWithdrawal
-      - withdrawalFee
-      properties:
-        displayName:
-          type: string
-        blockchain:
-          $ref: '#/components/schemas/Blockchain'
-        contractAddress:
-          type: string
-        depositEnabled:
-          type: boolean
-        minimumDeposit:
-          type: string
-          format: decimal
-        withdrawEnabled:
-          type: boolean
-        minimumWithdrawal:
-          type: string
-          format: decimal
-        maximumWithdrawal:
-          type: string
-          format: decimal
-        withdrawalFee:
-          type: string
-          format: decimal
-        nativeDecimals:
-          type: integer
-          format: uint8
-          description: Native decimals for the token on this blockchain.
     SqrtFunction:
       type: object
       title: SqrtFunction
@@ -133,50 +95,7 @@ components:
         factor:
           type: string
           format: decimal
-    CollateralSummary:
-      type: object
-      title: CollateralSummary
-      required:
-      - symbol
-      - imfFunction
-      - mmfFunction
-      - haircutFunction
-      properties:
-        symbol:
-          type: string
-          description: Symbol of the collateral.
-        imfFunction:
-          description: IMF function.
-          allOf:
-          - $ref: '#/components/schemas/PositionImfFunction'
-          - description: IMF function.
-        mmfFunction:
-          description: MMF function.
-          allOf:
-          - $ref: '#/components/schemas/PositionImfFunction'
-          - description: MMF function.
-        haircutFunction:
-          description: Calculates the haircut for collateral value.
-          allOf:
-          - $ref: '#/components/schemas/CollateralFunction'
-          - description: Calculates the haircut for collateral value.
-    InverseSqrtFunction:
-      type: object
-      title: InverseSqrtFunction
-      required:
-      - base
-      - positiveCurvePenalty
-      properties:
-        base:
-          type: string
-          format: decimal
-        positiveCurvePenalty:
-          type: string
-          format: decimal
-    IdentityFunction:
-      type: object
-      title: IdentityFunction
-    CollateralFunctionKind_IdentityFunction:
+    PositionImfFunction_SqrtFunction:
       allOf:
       - type: object
         required:
@@ -185,41 +104,9 @@ components:
           type:
             type: string
             enum:
-            - identity
-            example: identity
-      - $ref: '#/components/schemas/IdentityFunction'
-    PositionImfFunction:
-      type: object
-      anyOf:
-      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
-      discriminator:
-        propertyName: type
-        mapping:
-          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
-    MarketAsset:
-      type: object
-      title: MarketAsset
-      required:
-      - symbol
-      - displayName
-      - tokens
-      properties:
-        symbol:
-          description: Symbol of the asset, e.g. ETH.
-          allOf:
-          - $ref: '#/components/schemas/CustodyAsset'
-          - description: Symbol of the asset, e.g. ETH.
-        displayName:
-          type: string
-          description: Display name of the asset.
-        coingeckoId:
-          type: string
-          description: Coingecko ID of the asset.
-        tokens:
-          type: array
-          description: Token on each blockchain the asset is available on.
-          items:
-            $ref: '#/components/schemas/Token'
+            - sqrt
+            example: sqrt
+      - $ref: '#/components/schemas/SqrtFunction'
     CustodyAsset:
       type: string
       enum:
@@ -1824,41 +1711,130 @@ components:
       - EWH.US
       - NLR.US
       - FUTU.US
-    Blockchain:
-      type: string
-      enum:
-      - 0G
-      - Aptos
-      - Arbitrum
-      - Avalanche
-      - Base
-      - Berachain
-      - Bitcoin
-      - BitcoinCash
-      - Bsc
-      - Cardano
-      - Dogecoin
-      - Eclipse
-      - EqualsMoney
-      - Ethereum
-      - Fogo
-      - HyperEVM
-      - Hyperliquid
-      - Linea
-      - Litecoin
-      - Monad
-      - Near
-      - Optimism
-      - Plasma
-      - Polygon
-      - Sei
-      - Sui
-      - Solana
-      - Stable
-      - Story
-      - Tron
-      - XRP
-      - Zcash
+    CollateralFunction:
+      type: object
+      title: CollateralFunction
+      required:
+      - weight
+      - kind
+      properties:
+        weight:
+          type: string
+          format: decimal
+        kind:
+          $ref: '#/components/schemas/CollateralFunctionKind'
+    InverseSqrtFunction:
+      type: object
+      title: InverseSqrtFunction
+      required:
+      - base
+      - positiveCurvePenalty
+      properties:
+        base:
+          type: string
+          format: decimal
+        positiveCurvePenalty:
+          type: string
+          format: decimal
+    CollateralFunctionKind:
+      type: object
+      anyOf:
+      - $ref: '#/components/schemas/CollateralFunctionKind_IdentityFunction'
+      - $ref: '#/components/schemas/CollateralFunctionKind_InverseSqrtFunction'
+      discriminator:
+        propertyName: type
+        mapping:
+          identity: '#/components/schemas/CollateralFunctionKind_IdentityFunction'
+          inverseSqrt: '#/components/schemas/CollateralFunctionKind_InverseSqrtFunction'
+    CollateralFunctionKind_InverseSqrtFunction:
+      allOf:
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum:
+            - inverseSqrt
+            example: inverseSqrt
+      - $ref: '#/components/schemas/InverseSqrtFunction'
+    CollateralSummary:
+      type: object
+      title: CollateralSummary
+      required:
+      - symbol
+      - imfFunction
+      - mmfFunction
+      - haircutFunction
+      properties:
+        symbol:
+          type: string
+          description: Symbol of the collateral.
+        imfFunction:
+          description: IMF function.
+          allOf:
+          - $ref: '#/components/schemas/PositionImfFunction'
+          - description: IMF function.
+        mmfFunction:
+          description: MMF function.
+          allOf:
+          - $ref: '#/components/schemas/PositionImfFunction'
+          - description: MMF function.
+        haircutFunction:
+          description: Calculates the haircut for collateral value.
+          allOf:
+          - $ref: '#/components/schemas/CollateralFunction'
+          - description: Calculates the haircut for collateral value.
+    Token:
+      type: object
+      title: Token
+      required:
+      - displayName
+      - blockchain
+      - depositEnabled
+      - minimumDeposit
+      - withdrawEnabled
+      - minimumWithdrawal
+      - withdrawalFee
+      properties:
+        displayName:
+          type: string
+        blockchain:
+          $ref: '#/components/schemas/Blockchain'
+        contractAddress:
+          type: string
+        depositEnabled:
+          type: boolean
+        minimumDeposit:
+          type: string
+          format: decimal
+        withdrawEnabled:
+          type: boolean
+        minimumWithdrawal:
+          type: string
+          format: decimal
+        maximumWithdrawal:
+          type: string
+          format: decimal
+        withdrawalFee:
+          type: string
+          format: decimal
+        nativeDecimals:
+          type: integer
+          format: uint8
+          description: Native decimals for the token on this blockchain.
+    CollateralFunctionKind_IdentityFunction:
+      allOf:
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum:
+            - identity
+            example: identity
+      - $ref: '#/components/schemas/IdentityFunction'
     ApiErrorCode:
       type: string
       enum:
@@ -1897,28 +1873,6 @@ components:
       - TOO_MANY_REQUESTS
       - TRADING_PAUSED
       - UNAUTHORIZED
-    CollateralFunctionKind_InverseSqrtFunction:
-      allOf:
-      - type: object
-        required:
-        - type
-        properties:
-          type:
-            type: string
-            enum:
-            - inverseSqrt
-            example: inverseSqrt
-      - $ref: '#/components/schemas/InverseSqrtFunction'
-    CollateralFunctionKind:
-      type: object
-      anyOf:
-      - $ref: '#/components/schemas/CollateralFunctionKind_IdentityFunction'
-      - $ref: '#/components/schemas/CollateralFunctionKind_InverseSqrtFunction'
-      discriminator:
-        propertyName: type
-        mapping:
-          identity: '#/components/schemas/CollateralFunctionKind_IdentityFunction'
-          inverseSqrt: '#/components/schemas/CollateralFunctionKind_InverseSqrtFunction'
     ApiErrorResponse:
       type: object
       title: ApiErrorResponse
@@ -1930,30 +1884,76 @@ components:
           $ref: '#/components/schemas/ApiErrorCode'
         message:
           type: string
-    PositionImfFunction_SqrtFunction:
-      allOf:
-      - type: object
-        required:
-        - type
-        properties:
-          type:
-            type: string
-            enum:
-            - sqrt
-            example: sqrt
-      - $ref: '#/components/schemas/SqrtFunction'
-    CollateralFunction:
+    IdentityFunction:
       type: object
-      title: CollateralFunction
+      title: IdentityFunction
+    Blockchain:
+      type: string
+      enum:
+      - 0G
+      - Aptos
+      - Arbitrum
+      - Avalanche
+      - Base
+      - Berachain
+      - Bitcoin
+      - BitcoinCash
+      - Bsc
+      - Cardano
+      - Dogecoin
+      - Eclipse
+      - EqualsMoney
+      - Ethereum
+      - Fogo
+      - HyperEVM
+      - Hyperliquid
+      - Linea
+      - Litecoin
+      - Monad
+      - Near
+      - Optimism
+      - Plasma
+      - Polygon
+      - Sei
+      - Sui
+      - Solana
+      - Stable
+      - Story
+      - Tron
+      - XRP
+      - Zcash
+    PositionImfFunction:
+      type: object
+      anyOf:
+      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
+      discriminator:
+        propertyName: type
+        mapping:
+          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
+    MarketAsset:
+      type: object
+      title: MarketAsset
       required:
-      - weight
-      - kind
+      - symbol
+      - displayName
+      - tokens
       properties:
-        weight:
+        symbol:
+          description: Symbol of the asset, e.g. ETH.
+          allOf:
+          - $ref: '#/components/schemas/CustodyAsset'
+          - description: Symbol of the asset, e.g. ETH.
+        displayName:
           type: string
-          format: decimal
-        kind:
-          $ref: '#/components/schemas/CollateralFunctionKind'
+          description: Display name of the asset.
+        coingeckoId:
+          type: string
+          description: Coingecko ID of the asset.
+        tokens:
+          type: array
+          description: Token on each blockchain the asset is available on.
+          items:
+            $ref: '#/components/schemas/Token'
 x-tagGroups:
 - name: Public Endpoints
   tags:
