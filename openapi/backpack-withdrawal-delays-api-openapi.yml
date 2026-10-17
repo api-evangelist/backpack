@@ -140,6 +140,51 @@ paths:
       operationId: update_withdrawal_delay
 components:
   schemas:
+    WithdrawalDelay:
+      type: object
+      title: WithdrawalDelay
+      properties:
+        currentWithdrawalDelayHours:
+          type: integer
+          format: int32
+          description: The delay applied to withdrawals being processed.
+        pendingWithdrawalDelayHours:
+          type: integer
+          format: int32
+          description: 'The delay that will be applied to withdrawals once the update to the
+
+            setting is enabled.'
+        pendingWithdrawalDelayHoursEnabledAt:
+          type: string
+          format: naive-date-time
+          description: 'The time when the update to the withdrawal delay setting will be
+
+            applied.'
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
+    CreateWithdrawalDelayRequest:
+      type: object
+      title: CreateWithdrawalDelayRequest
+      required:
+      - withdrawalDelayHours
+      - twoFactorToken
+      properties:
+        withdrawalDelayHours:
+          type: integer
+          format: uint32
+          description: The delay applied to withdrawals being processed, in hours.
+        twoFactorToken:
+          type: string
+          description: Issued two factor token.
     UpdateWithdrawalDelayRequest:
       type: object
       title: UpdateWithdrawalDelayRequest
@@ -192,51 +237,6 @@ components:
       - TOO_MANY_REQUESTS
       - TRADING_PAUSED
       - UNAUTHORIZED
-    CreateWithdrawalDelayRequest:
-      type: object
-      title: CreateWithdrawalDelayRequest
-      required:
-      - withdrawalDelayHours
-      - twoFactorToken
-      properties:
-        withdrawalDelayHours:
-          type: integer
-          format: uint32
-          description: The delay applied to withdrawals being processed, in hours.
-        twoFactorToken:
-          type: string
-          description: Issued two factor token.
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
-    WithdrawalDelay:
-      type: object
-      title: WithdrawalDelay
-      properties:
-        currentWithdrawalDelayHours:
-          type: integer
-          format: int32
-          description: The delay applied to withdrawals being processed.
-        pendingWithdrawalDelayHours:
-          type: integer
-          format: int32
-          description: 'The delay that will be applied to withdrawals once the update to the
-
-            setting is enabled.'
-        pendingWithdrawalDelayHoursEnabledAt:
-          type: string
-          format: naive-date-time
-          description: 'The time when the update to the withdrawal delay setting will be
-
-            applied.'
 x-tagGroups:
 - name: Public Endpoints
   tags:

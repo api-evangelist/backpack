@@ -396,6 +396,113 @@ paths:
       operationId: get_position_history
 components:
   schemas:
+    PositionHistoryRow:
+      type: object
+      title: PositionHistoryRow
+      required:
+      - id
+      - symbol
+      - netQuantity
+      - netExposureQuantity
+      - netExposureNotional
+      - netCost
+      - markPrice
+      - entryPrice
+      - cumulativePnlRealized
+      - unrealizedPnl
+      - fundingQuantity
+      - interest
+      - liquidated
+      - imf
+      - fees
+      - state
+      - closedVolume
+      - liquidationFees
+      properties:
+        id:
+          type: string
+        symbol:
+          type: string
+        netQuantity:
+          type: string
+          format: decimal
+        netExposureQuantity:
+          type: string
+          format: decimal
+        netExposureNotional:
+          type: string
+          format: decimal
+        netCost:
+          type: string
+          format: decimal
+        markPrice:
+          type: string
+          format: decimal
+        entryPrice:
+          type: string
+          format: decimal
+        cumulativePnlRealized:
+          type: string
+          format: decimal
+        unrealizedPnl:
+          type: string
+          format: decimal
+        fundingQuantity:
+          type: string
+          format: decimal
+        interest:
+          type: string
+          format: decimal
+        liquidated:
+          type: string
+          format: decimal
+        imf:
+          type: string
+          format: decimal
+        fees:
+          type: string
+          format: decimal
+          description: Total trading fees paid for this position.
+        state:
+          $ref: '#/components/schemas/PositionState'
+        closedVolume:
+          type: string
+          format: decimal
+        liquidationFees:
+          type: string
+          format: decimal
+          description: Total liquidation fees paid for this position.
+        closingPrice:
+          type: string
+          format: decimal
+        accountLeverage:
+          type: string
+          format: decimal
+        openedAt:
+          type: string
+          format: naive-date-time
+        closedAt:
+          type: string
+          format: naive-date-time
+    PositionImfFunction:
+      type: object
+      anyOf:
+      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
+      discriminator:
+        propertyName: type
+        mapping:
+          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
+    ApiErrorResponse:
+      type: object
+      title: ApiErrorResponse
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
+          type: string
     SortDirection:
       type: string
       enum:
@@ -512,99 +619,6 @@ components:
           type: string
           format: decimal
           description: Cumulative interest paid for this position's unrealized pnl.
-    PositionHistoryRow:
-      type: object
-      title: PositionHistoryRow
-      required:
-      - id
-      - symbol
-      - netQuantity
-      - netExposureQuantity
-      - netExposureNotional
-      - netCost
-      - markPrice
-      - entryPrice
-      - cumulativePnlRealized
-      - unrealizedPnl
-      - fundingQuantity
-      - interest
-      - liquidated
-      - imf
-      - fees
-      - state
-      - closedVolume
-      - liquidationFees
-      properties:
-        id:
-          type: string
-        symbol:
-          type: string
-        netQuantity:
-          type: string
-          format: decimal
-        netExposureQuantity:
-          type: string
-          format: decimal
-        netExposureNotional:
-          type: string
-          format: decimal
-        netCost:
-          type: string
-          format: decimal
-        markPrice:
-          type: string
-          format: decimal
-        entryPrice:
-          type: string
-          format: decimal
-        cumulativePnlRealized:
-          type: string
-          format: decimal
-        unrealizedPnl:
-          type: string
-          format: decimal
-        fundingQuantity:
-          type: string
-          format: decimal
-        interest:
-          type: string
-          format: decimal
-        liquidated:
-          type: string
-          format: decimal
-        imf:
-          type: string
-          format: decimal
-        fees:
-          type: string
-          format: decimal
-          description: Total trading fees paid for this position.
-        state:
-          $ref: '#/components/schemas/PositionState'
-        closedVolume:
-          type: string
-          format: decimal
-        liquidationFees:
-          type: string
-          format: decimal
-          description: Total liquidation fees paid for this position.
-        closingPrice:
-          type: string
-          format: decimal
-        accountLeverage:
-          type: string
-          format: decimal
-        openedAt:
-          type: string
-          format: naive-date-time
-        closedAt:
-          type: string
-          format: naive-date-time
-    PositionState:
-      type: string
-      enum:
-      - Open
-      - Closed
     FundingPayment:
       type: object
       title: FundingPayment
@@ -638,18 +652,6 @@ components:
           type: string
           format: decimal
           description: The funding rate for the payment.
-    PositionImfFunction_SqrtFunction:
-      allOf:
-      - type: object
-        required:
-        - type
-        properties:
-          type:
-            type: string
-            enum:
-            - sqrt
-            example: sqrt
-      - $ref: '#/components/schemas/SqrtFunction'
     SqrtFunction:
       type: object
       title: SqrtFunction
@@ -663,14 +665,11 @@ components:
         factor:
           type: string
           format: decimal
-    PositionImfFunction:
-      type: object
-      anyOf:
-      - $ref: '#/components/schemas/PositionImfFunction_SqrtFunction'
-      discriminator:
-        propertyName: type
-        mapping:
-          sqrt: '#/components/schemas/PositionImfFunction_SqrtFunction'
+    PositionState:
+      type: string
+      enum:
+      - Open
+      - Closed
     ApiErrorCode:
       type: string
       enum:
@@ -709,17 +708,6 @@ components:
       - TOO_MANY_REQUESTS
       - TRADING_PAUSED
       - UNAUTHORIZED
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
     MarketType:
       type: string
       enum:
@@ -729,6 +717,18 @@ components:
       - DATED
       - PREDICTION
       - RFQ
+    PositionImfFunction_SqrtFunction:
+      allOf:
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum:
+            - sqrt
+            example: sqrt
+      - $ref: '#/components/schemas/SqrtFunction'
 x-tagGroups:
 - name: Public Endpoints
   tags:

@@ -481,43 +481,16 @@ components:
           format: decimal
         symbol:
           type: string
-    MaxOrderQuantity:
+    ApiErrorResponse:
       type: object
-      title: MaxOrderQuantity
+      title: ApiErrorResponse
       required:
-      - maxOrderQuantity
-      - side
-      - symbol
+      - code
+      - message
       properties:
-        autoBorrow:
-          type: boolean
-        autoBorrowRepay:
-          type: boolean
-        autoLendRedeem:
-          type: boolean
-        maxOrderQuantity:
-          type: string
-          format: decimal
-        price:
-          type: string
-          format: decimal
-        side:
-          type: string
-        symbol:
-          type: string
-        reduceOnly:
-          type: boolean
-    MaxBorrowQuantity:
-      type: object
-      title: MaxBorrowQuantity
-      required:
-      - maxBorrowQuantity
-      - symbol
-      properties:
-        maxBorrowQuantity:
-          type: string
-          format: decimal
-        symbol:
+        code:
+          $ref: '#/components/schemas/ApiErrorCode'
+        message:
           type: string
     AccountSummary:
       type: object
@@ -591,11 +564,49 @@ components:
           type: integer
           format: uint64
           description: Number of open trigger orders.
+    MaxBorrowQuantity:
+      type: object
+      title: MaxBorrowQuantity
+      required:
+      - maxBorrowQuantity
+      - symbol
+      properties:
+        maxBorrowQuantity:
+          type: string
+          format: decimal
+        symbol:
+          type: string
     Side:
       type: string
       enum:
       - Bid
       - Ask
+    MaxOrderQuantity:
+      type: object
+      title: MaxOrderQuantity
+      required:
+      - maxOrderQuantity
+      - side
+      - symbol
+      properties:
+        autoBorrow:
+          type: boolean
+        autoBorrowRepay:
+          type: boolean
+        autoLendRedeem:
+          type: boolean
+        maxOrderQuantity:
+          type: string
+          format: decimal
+        price:
+          type: string
+          format: decimal
+        side:
+          type: string
+        symbol:
+          type: string
+        reduceOnly:
+          type: boolean
     ApiErrorCode:
       type: string
       enum:
@@ -634,17 +645,6 @@ components:
       - TOO_MANY_REQUESTS
       - TRADING_PAUSED
       - UNAUTHORIZED
-    ApiErrorResponse:
-      type: object
-      title: ApiErrorResponse
-      required:
-      - code
-      - message
-      properties:
-        code:
-          $ref: '#/components/schemas/ApiErrorCode'
-        message:
-          type: string
     UpdateAccountSettingsRequest:
       type: object
       title: UpdateAccountSettingsRequest
