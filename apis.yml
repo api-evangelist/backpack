@@ -8,7 +8,7 @@ apis:
 - aid: backpack:backpack-wallet
   name: Backpack Wallet
   tags:
-  - Crypto
+  - Cryptocurrency
   - Wallets
   - Solana
   - Ethereum
@@ -639,7 +639,7 @@ apis:
     url: asyncapi/backpack-asyncapi.yml
 name: Backpack
 tags:
-  - Crypto
+  - Cryptocurrency
   - Exchange
   - Wallets
   - Trading
